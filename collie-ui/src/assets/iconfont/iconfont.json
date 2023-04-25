@@ -1,0 +1,30 @@
+{
+  "id": "4035487",
+  "name": "collie",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "16563853",
+      "name": "下载盘点单、下载打印模板",
+      "font_class": "cangpeitubiao_xiazaipandiandanxiazaidayinmoban",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "1418205",
+      "name": "发送",
+      "font_class": "fasong",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "6219264",
+      "name": "清空",
+      "font_class": "qingkong",
+      "unicode": "e946",
+      "unicode_decimal": 59718
+    }
+  ]
+}
