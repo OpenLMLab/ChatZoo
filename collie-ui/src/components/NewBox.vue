@@ -14,7 +14,7 @@
                     <el-input
                         type="textarea"
                         :rows="5"
-                        v-model="form.dialog"
+                        v-model="form.dialogue"
                         placeholder="请输入初始化对话"
                     ></el-input>
                     </el-form-item>
@@ -39,14 +39,24 @@ export default {
         return {
             form: {
                 name: '',
-                dialog: '',
+                dialogue: '',
                 url: ''
             }
         }
     },
     methods: {
         register() {
-            this.$emit('new-box-data', this.form)
+            let data = {}
+            data.name = this.form.name
+            let diaVec = this.form.dialogue.split('}')
+            diaVec.pop()
+            for(let i=0; i<diaVec.length; i++) {
+                diaVec[i] = diaVec[i] + '}'
+            }
+            console.log(diaVec)
+            const objects = diaVec.map(jsonString => JSON.parse(jsonString));
+            data.dialogue = objects
+            this.$emit('new-box-data', data)
         }
     }
 };
