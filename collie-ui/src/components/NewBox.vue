@@ -89,14 +89,15 @@ opacity: 0.7;
 
 
 .box-card {
-    width: 480px;
+    width: 300px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    height: 100%;
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif;
+    margin-right: 30px;
+    height: 100%;
 }
 
 .el-form-item {
