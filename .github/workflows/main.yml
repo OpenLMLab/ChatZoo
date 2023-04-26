@@ -1,0 +1,68 @@
+name: npm auto release
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  build:
+    strategy:
+      matrix:
+        node-version: [19.6.1]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Source
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          
+      - name: Cache
+        uses: actions/cache@v2.1.8
+        with:
+          path: ./collie-ui/node_modules
+          key: ${{runner.OS}}-${{hashFiles('**/yarn.lock')}}
+          
+      - name: Install Dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: |
+          npm install ./collie-ui/.
+          
+      - name: Build
+        run: |
+          npm run build ./collie-ui/.
+          
+      - name: Read Version
+        id: version
+        uses: ashley-taylor/read-json-property-action@v1.0
+        with:
+          path: ./collie-ui/package.json
+          property: version
+          
+      - name: Zip the Build
+        run: zip -r collie-chat.zip ./collie-ui/dist/
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: TODO New Release.
+          draft: false
+          prerelease: false
+        
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./collie-chat.zip
+          asset_name: collie-chat.zip
+          asset_content_type: application/zip
