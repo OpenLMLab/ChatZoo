@@ -53,9 +53,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}/${{ steps.version.outputs.value }}
+          tag_name: ui
           release_name: Release ${{ github.ref }}
-          body: TODO New Release.
+          body: UI version ${{ steps.version.outputs.value }}.
           draft: false
           prerelease: false
         
