@@ -53,8 +53,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ui
-          release_name: Release ${{ github.ref }}
+          tag_name: refs/heads/ui
+          release_name: Release refs/heads/ui
           body: UI version ${{ steps.version.outputs.value }}.
           draft: false
           prerelease: false
