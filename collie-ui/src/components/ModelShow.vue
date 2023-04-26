@@ -143,17 +143,11 @@ export default {
     height: 70vh;
     display: flex;
     flex-direction: row;
-    padding-left: 5vw;
-    padding-right: 5vw;
+    justify-content: flex-start;
     padding-bottom: 5vh;
     overflow-x: scroll;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE 10+, edge */
-}
-
-.el-main::-webkit-scrollbar { /* WebKit */
-    width: 0;
-    height: 0;
+    width: 80vw;
+    margin: 0 auto;
 }
 
 body > .el-container {
