@@ -5,12 +5,11 @@
         </el-header>
         <el-main style="height: 80%; display: flex; flex-direction: row;">
           <div style="display: flex; flex: 1;">
-            <carousel ref="carouselRef" style="display: flex; flex: 1;" :per-page="2" :autoplay="false" :navigation-enabled="true" :loop="true">
+            <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="2" :autoplay="false" :navigation-enabled="false" :loop="true">
               <slide v-for="(model, index) in models" :key="index">
                 <div class="slide-content">
-                  <ChatBox :name="model.name" :conversations="model.dialogue" @delete="deleteChatBox(index)"/>
+                  <ChatBox :name="model.name" :conversations="model.dialogue" @delete="deleteBox(model)"/>
                 </div>
-                <button @click.prevent="deleteBox">删除</button>
               </slide>
               <slide v-if="showNewBox">
                 <div class="slide-content">
@@ -34,7 +33,6 @@
 <script>
 import ChatBox from './ChatBox.vue'
 import NewBox from './NewBox.vue'
-import Vue from 'vue'
 import { Carousel, Slide } from 'vue-carousel'
 
 export default {
@@ -51,8 +49,9 @@ export default {
             // 遍历每个dialogue数组
             for(let i = 0; i < this.models.length; i++) {
               this.models[i].dialogue.push({'HUMAN': this.newMessage});
-              this.newMessage = '';
             }
+            this.newMessage = '';
+            console.log(this.models)
         }
     },
     clearDialogue() {
@@ -60,7 +59,7 @@ export default {
       location.reload();
     },
     downloadIt() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.dialogue_moss));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.models));
       const downloadAnchorNode = document.createElement('a');
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", "dialogue.json");
@@ -69,14 +68,18 @@ export default {
       downloadAnchorNode.remove();
     },
     handleNewBoxData(data) {
-      console.log(data)
       let newModel = {}
       newModel.name = data.name
       newModel.dialogue = data.dialogue
       this.models.push(newModel)
+      console.log(this.models)
     },
-    deleteBox(index) {
+    deleteBox(model) {
+      // 删除models数组中的元素
+      const index = this.models.indexOf(model); 
+      console.log(index)
       this.models.splice(index, 1);
+      console.log(this.models)
     }
   },
   data() {
@@ -105,13 +108,13 @@ export default {
                         ]
           },
           {
-            "name": "Alpaca",
+            "name": "Alpaca1",
             "dialogue":  
             [
               {"BOT": "你好，我是Alpaca，请以这样的格式与我对话：\n[INSTRUCT]Who are you?\n[INPUT]None\n或者\n[INSTRUCT]Please arrange the words below in alphabetical order.\n[INPUT]apple, banana, grape"}
             ]
           },
-          {"name": "Alpaca",
+          {"name": "Alpaca2",
           "dialogue": 
             [
               {"BOT": "你好，我是Alpaca，请以这样的格式与我对话：\n[INSTRUCT]Who are you?\n[INPUT]None\n或者\n[INSTRUCT]Please arrange the words below in alphabetical order.\n[INPUT]apple, banana, grape"}

@@ -1,9 +1,10 @@
 <template>
     <div>
         <div class="box-card">
-            <div class="chat-header clearfix">
+            <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
                 <h4>{{ model }}</h4>
                 <span>Chat with a bot</span>
+                <button @click="deleteChatBox">删除</button>
             </div>
             <div class="chat-container">
                 <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
@@ -36,6 +37,9 @@ export default {
         };
     },
     methods: {
+        deleteChatBox() {
+            this.$emit('delete');
+        }
     }
 };
 </script>
