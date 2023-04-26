@@ -9,14 +9,14 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [19.6.1]
+        node-version: [18]
     runs-on: ubuntu-latest
     steps:
       - name: Check Source
         uses: actions/checkout@v3
         
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.5.2
+        uses: actions/setup-node@v3.6.0
         with:
           node-version: ${{ matrix.node-version }}
           
