@@ -1,25 +1,16 @@
 <template>
-    <el-container>
-        <el-header style="height: 10%;">
+    <el-container style="width: 100vw; height: 95vh">
+        <el-header style="height: 10vh;">
             <h1 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Collie    评测界面</h1>
         </el-header>
-        <el-main style="height: 80%; display: flex; flex-direction: row;">
-          <div style="display: flex; flex: 1;">
-            <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="2" :autoplay="false" :navigation-enabled="false" :loop="true">
-              <slide v-for="(model, index) in models" :key="index">
-                <div class="slide-content">
-                  <ChatBox :name="model.name" :conversations="model.dialogue" @delete="deleteBox(model)"/>
-                </div>
-              </slide>
-              <slide v-if="showNewBox">
-                <div class="slide-content">
-                  <NewBox @new-box-data="handleNewBoxData" />
-                </div>
-              </slide>
-            </carousel>
-          </div>
+        <el-main class="el-main">
+          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
+          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
+          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
+          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
+          <NewBox @new-box-data="handleNewBoxData" />
         </el-main>
-        <el-footer style="height: 10%;">
+        <el-footer style="height: 10vh;">
             <div class="chat-input">
                 <button class="clear-button" @click="clearDialogue"><i class="iconfont">&#xe946;</i></button>
                 <input type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
@@ -33,13 +24,10 @@
 <script>
 import ChatBox from './ChatBox.vue'
 import NewBox from './NewBox.vue'
-import { Carousel, Slide } from 'vue-carousel'
 
 export default {
   name: 'ModelShow',
   components: {
-    Carousel,
-    Slide,
     ChatBox,
     NewBox
   },
@@ -126,15 +114,6 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      // 在 mounted 生命周期钩子中检查最后一个轮播项
-      console.log(this.$refs.carouselRef);
-      const lastSlideIndex = this.models.length - 1;
-      const lastSlide = this.$refs.carouselRef.getSlide(lastSlideIndex);
-      if (lastSlide) {
-        this.showNewBox = true;
-      }
-    });
   },
 
 }
@@ -148,6 +127,7 @@ export default {
     background-color: #FFF;
     color: #333;
     text-align: center;
+    justify-content: center;
 }
 
 .el-footer {
@@ -160,6 +140,20 @@ export default {
     background-color: #FFFFFF;
     color: #FFF;
     text-align: center;
+    height: 70vh;
+    display: flex;
+    flex-direction: row;
+    padding-left: 5vw;
+    padding-right: 5vw;
+    padding-bottom: 5vh;
+    overflow-x: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+, edge */
+}
+
+.el-main::-webkit-scrollbar { /* WebKit */
+    width: 0;
+    height: 0;
 }
 
 body > .el-container {
