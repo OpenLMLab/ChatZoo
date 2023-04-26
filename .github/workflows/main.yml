@@ -45,7 +45,7 @@ jobs:
           property: version
           
       - name: Zip the Build
-        run: zip -r collie-chat.zip ./collie-ui/dist/
+        run: zip -r collie-ui.zip ./collie-ui/dist/
       
       - name: Create Release
         id: create_release
