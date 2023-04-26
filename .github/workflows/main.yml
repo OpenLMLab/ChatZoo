@@ -29,11 +29,13 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'
         run: |
-          npm install ./collie-ui/.
+          npm install
+        working-directory: ./collie-ui
           
       - name: Build
         run: |
-          npm run build ./collie-ui/.
+          npm run build
+        working-directory: ./collie-ui
           
       - name: Read Version
         id: version
