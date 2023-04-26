@@ -4,7 +4,6 @@
             <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
                 <h4>{{ model }}</h4>
                 <span>Chat with a bot</span>
-                <button @click="deleteChatBox">删除</button>
             </div>
             <div class="chat-container">
                 <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
@@ -53,6 +52,8 @@ export default {
     border-top-right-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     flex: 1;
+    justify-content: space-around;
+    
 }
 
 .chat-header h4 {
@@ -101,14 +102,15 @@ clear: both
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    height: 100%;
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif;
+    margin-left: 50px;
 }
 
 .left, .right {
     border-radius: 5px;
+    font-weight: 400;
 }
 
 .left {
@@ -122,6 +124,7 @@ clear: both
   margin-left: 20px;
   margin-top: 20px;
   align-self: flex-start;
+  word-break: break-all;
 }
 
 .right {
