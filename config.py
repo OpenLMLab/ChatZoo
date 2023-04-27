@@ -45,6 +45,8 @@ class ModelConfig:
     top_p: float = 0.7
     temperature: float = 0.95
     repetition_penalty: float = 1.02
+    # for lora-finetuned model such as baize
+    base_model: str = "decapoda-research/llama-7b-hf"
 
     def __post_init__(self):
         if self.tokenizer_path is None:
@@ -58,3 +60,11 @@ class ModelConfig:
                     "check `pretrained_path` in your config or set `type` as "
                     f"one of: {set(MODEL_NAME_TO_MODEL_DICT.values())}"
                 )
+        if torch.cuda.device_count() < 1:
+            # no gpu
+            if self.dtype == torch.float16:
+                print(
+                    "Half precision is not supported with no gpu available. "
+                    "We will set `config.dtype` to `torch.float32`."
+                )
+                self.dtype = torch.float32
