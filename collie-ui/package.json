@@ -13,7 +13,8 @@
     "element-ui": "^2.15.13",
     "uuid": "^9.0.0",
     "vue": "^2.6.14",
-    "vue-carousel": "^0.18.0"
+    "vue-carousel": "^0.18.0",
+    "vue-dragscroll": "^4.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
