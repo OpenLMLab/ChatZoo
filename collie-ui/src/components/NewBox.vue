@@ -1,33 +1,20 @@
 <template>
-    <div class="box-card">
-        <div class="chat-header clearfix">
-            <h4>注册你的模型！</h4>
-            <span>Register Your Own Model!</span>
+    <div class="new-box-card">
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
+            <h4>控制台</h4>
+            <span>注册、修改模型</span>
         </div>
-        <div class="box-container">
-            <el-form :model="form" label-width="120px">
-                <el-form-item label="模型名称">
-                <el-input v-model="form.name"></el-input>
-                </el-form-item>
-                <el-form-item label="初始化对话">
-                <el-input
-                    type="textarea"
-                    :rows="5"
-                    v-model="form.dialogue"
-                    placeholder="请输入初始化对话"
-                ></el-input>
-                </el-form-item>
-                <el-form-item label="后端 URL">
-                <el-input v-model="form.url"></el-input>
-                </el-form-item>
-                <el-form-item>
-                    <button class="button" @click.prevent="register">
-                        立即注册！
-                    </button>
-                </el-form-item>
-            </el-form>
+        <el-form :model="form" label-width="120px" style="flex:15">
+            <el-form-item label="模型名称">
+            <el-input v-model="form.name"></el-input>
+            </el-form-item>>
+            <el-form-item>
+                <el-button type="primary" @click.prevent="register">
+                    立即注册！
+                </el-button>
+            </el-form-item>
+        </el-form>
         </div>
-    </div>
   </template>
   
 <script>
@@ -44,16 +31,15 @@ export default {
     },
     methods: {
         register() {
+            const uuid = require('uuid');
             let data = {}
             data.name = this.form.name
-            let diaVec = this.form.dialogue.split('}')
-            diaVec.pop()
-            for(let i=0; i<diaVec.length; i++) {
-                diaVec[i] = diaVec[i] + '}'
-            }
-            console.log(diaVec)
-            const objects = diaVec.map(jsonString => JSON.parse(jsonString));
-            data.dialogue = objects
+            data.dialogue = [{'role':'BOT','content':'我是机器人' + data.name}]
+            const uuidv4 = uuid.v4({format:'N'})
+            data.id = uuidv4
+            data.status = 'info'
+            data.url = '/generate' + data.id
+            console.log('新模型的数据',data)
             this.$emit('new-box-data', data)
         }
     }
@@ -68,7 +54,7 @@ export default {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    flex: 1;
+    flex: 1
 }
 
 .chat-header h4 {
@@ -81,8 +67,19 @@ font-size: 0.8rem;
 opacity: 0.7;
 }
 
+.new-box-card {
+    width: 80%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .box-container {
     height: 100%;
+    width: 100%;
 }
 
 
