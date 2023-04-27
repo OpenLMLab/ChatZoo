@@ -16,9 +16,7 @@ class ChatBOT:
         self.tokenizer = AutoTokenizer.from_pretrained(config.tokenizer_path, trust_remote_code=True)
         # TODO 
         # self.load_model()
-        # self.load_from_s3()
-        import time
-        time.sleep(3)
+        self.load_from_s3()
         self.set_generate_params()
 
     def set_generate_params(self):
