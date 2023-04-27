@@ -1,14 +1,20 @@
 <template>
-    <div class="box-card">
+    <div class="box-card" v-loading="loading">
         <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
-            <h4>{{ model }}</h4>
-            <span>Chat with a bot</span>
-            <button @click.prevent="deleteChatBox">删除</button>
+            <div style="padding: 10px;">
+                <el-tag size="mini" effect="dark" :type="currstatus">{{statusClass}}</el-tag>
+            </div>
+            <div>
+                <h4>{{ model }}</h4>
+            </div>
+            <div class="btn-container">
+                <el-button type="danger" size="mini" @click.prevent="deleteChatBox" >删除</el-button>
+            </div>
         </div>
         <div class="chat-container">
             <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
-                <div :class="Object.keys(message)[0] === 'BOT' ? 'left' : 'right'">
-                    <p :style="{'white-space': 'pre-line'}">{{ Object.values(message)[0] }}</p>
+                <div :class="(message.role) === 'BOT' ? 'left' : 'right'">
+                    <p :style="{'white-space': 'pre-line'}">{{ message.content }}</p>
                 </div>
             </div>
         </div>
@@ -16,6 +22,7 @@
 </template>
   
 <script>
+import axios from 'axios';
 export default {
     name: 'ChatBox',
     props: {
@@ -26,26 +33,95 @@ export default {
         conversations: {
             type: Array,
             required: true
+        },
+        status: {
+            type: String,
+            required: true
+        },
+        url: {
+            type: String,
+            required: true
+        },
+        id: {
+            type: String,
+            required: true
         }
     },
     data() {
         return {
             model: this.name,
-            dialogue: this.conversations
+            dialogue: this.conversations,
+            currstatus: this.status,
+            loading: false
         };
+    },
+    watch: {
+        status(newVal) {
+            this.currstatus = newVal;
+            
+        }
     },
     methods: {
         deleteChatBox() {
             this.$emit('delete');
+        },
+        chat() {
+            console.log(this.model,'发送消息')
+            console.log(this.chat)
+            const instance = axios.create({
+                baseURL: 'http://127.0.0.1:10030/'
+            })
+            const data = this.dialogue
+            console.log('要发送的', data)
+            this.loading = true
+            console.log('连接', this.url)
+            instance.post(this.url, data, {
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            })
+            .then((response) => {
+                console.log('返回',response.data.response);
+                const res = {"role": "BOT", "content": response.data.response}
+                this.$emit('chat-response', res, this.id);
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+            .finally(() => {
+                this.loading = false
+            })
         }
     },
     mounted() {
+    },
+    computed: {
+        statusClass() {
+            switch(this.currstatus) {
+                case 'success':
+                    return '在线';
+                case 'info':
+                    return '离线';
+                default:
+                    return '离线';
+            }
+        }
     }
 };
 </script>
 <style>
+.btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+.delete-btn:hover {
+  background-color: #d32f2f;
+}
 
 .chat-header {
+    align-items: center;
     background-color: #333;
     color: #fff;
     padding: 10px;
@@ -53,17 +129,16 @@ export default {
     border-top-right-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     flex: 1;
-    justify-content: space-around;
-    
+    display: flex;
 }
 
 .chat-header h4 {
 margin: 0;
-font-size: 1.2rem;
+font-size: 1.8rem;
 }
 
 .chat-header span {
-font-size: 0.8rem;
+font-size: 2.8rem;
 opacity: 0.7;
 }
 

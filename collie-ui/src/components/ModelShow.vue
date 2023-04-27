@@ -5,27 +5,30 @@
         </el-header>
         <el-main style="height: 80%; display: flex; flex-direction: row;">
           <div style="display: flex; flex: 1; width: 100%;" @touchmove.prevent>
-            <carousel :key="models.length + 1" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="false" :loop="true" no-touch>
+            <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
               <slide v-for="(model, index) in models" :key="index">
                 <div class="slide-content">
-                  <ChatBox :name="model.name" :conversations="model.dialogue" @delete="deleteBox(model)"/>
-                </div>
-              </slide>
-              <slide v-if="showNewBox">
-                <div class="slide-content">
-                  <NewBox @new-box-data="handleNewBoxData" />
+                  <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue" :status="model.status" :url="model.url" @delete="deleteBox(model)" @chat-response="handleChatResponse"/>
                 </div>
               </slide>
             </carousel>
           </div>
+          <div class="console">
+            <div class="newbox">
+              <NewBox @new-box-data="handleNewBoxData" />
+            </div>
+
+          </div>
         </el-main>
         <el-footer style="height: 10%;">
-          <el-button>开启对话</el-button>
             <div class="chat-input">
                 <button class="clear-button" @click="clearDialogue"><i class="iconfont">&#xe946;</i></button>
                 <input type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
                 <button class="send-button" @click="sendMessage" ><i class="iconfont">&#xe604;</i></button>
-                <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button>
+                <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button>                
+            </div>
+            <div class="testConnect">
+              <el-button @click="testConnect" type="success">测试连接</el-button>
             </div>
         </el-footer>
     </el-container>
@@ -34,26 +37,34 @@
 <script>
 import ChatBox from './ChatBox.vue'
 import NewBox from './NewBox.vue'
+import { Carousel, Slide } from 'vue-carousel'
+import axios from 'axios';
 
 window.onload = function() {
-  console.log('每个',document.querySelector('.chat-container').style)
 };
 
 export default {
   name: 'ModelShow',
   components: {
+    Carousel,
+    Slide,
     ChatBox,
     NewBox
   },
   methods: {
+    handleChatResponse(data, id) {
+      console.log(data)
+      const model = this.models.find((model) => model.id === id);
+      model.dialogue.push(data)
+    },
     sendMessage() {
         if(this.newMessage) {
             // 遍历每个dialogue数组
             for(let i = 0; i < this.models.length; i++) {
-              this.models[i].dialogue.push({'HUMAN': this.newMessage});
+              this.models[i].dialogue.push({"role":"HUMAN", "content":this.newMessage});
+              this.$refs.chat[i].chat()
             }
             this.newMessage = '';
-            console.log(this.models)
         }
     },
     clearDialogue() {
@@ -73,8 +84,11 @@ export default {
       let newModel = {}
       newModel.name = data.name
       newModel.dialogue = data.dialogue
+      newModel.status = data.status
+      newModel.url = data.url
+      newModel.id = data.id
       this.models.push(newModel)
-      console.log(this.models)
+      console.log('新的数据', this.models)
     },
     deleteBox(model) {
       // 删除models数组中的元素
@@ -82,6 +96,49 @@ export default {
       console.log(index)
       this.models.splice(index, 1);
       console.log(this.models)
+    },
+    testConnect() {
+      const instance = axios.create({
+        baseURL: 'http://127.0.0.1:10030/'
+      })
+      const data = this.models.map((model) => {
+        return {
+          id: model.id,
+          name: model.name
+        }
+      })
+      console.log(data)
+      const loading = this.$loading({
+        lock: true,
+        text: '模型启动中...',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0,0,0,0.7)'
+      })
+      instance.post('/init/', data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then((response) => {
+        console.log('返回',response.data);
+        const lenOfResponse = Object.keys(response.data).length;
+        console.log('大小',lenOfResponse)
+        for (let i = 0; i < lenOfResponse; i++) {
+          const value = response.data[Object.keys(response.data)[i]]
+          if (value === 0) {
+            this.models[i].status = 'success'
+          } else {
+            this.models[i].status = 'info'
+          }
+        }
+        console.log(this.models)
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        loading.close();
+      })
     }
   },
   data() {
@@ -89,38 +146,34 @@ export default {
         showNewBox: false,
         models:[
           {
-            "name": "MOSS", 
+            'id': "0",
+            "name": "fnlp/moss-moon-003-base", 
             "dialogue": [
-                          {"BOT":"你好，我是BOT"},
-                          {"HUMAN":"你好，我是HUMAN"},
-                          {"BOT":"很高兴认识你"},
-                          {"HUMAN":"我也是。"},
-                          {"BOT":"你好，我是BOT"},
-                          {"HUMAN":"你好，我是HUMAN"},
-                          {"BOT":"很高兴认识你"},
-                          {"HUMAN":"我也是。"},
-                          {"BOT":"你好，我是BOT"},
-                          {"HUMAN":"你好，我是HUMAN"},
-                          {"BOT":"很高兴认识你"},
-                          {"HUMAN":"我也是。"},
-                          {"BOT":"你好，我是BOT"},
-                          {"HUMAN":"你好，我是HUMAN"},
-                          {"BOT":"很高兴认识你"},
-                          {"HUMAN":"我也是。"}
-                        ]
+                          {"role":"BOT", "content": "Hello"},
+                          {"role":"HUMAN", "content": "Hello，我是人类"},
+                        ],
+            "status": "info",
+            "url": "/generate/0"
           },
           {
-            "name": "Alpaca1",
-            "dialogue":  
-            [
-              {"BOT": "你好，我是Alpaca，请以这样的格式与我对话：\n[INSTRUCT]Who are you?\n[INPUT]None\n或者\n[INSTRUCT]Please arrange the words below in alphabetical order.\n[INPUT]apple, banana, grape"}
-            ]
+            "id": "1",
+            "name": "THUDM/chatglm-6b",
+            "status": "info",
+            "dialogue": [
+                          {"role":"BOT", "content": "Hello"},
+                          {"role":"HUMAN", "content": "Hello，我是人类"},
+                        ],
+            "url": "/generate/1"
           },
-          {"name": "Alpaca2",
-          "dialogue": 
-            [
-              {"BOT": "你好，我是Alpaca，请以这样的格式与我对话：\n[INSTRUCT]Who are you?\n[INPUT]None\n或者\n[INSTRUCT]Please arrange the words below in alphabetical order.\n[INPUT]apple, banana, grape"}
-            ]
+          {
+            "id": "2",
+            "name": "YeungNLP/firefly-1b4",
+            "dialogue": [
+                          {"role":"BOT", "content": "Hello"},
+                          {"role":"HUMAN", "content": "Hello，我是人类"},
+                        ],
+            "status": "info",
+            "url": "/generate/2"
           }
         ],
         newMessage: '',
@@ -128,23 +181,7 @@ export default {
     }
   },
   mounted() {
-    // const innerHeight = window.innerHeight * 0.8 * 0.9;
-    // let idelNum = Math.floor(window.innerWidth / (innerHeight / 2));
-    // if (idelNum >= this.models.length + 1) {
-    //   this.itemPerPage = this.models.length + 1;
-    // } else {
-    //   while((this.models.length + 1) % idelNum != 0) {
-    //     idelNum --;
-    //   }
-    //   this.itemPerPage = idelNum;
-    // }
-    // console.log('高度',innerHeight)
-    // console.log('宽度',window.innerWidth)
-    // console.log('数量',this.itemPerPage)
-    // console.log('最大',this.models.length)
     this.$nextTick(() => {
-      // 在 mounted 生命周期钩子中检查最后一个轮播项
-      console.log(this.$refs.carouselRef);
       const lastSlideIndex = this.models.length - 1;
       const lastSlide = this.$refs.carouselRef.getSlide(lastSlideIndex);
       if (lastSlide) {
@@ -156,16 +193,13 @@ export default {
     itemPerPage() {
       const innerHeight = window.innerHeight * 0.8 * 0.9;
       // 理想的每页的个数
-      let idelNum = Math.floor(window.innerWidth / (innerHeight / 3));
+      let idelNum = Math.floor(window.innerWidth / (innerHeight / 2));
       console.log('理想',idelNum)
       // 如果理想的个数 大于总个数
-      if (idelNum >= this.models.length + 1) {
-        console.log('现在的页数',this.models.length + 1)
-        return this.models.length + 1;
+      if (idelNum >= this.models.length) {
+        console.log('现在的页数',this.models.length)
+        return this.models.length;
       } else {
-        while((this.models.length + 1) % idelNum != 0) {
-          idelNum --;
-        }
         console.log('现在的页数',idelNum)
         return idelNum;
       }
@@ -195,6 +229,7 @@ export default {
     background-color: #FFFFFF;
     color: #333;
     text-align: center;
+    display: flex;
 }
 
 .el-main {
@@ -202,6 +237,7 @@ export default {
     color: #FFF;
     text-align: center;
     overflow: hidden;
+    display: flex;
 }
 
 body > .el-container {
@@ -254,6 +290,11 @@ body > .el-container {
 .VueCarousel{
   height: 100%;
   width: 100%;
+  flex: 5
+}
+
+.newbox {
+  height: 90%;
 }
 
 .VueCarousel-wrapper{
