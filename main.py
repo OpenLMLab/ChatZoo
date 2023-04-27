@@ -30,16 +30,17 @@ async def init_single(model_info, status_dict):
     idx = model_info["id"]
     model_name = model_info["name"]
     print(f"Initializing id: {idx}, model: {model_name}...")
-    exists_model_names = [bot.model_name for bot in bots.values()]
     try:
-        if model_name not in exists_model_names:
+        if model_name not in bot_names.keys():
             config = ModelConfig(
                 # TODO
                 pretrained_path=model_name
             )
             bot = choose_bot(config)
+            bot_names[model_name] = bot
         else:
-            print(f"{model_name} is already exits.")
+            print(f"{model_name} is already exists.")
+            bot = bot_names[model_name]
     except Exception as e:
         traceback.print_exc()
         # 1: error happens
@@ -78,4 +79,5 @@ def initialize(model_infos: list):
 
 if __name__ == "__main__":
     bots = {}
+    bot_names = {}
     uvicorn.run(app, port=10030)
