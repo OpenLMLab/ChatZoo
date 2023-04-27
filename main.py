@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 
 import uvicorn
 from fastapi import FastAPI
@@ -17,7 +18,7 @@ app.add_middleware(
 )
 
 @app.post("/generate/{idx}")
-async def generate(idx: int, dialogue: list):
+async def generate(idx: str, dialogue: list):
     response = bots[idx].chat(dialogue)
     if response is not None:
         status = 0
@@ -26,7 +27,7 @@ async def generate(idx: int, dialogue: list):
     return {"status": status, "response": response}
 
 async def init_single(model_info, status_dict):
-    idx = int(model_info["id"])
+    idx = model_info["id"]
     model_name = model_info["name"]
     print(f"Initializing id: {idx}, model: {model_name}...")
     exists_model_names = [bot.model_name for bot in bots.values()]
@@ -40,7 +41,7 @@ async def init_single(model_info, status_dict):
         else:
             print(f"{model_name} is already exits.")
     except Exception as e:
-        print(e.message)
+        traceback.print_exc()
         # 1: error happens
         status_dict[idx] = 1
     else:
