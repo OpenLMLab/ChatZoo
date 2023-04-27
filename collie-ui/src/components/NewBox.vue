@@ -1,33 +1,31 @@
 <template>
-    <div>
-        <div class="box-card">
-            <div class="chat-header clearfix">
-                <h4>注册你的模型！</h4>
-                <span>Register Your Own Model!</span>
-            </div>
-            <div class="box-container">
-                <el-form :model="form" label-width="120px">
-                    <el-form-item label="模型名称">
-                    <el-input v-model="form.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="初始化对话">
-                    <el-input
-                        type="textarea"
-                        :rows="5"
-                        v-model="form.dialogue"
-                        placeholder="请输入初始化对话"
-                    ></el-input>
-                    </el-form-item>
-                    <el-form-item label="后端 URL">
-                    <el-input v-model="form.url"></el-input>
-                    </el-form-item>
-                    <el-form-item>
-                        <button class="button" @click.prevent="register">
-                            立即注册！
-                        </button>
-                    </el-form-item>
-                </el-form>
-            </div>
+    <div class="box-card">
+        <div class="chat-header clearfix">
+            <h4>注册你的模型！</h4>
+            <span>Register Your Own Model!</span>
+        </div>
+        <div class="box-container">
+            <el-form :model="form" label-width="120px">
+                <el-form-item label="模型名称">
+                <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="初始化对话">
+                <el-input
+                    type="textarea"
+                    :rows="5"
+                    v-model="form.dialogue"
+                    placeholder="请输入初始化对话"
+                ></el-input>
+                </el-form-item>
+                <el-form-item label="后端 URL">
+                <el-input v-model="form.url"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <button class="button" @click.prevent="register">
+                        立即注册！
+                    </button>
+                </el-form-item>
+            </el-form>
         </div>
     </div>
   </template>
@@ -88,16 +86,6 @@ opacity: 0.7;
 }
 
 
-.box-card {
-    width: 480px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    font-family: Arial, sans-serif;
-}
 
 .el-form-item {
     display: flex;
