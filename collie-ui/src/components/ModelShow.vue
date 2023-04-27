@@ -222,6 +222,7 @@ export default {
     background-color: #FFF;
     color: #333;
     text-align: center;
+    justify-content: center;
 }
 
 .el-footer {

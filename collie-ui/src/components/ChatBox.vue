@@ -180,14 +180,16 @@ clear: both
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    height: 100%;
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif;
+    margin-right: 30px;
+    height: 100%;
 }
 
 .left, .right {
     border-radius: 5px;
+    font-weight: 400;
 }
 
 .left {
@@ -201,6 +203,7 @@ clear: both
   margin-left: 20px;
   margin-top: 20px;
   align-self: flex-start;
+  word-break: break-all;
 }
 
 .right {
