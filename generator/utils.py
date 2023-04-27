@@ -17,7 +17,8 @@ from accelerate.utils import (
     retie_parameters,
 )
 
-from accelerate.utils import (load_state_dict, set_module_tensor_to_device,
+from accelerate import load_checkpoint_and_dispatch
+from accelerate.utils import (set_module_tensor_to_device,
                               load_offloaded_weights, is_torch_version,
                               save_offload_index, offload_weight)
 from accelerate import dispatch_model
@@ -115,7 +116,7 @@ def load_checkpoint_and_dispatch(
         device_map = infer_auto_device_map(
             model, max_memory=max_memory, no_split_module_classes=no_split_module_classes, dtype=dtype
         )
-    if offload_state_dict is None and "disk" in device_map.values():
+    if offload_state_dict is None and device_map is not None and "disk" in device_map.values():
         offload_state_dict = True
     load_checkpoint_in_model(
         model,

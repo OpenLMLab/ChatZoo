@@ -1,7 +1,9 @@
+import os
+import traceback
+
 import torch
 from transformers import AutoTokenizer, AutoConfig
-from accelerate import init_empty_weights
-
+from accelerate import init_empty_weights #, load_checkpoint_and_dispatch
 from .utils import load_checkpoint_and_dispatch
 
 class ChatBOT:
@@ -13,14 +15,20 @@ class ChatBOT:
         self.model_name = config.pretrained_path
         self.tokenizer = AutoTokenizer.from_pretrained(config.tokenizer_path, trust_remote_code=True)
         # TODO 
-        # self.model = self.model_cls.from_pretrianed(model_name, trust_remote_code=True)
-        self.load_from_s3()
+        # self.load_model()
+        # self.load_from_s3()
+        import time
+        time.sleep(3)
+        self.set_generate_params()
+
+    def set_generate_params(self):
 
         self.gen_kwargs = {
-            "max_length": config.max_length, "num_beams": config.num_beams,
-            "do_sample": config.do_sample, "top_p": config.top_p,
-            "top_k": config.top_k, "temperature": config.temperature,
-            "repetition_penalty": config.repetition_penalty
+            "max_length": self.config.max_length,
+            "num_beams": self.config.num_beams,
+            "do_sample": self.config.do_sample, "top_p": self.config.top_p,
+            "top_k": self.config.top_k, "temperature": self.config.temperature,
+            "repetition_penalty": self.config.repetition_penalty
         }
 
     @property
@@ -34,26 +42,40 @@ class ChatBOT:
 
         :param query: list of dict
             [
-                {"BOT": "hello"},
-                {"HUMAN": "hello, bot"},
+                {"role": "BOT", "content": "hello"}
+                {"role": "HUMAN", "content": "hello, bot"},
                 ...
             ]
         """
-        prompt = self.get_prompt(query)
-        input_dict = self.tokenizer(prompt, return_tensors="pt")
-        for key, value in input_dict.items():
-            try:
-                input_dict[key] = value.cuda()
-            except AttributeError:
-                pass
+        print("Start generating...")
+        try:
+            prompt = self.get_prompt(query)
+            input_dict = self.tokenizer(prompt, return_tensors="pt")
+            for key, value in input_dict.items():
+                try:
+                    if torch.cuda.device_count() >= 1:
+                        input_dict[key] = value.cuda()
+                except AttributeError:
+                    pass
+
+            response = self.get_response(input_dict)
+            response = self.tokenizer.decode(response, skip_special_tokens=True)
+            response = self.process_response(response)
+        except Exception as e:
+            response = e.message
+            traceback.print_exc()
+    
+        return response
+    
+    def get_response(self, input_dict):
+        """
+        Generate response.
+        """
         output = self.model.generate(**input_dict, **self.gen_kwargs)
         response = output.tolist()[0][len(input_dict["input_ids"][0]):]
-        response = self.tokenizer.decode(response, skip_special_tokens=True)
-        response = self.process_response(response)
-        query.append({"BOT": response})
 
-        return query
-    
+        return response
+
     def process_response(self, response):
         """
         Post process
@@ -74,6 +96,31 @@ class ChatBOT:
         raise NotImplementedError(
             "Every model should implement its own `get_prompt` method."
         )
+    
+    def load_model(self):
+        config = AutoConfig.from_pretrained(
+            self.model_name, trust_remote_code=True)
+        
+        if torch.cuda.device_count() >= 1:
+            with init_empty_weights():
+                self.model = self.model_cls._from_config(
+                    config=config, torch_dtype=torch.float16
+                )
+
+            load_checkpoint_and_dispatch(
+                self.model, self.config.pretrained_path, device_map="auto",
+                no_split_module_classes=self.no_split_module_classes,
+                dtype=self.config.dtype
+            )
+        else:
+            self.model = self.model_cls._from_config(
+                config=config, torch_dtype=self.config.dtype
+            )
+            load_checkpoint_and_dispatch(
+                self.model, self.config.pretrained_path, device_map=None,
+                no_split_module_classes=self.no_split_module_classes,
+                dtype=self.config.dtype
+            )
 
     def load_from_s3(self):
         """
@@ -85,14 +132,7 @@ class ChatBOT:
         from petrel_client.client import Client
         from tqdm import tqdm
         client = Client()
-        
-        # get config
-        config = AutoConfig.from_pretrained(
-            self.model_name, trust_remote_code=True)
-        with init_empty_weights():
-            self.model = self.model_cls._from_config(
-                config=config, torch_dtype=torch.float16
-            )
+
         # get model_index
         model_list = []
         if client.contains(f"{prefix}pytorch_model.bin.index.json"):
@@ -108,11 +148,29 @@ class ChatBOT:
         else:
             model_list.append(f"{prefix}pytorch_model.bin")
 
-        load_checkpoint_and_dispatch(
-            self.model, model_list, device_map="auto",
-            no_split_module_classes=self.no_split_module_classes,
-            dtype=self.config.dtype
-        )
+        # get config
+        config = AutoConfig.from_pretrained(
+            self.model_name, trust_remote_code=True)
+        
+        if torch.cuda.device_count() >= 1:
+            with init_empty_weights():
+                self.model = self.model_cls._from_config(
+                    config=config, torch_dtype=self.config.dtype
+                )
+            load_checkpoint_and_dispatch(
+                self.model, model_list, device_map="auto",
+                no_split_module_classes=self.no_split_module_classes,
+                dtype=self.config.dtype
+            )
+        else:
+            self.model = self.model_cls._from_config(
+                config=config, torch_dtype=self.config.dtype
+            )
+            load_checkpoint_and_dispatch(
+                self.model, model_list, device_map=None,
+                no_split_module_classes=self.no_split_module_classes,
+                dtype=self.config.dtype
+            )
 
     @property
     def no_split_module_classes(self):

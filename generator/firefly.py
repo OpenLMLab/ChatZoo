@@ -18,8 +18,8 @@ class FireflyBOT(ChatBOT):
 
         :param query: list of dict
             [
-                {"BOT": "hello"},
-                {"HUMAN": "hello, bot"},
+                {"role": "BOT", "content": "hello"}
+                {"role": "HUMAN", "content": "hello, bot"},
                 ...
             ]
         """
@@ -29,9 +29,7 @@ class FireflyBOT(ChatBOT):
         }
         prompt = ""
         for i, q in enumerate(query):
-            assert len(q) == 1, q
-            _type = list(q.keys())[0]
-            prompt += prompt_dict[_type].format(q[_type])
+            prompt += prompt_dict[q["role"]].format(q["content"])
         prompt += "</s>"
 
         return prompt
