@@ -1,20 +1,19 @@
 <template>
-    <div>
-        <div class="box-card">
-            <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
-                <h4>{{ model }}</h4>
-                <span>Chat with a bot</span>
-            </div>
-            <div class="chat-container">
-                <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
-                    <div :class="Object.keys(message)[0] === 'BOT' ? 'left' : 'right'">
-                        <p :style="{'white-space': 'pre-line'}">{{ Object.values(message)[0] }}</p>
-                    </div>
+    <div class="box-card">
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
+            <h4>{{ model }}</h4>
+            <span>Chat with a bot</span>
+            <button @click.prevent="deleteChatBox">删除</button>
+        </div>
+        <div class="chat-container">
+            <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
+                <div :class="Object.keys(message)[0] === 'BOT' ? 'left' : 'right'">
+                    <p :style="{'white-space': 'pre-line'}">{{ Object.values(message)[0] }}</p>
                 </div>
             </div>
         </div>
     </div>
-  </template>
+</template>
   
 <script>
 export default {
@@ -39,6 +38,8 @@ export default {
         deleteChatBox() {
             this.$emit('delete');
         }
+    },
+    mounted() {
     }
 };
 </script>
@@ -71,13 +72,15 @@ opacity: 0.7;
     overflow-y: auto;
     height: 100%;
     margin-bottom: 5%;
+    display: flex;
+    flex-direction: column;
 }
 
 
 .chat-body {
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  width: 100%;
 }
 
 .text {
@@ -98,7 +101,7 @@ clear: both
 }
 
 .box-card {
-    width: 300px;
+    width: 80%;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);

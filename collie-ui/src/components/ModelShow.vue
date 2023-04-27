@@ -1,16 +1,26 @@
 <template>
-    <el-container style="width: 100vw; height: 95vh">
-        <el-header style="height: 10vh;">
+    <el-container>
+        <el-header style="height: 10%; margin-top: 0;">
             <h1 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Collie    评测界面</h1>
         </el-header>
-        <el-main class="el-main">
-          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
-          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
-          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
-          <ChatBox :name="'MOSS'" :conversations="[{'BOT': '你好111111111111111111111111111111111111111111111111111111111111111'}]" @delete="deleteBox(model)"/>
-          <NewBox @new-box-data="handleNewBoxData" />
+        <el-main style="height: 80%; display: flex; flex-direction: row;">
+          <div style="display: flex; flex: 1; width: 100%;" @touchmove.prevent>
+            <carousel :key="models.length + 1" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="false" :loop="true" no-touch>
+              <slide v-for="(model, index) in models" :key="index">
+                <div class="slide-content">
+                  <ChatBox :name="model.name" :conversations="model.dialogue" @delete="deleteBox(model)"/>
+                </div>
+              </slide>
+              <slide v-if="showNewBox">
+                <div class="slide-content">
+                  <NewBox @new-box-data="handleNewBoxData" />
+                </div>
+              </slide>
+            </carousel>
+          </div>
         </el-main>
-        <el-footer style="height: 10vh;">
+        <el-footer style="height: 10%;">
+          <el-button>开启对话</el-button>
             <div class="chat-input">
                 <button class="clear-button" @click="clearDialogue"><i class="iconfont">&#xe946;</i></button>
                 <input type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
@@ -24,6 +34,10 @@
 <script>
 import ChatBox from './ChatBox.vue'
 import NewBox from './NewBox.vue'
+
+window.onload = function() {
+  console.log('每个',document.querySelector('.chat-container').style)
+};
 
 export default {
   name: 'ModelShow',
@@ -114,14 +128,61 @@ export default {
     }
   },
   mounted() {
+    // const innerHeight = window.innerHeight * 0.8 * 0.9;
+    // let idelNum = Math.floor(window.innerWidth / (innerHeight / 2));
+    // if (idelNum >= this.models.length + 1) {
+    //   this.itemPerPage = this.models.length + 1;
+    // } else {
+    //   while((this.models.length + 1) % idelNum != 0) {
+    //     idelNum --;
+    //   }
+    //   this.itemPerPage = idelNum;
+    // }
+    // console.log('高度',innerHeight)
+    // console.log('宽度',window.innerWidth)
+    // console.log('数量',this.itemPerPage)
+    // console.log('最大',this.models.length)
+    this.$nextTick(() => {
+      // 在 mounted 生命周期钩子中检查最后一个轮播项
+      console.log(this.$refs.carouselRef);
+      const lastSlideIndex = this.models.length - 1;
+      const lastSlide = this.$refs.carouselRef.getSlide(lastSlideIndex);
+      if (lastSlide) {
+        this.showNewBox = true;
+      }
+    });
   },
+  computed: {
+    itemPerPage() {
+      const innerHeight = window.innerHeight * 0.8 * 0.9;
+      // 理想的每页的个数
+      let idelNum = Math.floor(window.innerWidth / (innerHeight / 3));
+      console.log('理想',idelNum)
+      // 如果理想的个数 大于总个数
+      if (idelNum >= this.models.length + 1) {
+        console.log('现在的页数',this.models.length + 1)
+        return this.models.length + 1;
+      } else {
+        while((this.models.length + 1) % idelNum != 0) {
+          idelNum --;
+        }
+        console.log('现在的页数',idelNum)
+        return idelNum;
+      }
+    }
+  }
 
 }
 </script>
   
 <style>
+.body {
+  overflow-y: hidden;
+}
+
 .el-container {
     padding: 0; margin: 0; height: 100vh; 
+    overflow-y: hidden;
 }
 .el-header {
     background-color: #FFF;
@@ -140,14 +201,7 @@ export default {
     background-color: #FFFFFF;
     color: #FFF;
     text-align: center;
-    height: 70vh;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    padding-bottom: 5vh;
-    overflow-x: scroll;
-    width: 80vw;
-    margin: 0 auto;
+    overflow: hidden;
 }
 
 body > .el-container {
@@ -199,15 +253,11 @@ body > .el-container {
 
 .VueCarousel{
   height: 100%;
+  width: 100%;
 }
 
 .VueCarousel-wrapper{
   height: 100%;
-}
-
-/* 让每个 slide 元素宽度为父容器的宽度 */
-.VueCarousel-inner .VueCarousel-slide {
-  width: 100%;
 }
 
 /* 让每个 slide 等距离分布 */
@@ -217,12 +267,16 @@ body > .el-container {
   height: 90% !important;
 }
 
+.VueCarousel-slide .VueCarousel-slide-active {
+  width: 100%;
+}
+
 /* 让每个 slide 的内容水平居中 */
 .slide-content {
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 10px;
   height: 100%;
+  width: 100%
 }
 </style>
