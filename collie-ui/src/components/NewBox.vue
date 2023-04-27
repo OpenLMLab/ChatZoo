@@ -4,16 +4,18 @@
             <h4>控制台</h4>
             <span>注册、修改模型</span>
         </div>
-        <el-form :model="form" label-width="120px" style="flex:15">
-            <el-form-item label="模型名称">
-            <el-input v-model="form.name"></el-input>
-            </el-form-item>>
-            <el-form-item>
-                <el-button type="primary" @click.prevent="register">
-                    立即注册！
-                </el-button>
-            </el-form-item>
-        </el-form>
+        <div class="box-main">
+            <el-form :model="form" label-width="120px" >
+                <el-form-item label="模型名称">
+                <el-input v-model="form.name"></el-input>
+                </el-form-item>>
+                <el-form-item>
+                    <el-button type="primary" @click.prevent="register">
+                        立即注册！
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </div>
         </div>
   </template>
   
@@ -75,6 +77,11 @@ opacity: 0.7;
     height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.box-main {
+    flex: 15;
+    align-items: center;
 }
 
 .box-container {
