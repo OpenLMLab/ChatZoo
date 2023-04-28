@@ -4,7 +4,7 @@ import traceback
 import torch
 from transformers import AutoTokenizer, AutoConfig
 from accelerate import init_empty_weights #, load_checkpoint_and_dispatch
-from .utils import load_checkpoint_and_dispatch
+from .utils import find_free_network_port, load_checkpoint_and_dispatch
 
 class ChatBOT:
     """
@@ -12,6 +12,7 @@ class ChatBOT:
     """
     def __init__(self, config):
         self.config = config
+        self.port = find_free_network_port()
         self.model_name = config.pretrained_path
         self.tokenizer = AutoTokenizer.from_pretrained(config.tokenizer_path, trust_remote_code=True)
         # TODO 
@@ -48,7 +49,7 @@ class ChatBOT:
         print("Start generating...")
         try:
             prompt = self.get_prompt(query)
-            input_dict = self.tokenizer(prompt, return_tensors="pt")
+            input_dict = self.get_input(prompt)
             for key, value in input_dict.items():
                 try:
                     if torch.cuda.device_count() >= 1:
@@ -56,30 +57,15 @@ class ChatBOT:
                 except AttributeError:
                     pass
 
-            response = self.get_response(input_dict)
-            response = self.tokenizer.decode(response, skip_special_tokens=True)
+            output = self.model.generate(**input_dict, **self.gen_kwargs)
+            response = self.get_response(output, input_dict)
             response = self.process_response(response)
         except Exception as e:
-            response = e.message
+            response = None
             traceback.print_exc()
     
         return response
     
-    def get_response(self, input_dict):
-        """
-        Generate response.
-        """
-        output = self.model.generate(**input_dict, **self.gen_kwargs)
-        response = output.tolist()[0][len(input_dict["input_ids"][0]):]
-
-        return response
-
-    def process_response(self, response):
-        """
-        Post process
-        """
-        return response
-
     def get_prompt(self, query):
         """
         Get different prompt for different model.
@@ -90,10 +76,45 @@ class ChatBOT:
                 {"HUMAN": "hello, bot"},
                 ...
             ]
+        :return: prompt string
         """
         raise NotImplementedError(
             "Every model should implement its own `get_prompt` method."
         )
+
+    def get_input(self, prompt):
+        """
+        Get input dict of model.generate.
+
+        :param prompt: str. The prompt string.
+        :return: dict. Later it will be passed to ``model.generate``.
+        """
+        return self.tokenizer(prompt, return_tensors="pt")
+    
+    def get_response(self, output, input_dict):
+        """
+        Get models's response of the dialog.
+        
+        For example, drop the instruction and history of the output. 
+
+        :param output: Output from ``model.generate``.
+        :param input_dict: Input returned from ``get_input``.
+        :return: str
+        """
+        response = output.tolist()[0][len(input_dict["input_ids"][0]):]
+        response = self.tokenizer.decode(response, skip_special_tokens=True)
+        return response
+
+    def process_response(self, response):
+        """
+        Post process, such as decode response to string.
+        
+        :param response: String decoded by tokenizer.
+        :return: str. It will be passed to the frontend as the latest
+            reply og the model
+        """
+        response = self.tokenizer.decode(response, skip_special_tokens=True)
+        return response
     
     def load_model(self):
         config = AutoConfig.from_pretrained(

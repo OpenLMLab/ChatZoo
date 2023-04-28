@@ -35,10 +35,9 @@ class GODELBOT(ChatBOT):
         prompt = f"{instruction} [CONTEXT] {dialog_prompt}"
         return prompt
     
-    def get_response(self, input_dict):
-        output = self.model.generate(**input_dict, **self.gen_kwargs)
+    def get_response(self, output, input_dict):
         response = output.tolist()[0]
-
+        response = self.tokenizer.decode(response, skip_special_tokens=True)
         return response
     
     def process_response(self, response):
