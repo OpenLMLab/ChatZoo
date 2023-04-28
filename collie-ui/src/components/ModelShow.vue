@@ -1,14 +1,17 @@
 <template>
     <el-container>
-        <el-header style="height: 10%; margin-top: 0;">
-            <h1 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Collie    评测界面</h1>
+        <el-header style="height: 10%; margin-top: 0; display: flex;">
+            <h1 style="font-size: 2rem; font-weight: bold; color: #333; align-items: center; display: flex; flex:1; justify-content: flex-end;">Collie    评测界面</h1>
+            <div class="testConnect" style="display:flex; flex:1; align-items: center;justify-content: flex-start; padding-left: 10px; ">
+              <el-button @click="testConnect" type="success" size="mini">测试连接</el-button>
+            </div>
         </el-header>
-        <el-main style="height: 80%; display: flex; flex-direction: row;">
-          <div style="display: flex; flex: 1; width: 100%;" @touchmove.prevent>
+        <el-main style="height: 80%; width: 100%;">
+          <div style="width: 80%;" @touchmove.prevent>
             <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
               <slide v-for="(model, index) in models" :key="index">
                 <div class="slide-content">
-                  <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue" :status="model.status" :url="model.url" @delete="deleteBox(model)" @chat-response="handleChatResponse"/>
+                  <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue" :status="model.status" :url="model.url" @delete="deleteBox(model)" @chat-response="handleChatResponse" @linkResponse="handleLink"/>
                 </div>
               </slide>
             </carousel>
@@ -17,18 +20,14 @@
             <div class="newbox">
               <NewBox @new-box-data="handleNewBoxData" />
             </div>
-
           </div>
         </el-main>
         <el-footer style="height: 10%;">
             <div class="chat-input">
                 <button class="clear-button" @click="clearDialogue"><i class="iconfont">&#xe946;</i></button>
-                <input type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
+                <input class="input-box" type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
                 <button class="send-button" @click="sendMessage" ><i class="iconfont">&#xe604;</i></button>
                 <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button>                
-            </div>
-            <div class="testConnect">
-              <el-button @click="testConnect" type="success">测试连接</el-button>
             </div>
         </el-footer>
     </el-container>
@@ -52,19 +51,42 @@ export default {
     NewBox
   },
   methods: {
-    handleChatResponse(data, id) {
-      console.log(data)
+    handleLink(id, code) {
       const model = this.models.find((model) => model.id === id);
-      model.dialogue.push(data)
+      model.status = code
+    },
+    handleChatResponse(data, id, code) {
+      const model = this.models.find((model) => model.id === id);
+      if(code === 'error') {
+        model.status = 'info'
+      } else {
+        model.dialogue.push(data)
+      }
+      this.getNum += 1;
+      if(this.getNum == this.models.length) {
+        this.canSend = true;
+      }
     },
     sendMessage() {
+        // 判断信息是否为空
         if(this.newMessage) {
+          // 判断是否能发送信息
+          if(this.canSend) {
+            this.getNum = 0
             // 遍历每个dialogue数组
             for(let i = 0; i < this.models.length; i++) {
-              this.models[i].dialogue.push({"role":"HUMAN", "content":this.newMessage});
-              this.$refs.chat[i].chat()
+              if(this.models[i].status === 'success') {
+                this.models[i].dialogue.push({"role":"HUMAN", "content":this.newMessage});
+                this.canSend = false;
+              }
+              this.$refs.chat[i].chat()  
             }
             this.newMessage = '';
+          } else {
+            this.$message.error('请等模型回答完毕再输入！')
+          }
+        } else {
+          this.$message.error('消息不能为空！')
         }
     },
     clearDialogue() {
@@ -137,6 +159,18 @@ export default {
         console.error(error);
       })
       .finally(() => {
+        const failModels = this.models.filter(model => model.status === 'info')
+        let failStr = ''
+        for(let i=0; i<failModels.length; i++) {
+          failStr += failModels[i].name
+        }
+        if(failModels.length != 0){
+            this.$message({
+            'type': 'error',
+            'message': '模型'+failStr+'未加载成功',
+            'duration': 5000
+          })
+        }
         loading.close();
       })
     }
@@ -177,7 +211,8 @@ export default {
           }
         ],
         newMessage: '',
-
+        canSend: true,
+        getNum: 0
     }
   },
   mounted() {
@@ -193,14 +228,16 @@ export default {
     itemPerPage() {
       const innerHeight = window.innerHeight * 0.8 * 0.9;
       // 理想的每页的个数
-      let idelNum = Math.floor(window.innerWidth / (innerHeight / 2));
+      let idelNum = Math.floor(window.innerWidth * 0.8 / (innerHeight / 2));
       console.log('理想',idelNum)
       // 如果理想的个数 大于总个数
       if (idelNum >= this.models.length) {
-        console.log('现在的页数',this.models.length)
+        console.log('最大个数',this.models.length)
+        console.log('每个的宽度', innerHeight / 2)
         return this.models.length;
       } else {
-        console.log('现在的页数',idelNum)
+        console.log('理想数量',idelNum)
+        console.log('每个的宽度', innerHeight / 2)
         return idelNum;
       }
     }
@@ -212,28 +249,37 @@ export default {
 <style>
 .body {
   overflow-y: hidden;
+
+}
+
+.input-box {
+  border-radius: 20px;
+  border: 2px solid black;
+  padding: 10px;
+  width: 100%;
+  height: 80%;
+
 }
 
 .el-container {
     padding: 0; margin: 0; height: 100vh; 
+    background-image: linear-gradient(-225deg, #FFFEFF 0%, #D7FFFE 100%);
     overflow-y: hidden;
 }
 .el-header {
-    background-color: #FFF;
     color: #333;
     text-align: center;
     justify-content: center;
+
 }
 
 .el-footer {
-    background-color: #FFFFFF;
     color: #333;
     text-align: center;
     display: flex;
 }
 
 .el-main {
-    background-color: #FFFFFF;
     color: #FFF;
     text-align: center;
     overflow: hidden;
@@ -254,7 +300,7 @@ body > .el-container {
   width: 80%; /* 新增：设置宽度为200像素 */
   margin: 0 auto; /* 新增：设置左右外边距为自动，实现水平居中 */
   padding: 10px;
-  border: 1px solid black;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .chat-input input {
@@ -263,7 +309,9 @@ body > .el-container {
   outline: none;
   font-size: 1rem;
   padding: 8px;
+  padding-left: 20px;
   margin-right: 10px;
+  margin-left: 10px;
 }
 
 .chat-input button {
@@ -289,12 +337,17 @@ body > .el-container {
 
 .VueCarousel{
   height: 100%;
-  width: 100%;
-  flex: 5
+  flex: 4;
+}
+
+.console {
+  flex-basis: 20%;
+  flex-grow: 1;
 }
 
 .newbox {
   height: 90%;
+  width: 100%;
 }
 
 .VueCarousel-wrapper{

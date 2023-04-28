@@ -2,15 +2,15 @@
     <div class="new-box-card">
         <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
             <h4>控制台</h4>
-            <span>注册、修改模型</span>
+            <span>注册你自己的模型！</span>
         </div>
         <div class="box-main">
             <el-form :model="form" label-width="120px" >
                 <el-form-item label="模型名称">
                 <el-input v-model="form.name"></el-input>
-                </el-form-item>>
+                </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click.prevent="register">
+                    <el-button :loading="loading" type="primary" @click.prevent="register">
                         立即注册！
                     </el-button>
                 </el-form-item>
@@ -24,6 +24,7 @@ export default {
     name: 'NewBox',
     data() {
         return {
+            loading: false,
             form: {
                 name: '',
                 dialogue: '',
@@ -33,16 +34,25 @@ export default {
     },
     methods: {
         register() {
-            const uuid = require('uuid');
-            let data = {}
-            data.name = this.form.name
-            data.dialogue = [{'role':'BOT','content':'我是机器人' + data.name}]
-            const uuidv4 = uuid.v4({format:'N'})
-            data.id = uuidv4
-            data.status = 'info'
-            data.url = '/generate' + data.id
-            console.log('新模型的数据',data)
-            this.$emit('new-box-data', data)
+            if(this.form.name) {
+                const uuid = require('uuid');
+                let data = {}
+                data.name = this.form.name
+                data.dialogue = [{'role':'BOT','content':'我是机器人' + data.name}]
+                const uuidv4 = uuid.v4({format:'N'})
+                data.id = uuidv4
+                data.status = 'info'
+                data.url = '/generate' + data.id
+                // // 直接测试
+                // const instance = axios.create({
+                //     baseURL: 'http://127.0.0.1:10030/'
+                // })
+                // const params = 
+
+                this.$emit('new-box-data', data)
+            } else {
+                this.$message.error('模型名称不能为空！')
+            }
         }
     }
 };
@@ -70,7 +80,7 @@ opacity: 0.7;
 }
 
 .new-box-card {
-    width: 80%;
+    width: 100%;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
@@ -98,7 +108,12 @@ opacity: 0.7;
 
 .el-form-item__label {
     color: #333;
-    text-align: left;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    font-size: medium;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-weight: bolder;
 }
 
 .button {

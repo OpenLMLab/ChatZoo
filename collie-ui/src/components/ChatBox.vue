@@ -9,6 +9,7 @@
             </div>
             <div class="btn-container">
                 <el-button type="danger" size="mini" @click.prevent="deleteChatBox" >删除</el-button>
+                <el-button type="success" size="mini" @click.prevent="linkToBox" :loading="link_loading">连接</el-button>
             </div>
         </div>
         <div class="chat-container">
@@ -45,52 +46,83 @@ export default {
         id: {
             type: String,
             required: true
-        }
+        },
     },
     data() {
         return {
             model: this.name,
             dialogue: this.conversations,
             currstatus: this.status,
-            loading: false
+            loading: false,
+            link_loading: false
         };
     },
     watch: {
         status(newVal) {
-            this.currstatus = newVal;
-            
+            this.currstatus = newVal;  
         }
     },
     methods: {
         deleteChatBox() {
             this.$emit('delete');
         },
-        chat() {
-            console.log(this.model,'发送消息')
-            console.log(this.chat)
+        linkToBox() {
             const instance = axios.create({
                 baseURL: 'http://127.0.0.1:10030/'
             })
-            const data = this.dialogue
-            console.log('要发送的', data)
-            this.loading = true
-            console.log('连接', this.url)
-            instance.post(this.url, data, {
-                headers: {
-                'Content-Type': 'application/json',
-                },
+            const data = [{id: this.id, name:this.name}]
+            this.link_loading = true
+            instance.post('/init/', data, {
+                    headers: {
+                    'Content-Type': 'application/json',
+                    },
             })
             .then((response) => {
-                console.log('返回',response.data.response);
-                const res = {"role": "BOT", "content": response.data.response}
-                this.$emit('chat-response', res, this.id);
+                const value = response.data[Object.keys(response.data)[0]]
+                if (value === 0) {
+                    this.$emit('linkResponse', this.id, "success");
+                } else {
+                    this.$emit('linkResponse', this.id,"info");
+                }
+                this.link_loading = false;
             })
-            .catch((error) => {
-                console.error(error);
+            .catch(() => {
+                this.link_loading = false;
             })
-            .finally(() => {
-                this.loading = false
-            })
+        },
+        chat() {
+            // 如果节点状态为info，则直接返回
+            if(this.status === 'info') {
+                const res = {}
+                this.$emit('chat-response', res, this.id, 'error');
+            } else {
+                console.log(this.model,'发送消息')
+                console.log(this.chat)
+                const instance = axios.create({
+                    baseURL: 'http://127.0.0.1:10030/'
+                })
+                const data = this.dialogue
+                this.loading = true
+                console.log('连接', this.url)
+                instance.post(this.url, data, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then((response) => {
+                    console.log('返回',response.data.response);
+                    const res = {"role": "BOT", "content": response.data.response}
+                    this.$emit('chat-response', res, this.id, 'success');
+                    this.loading = false;
+                })
+                .catch((error) => {
+                    this.$message.error('模型'+this.model+'未收到信息，请查看连接！')
+                    console.error(error);
+                    const res = {}
+                    this.$emit('chat-response', res, this.id, 'error');
+                    this.loading = false;
+                })
+            }
         }
     },
     mounted() {
@@ -182,7 +214,7 @@ clear: both
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif, "Times New Roman";
     margin-right: 30px;
     height: 100%;
 }
