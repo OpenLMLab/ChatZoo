@@ -51,9 +51,12 @@ async def init_single(model_info, status_dict):
     except Exception as e:
         traceback.print_exc()
         # 1: error happens
-        status_dict[idx] = 1
+        status = 1
+        bot = None
+        bot_names[model_name] = None
     else:
-        status_dict[idx] = 0
+        status = int(bot is None)
+    status_dict[idx] = status
     print(f"{model_name} Initialized. status: {status_dict[idx]}")
     bots[idx] = bot
 
@@ -64,7 +67,7 @@ def initialize(model_infos: list):
 
     :param model_infos: list of dict.
         [
-            {"id": 1, "name":"fnlp/moss-sft-003-base"},
+            {"id": 1, "name":"fnlp/moss-moon-003-base"},
             {"id": 2, "name":"THUDM/chatglm-6b"},
             {"id": 3, "name":"YeungNLP/firefly-1b4"},
         ]
