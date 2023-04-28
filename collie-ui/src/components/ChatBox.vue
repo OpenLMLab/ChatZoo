@@ -1,22 +1,23 @@
 <template>
     <div class="box-card" v-loading="loading">
-        <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
-            <div style="padding: 10px;">
-                <el-tag size="mini" effect="dark" :type="currstatus">{{statusClass}}</el-tag>
+        <!-- <el-button @click="drawer=true" type="primary">菜单</el-button> -->
+        <!-- <el-drawer :modal="false" title="参数控制" :visible.sync="drawer" direction="ltr" >看看</el-drawer> -->
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative">
+            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                <div>
+                    <el-button type="danger" icon="el-icon-delete" size="mini" @click.prevent="deleteChatBox" circle></el-button>
+                </div>
             </div>
-            <div>
+            <div style="display: flex;">
                 <h4>{{ model }}</h4>
-            </div>
-            <div class="btn-container">
-                <el-button type="danger" size="mini" @click.prevent="deleteChatBox" >删除</el-button>
-                <el-button type="success" size="mini" @click.prevent="linkToBox" :loading="link_loading">连接</el-button>
+                <el-tag size="mini" effect="dark" :type="currstatus" style="margin-left: 10px;">{{statusClass}}</el-tag>
             </div>
         </div>
-        <div class="chat-container">
+        <div id="chatContainer" class="chat-container">
             <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
                 <div :class="(message.role) === 'BOT' ? 'left' : 'right'">
-                    <p :style="{'white-space': 'pre-line'}">{{ message.content }}</p>
-                </div>
+                    <p :style="{'white-space': 'pre-line'}">{{message.content}}</p>
+                </div>  
             </div>
         </div>
     </div>
@@ -24,6 +25,7 @@
   
 <script>
 import axios from 'axios';
+
 export default {
     name: 'ChatBox',
     props: {
@@ -50,6 +52,7 @@ export default {
     },
     data() {
         return {
+            drawer: false,
             model: this.name,
             dialogue: this.conversations,
             currstatus: this.status,
@@ -61,6 +64,12 @@ export default {
         status(newVal) {
             this.currstatus = newVal;  
         }
+    },
+    updated: function() {
+        this.$nextTick(() => {
+            const chatContainer = this.$el.querySelector('.chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
     },
     methods: {
         deleteChatBox() {
@@ -110,7 +119,6 @@ export default {
                     },
                 })
                 .then((response) => {
-                    console.log('返回',response.data.response);
                     const res = {"role": "BOT", "content": response.data.response}
                     this.$emit('chat-response', res, this.id, 'success');
                     this.loading = false;
@@ -123,9 +131,14 @@ export default {
                     this.loading = false;
                 })
             }
+        },
+        scrollToBottom() {
+            const chatContainer = this.$el.querySelector('.chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
     },
     mounted() {
+        this.scrollToBottom();
     },
     computed: {
         statusClass() {

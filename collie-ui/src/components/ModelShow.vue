@@ -1,13 +1,10 @@
 <template>
     <el-container>
         <el-header style="height: 10%; margin-top: 0; display: flex;">
-            <h1 style="font-size: 2rem; font-weight: bold; color: #333; align-items: center; display: flex; flex:1; justify-content: flex-end;">Collie    评测界面</h1>
-            <div class="testConnect" style="display:flex; flex:1; align-items: center;justify-content: flex-start; padding-left: 10px; ">
-              <el-button @click="testConnect" type="success" size="mini">测试连接</el-button>
-            </div>
+            <h1 style="font-size: 2rem; font-weight: bold; color: #333; align-items: center; display: flex; flex:1; justify-content: center;">Collie    评测界面</h1>
         </el-header>
         <el-main style="height: 80%; width: 100%;">
-          <div style="width: 80%;" @touchmove.prevent>
+          <div style="width: 100%;" @touchmove.prevent>
             <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
               <slide v-for="(model, index) in models" :key="index">
                 <div class="slide-content">
@@ -16,18 +13,15 @@
               </slide>
             </carousel>
           </div>
-          <div class="console">
-            <div class="newbox">
-              <NewBox @new-box-data="handleNewBoxData" />
-            </div>
-          </div>
         </el-main>
         <el-footer style="height: 10%;">
             <div class="chat-input">
                 <button class="clear-button" @click="clearDialogue"><i class="iconfont">&#xe946;</i></button>
                 <input class="input-box" type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
                 <button class="send-button" @click="sendMessage" ><i class="iconfont">&#xe604;</i></button>
-                <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button>                
+                <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button> 
+                <el-button @click="drawer=true" type="primary">新建模型</el-button>
+                <el-drawer :modal="false" title="" :visible.sync="drawer" :with-header="false" direction="rtl" ><NewBox @new-box-data="handleNewBoxData" /></el-drawer>               
             </div>
         </el-footer>
     </el-container>
@@ -75,10 +69,10 @@ export default {
             this.getNum = 0
             // 遍历每个dialogue数组
             for(let i = 0; i < this.models.length; i++) {
-              if(this.models[i].status === 'success') {
+              // if(this.models[i].status === 'success') {
                 this.models[i].dialogue.push({"role":"HUMAN", "content":this.newMessage});
                 this.canSend = false;
-              }
+              // }
               this.$refs.chat[i].chat()  
             }
             this.newMessage = '';
@@ -177,6 +171,7 @@ export default {
   },
   data() {
     return {
+        drawer: false,
         showNewBox: false,
         models:[
           {
