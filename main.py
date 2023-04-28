@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import traceback
 
@@ -8,10 +9,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import ModelConfig
 from generator import choose_bot
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--host", default="127.0.0.1", type=str)
+parser.add_argument("--port", default=10030, type=int)
+parser.add_argument("--mid_port", default=10020, type=int)
+args = parser.parse_args()
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],
+    allow_origins=[f"http://localhost:{args.mid_port}"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,4 +87,4 @@ def initialize(model_infos: list):
 if __name__ == "__main__":
     bots = {}
     bot_names = {}
-    uvicorn.run(app, port=10030)
+    uvicorn.run(app, host=args.host, port=args.port)
