@@ -31,12 +31,18 @@ MODEL_NAME_TO_MODEL_DICT = {
     "BelleGroup/BELLE-7B-2M": "belle",
 }
 
+DTYPE_DICT = {
+    "float16": torch.float16,
+    "float32": torch.float32,
+    "bfloat16": torch.bfloat16
+}
+
 @dataclass
 class ModelConfig:
     pretrained_path: str # path of pretrained model.
     type: str = None # type of model. 'moss', 'chatglm' etc.
     tokenizer_path: str = None
-    dtype: torch.dtype = torch.float16
+    dtype: str = "float16"
     # generation
     max_length: int = 2048
     num_beams: int = 1
@@ -60,6 +66,7 @@ class ModelConfig:
                     "check `pretrained_path` in your config or set `type` as "
                     f"one of: {set(MODEL_NAME_TO_MODEL_DICT.values())}"
                 )
+        self.dtype = DTYPE_DICT[self.dtype]
         if torch.cuda.device_count() < 1:
             # no gpu
             if self.dtype == torch.float16:
