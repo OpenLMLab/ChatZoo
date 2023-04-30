@@ -43,14 +43,8 @@ export default {
                 data.dialogue = [{'role':'BOT','content':'我是机器人' + data.name}]
                 const uuidv4 = uuid.v4({format:'N'})
                 data.id = uuidv4
-                data.status = 'info'
-                data.url = '/generate' + data.id
-                // // 直接测试
-                // const instance = axios.create({
-                //     baseURL: 'http://127.0.0.1:10030/'
-                // })
-                // const params = 
-
+                // data.status = 'info'
+                data.url = this.form.url
                 this.$emit('new-box-data', data)
             } else {
                 this.$message.error('模型名称不能为空！')
@@ -60,7 +54,6 @@ export default {
 };
 </script>
 <style>
-
 .chat-header {
     background-color: #333;
     color: #fff;
@@ -82,8 +75,21 @@ opacity: 0.7;
 }
 
 .el-input {
-    width: 500px;
-    border: 1px solid #ccc;
+    width: 100%;
+    padding: 0%;
+}
+
+.chat-input input {
+    padding-left: 0px;
+}
+
+.el-form-item {
+    padding: 10%;
+}
+
+.el-input__inner {
+    padding: 0%;
+    width: 100%;
 }
 
 .new-box-card {

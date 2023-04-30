@@ -1,17 +1,21 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4035487 */
-  src: url('iconfont.woff2?t=1682334913883') format('woff2'),
-       url('iconfont.woff?t=1682334913883') format('woff'),
-       url('iconfont.ttf?t=1682334913883') format('truetype');
+  src: url('iconfont.woff2?t=1682826765060') format('woff2'),
+       url('iconfont.woff?t=1682826765060') format('woff'),
+       url('iconfont.ttf?t=1682826765060') format('truetype');
 }
 
 .iconfont {
   font-family: "iconfont" !important;
   font-size: 50px;
-  font-style: normal;
   color: black;
+  font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-chuangjian:before {
+  content: "\e614";
 }
 
 .icon-cangpeitubiao_xiazaipandiandanxiazaidayinmoban:before {
