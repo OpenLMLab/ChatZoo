@@ -1,6 +1,7 @@
 """
 Launch a server for a single model.
 """
+import os
 import argparse
 import asyncio
 import traceback
@@ -13,8 +14,9 @@ from config import ModelConfig
 from generator import choose_bot
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--mid_port", default=10020, type=int)
+parser.add_argument("--port", default=8081, type=int)
 parser.add_argument("--host", default="localhost", type=str)
+parser.add_argument("--devices", default="0", type=str)
 # model config
 parser.add_argument(
     "--pretrained_path", type=str, help="Path of pretrained model."
@@ -38,18 +40,30 @@ args = parser.parse_args()
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[f"http://localhost:{args.mid_port}"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+bot = None
+
+@app.on_event('startup')
+def init_bot():
+    print(f"Initializing model...")
+    print("Config:", config)
+    print("Using devices:", args.devices)
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+    global bot
+    bot = choose_bot(config)
 
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
 )
 
-@app.post("/generate")
+
+@app.post("/")
 async def generate(dialogue: list):
     response = bot.chat(dialogue)
     if response is not None:
@@ -59,7 +73,4 @@ async def generate(dialogue: list):
     return {"status": status, "response": response}
 
 if __name__ == "__main__":
-    print(f"Initializing model...")
-    print("Config:", config)
-    bot = choose_bot(config)
-    uvicorn.run(app="server:app", host=args.host, port=bot.port, reload=True)
+    uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)

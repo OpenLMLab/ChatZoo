@@ -113,7 +113,6 @@ class ChatBOT:
         :return: str. It will be passed to the frontend as the latest
             reply og the model
         """
-        response = self.tokenizer.decode(response, skip_special_tokens=True)
         return response
     
     def load_model(self):
