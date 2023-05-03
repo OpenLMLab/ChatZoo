@@ -1,0 +1,20 @@
+[
+    {
+        "name": "MOSS",
+        "dialogue": [
+            {"MOSS":"你好，我是MOSS"},
+            {"HUMAN":"你好，我是HUMAN"},
+            {"MOSS":"很高兴认识你"},
+            {"HUMAN":"我也是。"}
+        ]
+    },
+    {
+        "name": "Alpaca",
+        "dialogue": [
+            {"Alpaca":"你好，我是Alpaca"},
+            {"HUMAN":"你好，我是HUMAN"},
+            {"Alpaca":"很高兴认识你"},
+            {"HUMAN":"我也是。"}
+        ]
+    }    
+]
