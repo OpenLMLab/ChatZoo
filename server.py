@@ -13,7 +13,7 @@ from config import ModelConfig
 from generator import choose_bot
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--mid_port", default=10020, type=int)
+parser.add_argument("--port", type=int)
 parser.add_argument("--host", default="localhost", type=str)
 # model config
 parser.add_argument(
@@ -38,16 +38,24 @@ args = parser.parse_args()
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[f"http://localhost:{args.mid_port}"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+bot = None
+
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
 )
+
+@app.on_event('startup')
+def init_bot():
+    print(f"Initializing model...")
+    print("Config:", config)
+    bot = choose_bot(config)
 
 @app.post("/generate")
 async def generate(dialogue: list):
@@ -59,7 +67,4 @@ async def generate(dialogue: list):
     return {"status": status, "response": response}
 
 if __name__ == "__main__":
-    print(f"Initializing model...")
-    print("Config:", config)
-    bot = choose_bot(config)
-    uvicorn.run(app="server:app", host=args.host, port=bot.port, reload=True)
+    uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)
