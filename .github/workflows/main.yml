@@ -3,7 +3,7 @@ name: npm auto release
 on:
   push:
     branches:
-      - main
+      - ui-release
       
 jobs:
   build:
