@@ -64,7 +64,6 @@ def init_bot():
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
-    from_s3=args.from_s3
 )
 
 

@@ -15,10 +15,9 @@ class ChatBOT:
         self.port = find_free_network_port()
         self.model_name = config.pretrained_path
         self.tokenizer = AutoTokenizer.from_pretrained(config.tokenizer_path, trust_remote_code=True)
-        if config.from_s3:
-            self.load_from_s3()
-        else:
-            self.load_model()
+        # TODO 
+        # self.load_model()
+        self.load_from_s3()
         self.set_generate_params()
 
     def set_generate_params(self):

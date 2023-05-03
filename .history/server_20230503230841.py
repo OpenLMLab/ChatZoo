@@ -36,7 +36,8 @@ parser.add_argument(
     help="Dtype to load model."
 )
 parser.add_argument(
-    "--from_s3", default=False, action="store_true",
+    "--from_s3", 
+    action="store_true",
     help="Whether to load model from s3. Only for testing purpose."
 )
 args = parser.parse_args()
@@ -64,7 +65,6 @@ def init_bot():
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
-    from_s3=args.from_s3
 )
 
 

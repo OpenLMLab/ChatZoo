@@ -1,7 +1,6 @@
 """
 Launch a server for a single model.
 """
-import os
 import argparse
 import asyncio
 import traceback
@@ -14,9 +13,8 @@ from config import ModelConfig
 from generator import choose_bot
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--port", default=8081, type=int)
+parser.add_argument("--mid_port", default=10020, type=int)
 parser.add_argument("--host", default="localhost", type=str)
-parser.add_argument("--devices", default="0", type=str)
 # model config
 parser.add_argument(
     "--pretrained_path", type=str, help="Path of pretrained model."
@@ -35,10 +33,6 @@ parser.add_argument(
     "--dtype", type=str, default="float16",
     help="Dtype to load model."
 )
-parser.add_argument(
-    "--from_s3", default=False, action="store_true",
-    help="Whether to load model from s3. Only for testing purpose."
-)
 args = parser.parse_args()
 
 app = FastAPI()
@@ -56,15 +50,11 @@ bot = None
 def init_bot():
     print(f"Initializing model...")
     print("Config:", config)
-    print("Using devices:", args.devices)
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
-    global bot
     bot = choose_bot(config)
 
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
-    from_s3=args.from_s3
 )
 
 
@@ -78,4 +68,4 @@ async def generate(dialogue: list):
     return {"status": status, "response": response}
 
 if __name__ == "__main__":
-    uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)
+    uvicorn.run(app="server:app", host=args.host, port=bot.port, reload=True)
