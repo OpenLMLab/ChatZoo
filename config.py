@@ -76,3 +76,14 @@ class ModelConfig:
                     "We will set `config.dtype` to `torch.float32`."
                 )
                 self.dtype = torch.float32
+
+    def __repr__(self) -> str:
+        import os
+        width = os.get_terminal_size().columns // 2 * 2
+        single_side = (width - 8) // 2
+        r = f"\n{'-' * single_side} CONFIG {'-' * single_side}\n"
+        for k, v in self.__dict__.items():
+            r += f"{k}: {v}\n"
+        r += f"{'-' * width}\n"
+
+        return r

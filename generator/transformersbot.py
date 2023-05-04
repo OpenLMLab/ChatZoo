@@ -83,7 +83,7 @@ class TransformersChatBOT(ChatBOT):
         config = AutoConfig.from_pretrained(
             self.model_name, trust_remote_code=True)
         
-        if torch.cuda.device_count() >= 1:
+        if torch.cuda.device_count() > 1:
             with init_empty_weights():
                 self.model = self.model_cls._from_config(
                     config=config, torch_dtype=torch.float16
@@ -95,14 +95,11 @@ class TransformersChatBOT(ChatBOT):
                 dtype=self.config.dtype
             )
         else:
-            self.model = self.model_cls._from_config(
-                config=config, torch_dtype=self.config.dtype
-            )
-            load_checkpoint_and_dispatch(
-                self.model, self.config.pretrained_path, device_map=None,
-                no_split_module_classes=self.no_split_module_classes,
-                dtype=self.config.dtype
-            )
+            self.model = self.model_cls.from_pretrained(self.model)
+            if self.config.dtype == torch.float16:
+                self.model.half()
+            if torch.cuda.device_count() != 0:
+                self.model.cuda()
 
     def load_from_s3(self):
         """
