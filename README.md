@@ -74,7 +74,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 [
     {"role":"HUMAN", "content":"你好！你是谁？"},
     {"role":"BOT", "content": "你好！我是机器人！"},
-    {"role":"BOT", "content": "今天天气不错！"}
+    {"role":"HUMAN", "content": "今天天气不错！"}
 ]
 ```
 
