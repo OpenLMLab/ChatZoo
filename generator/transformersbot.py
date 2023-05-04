@@ -15,6 +15,14 @@ class TransformersChatBOT(ChatBOT):
     def load_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.config.tokenizer_path, trust_remote_code=True)
+        
+    def default_settings(self):
+
+        return {
+            "max_length": 2048, "num_beams": 1, "do_sample": True,
+            "top_p": 0.9, "top_k": 1, "temperature": 0.95,
+            "repetition_penalty": 1.02
+        }
     
     def get_prompt(self, query):
         """
@@ -49,8 +57,15 @@ class TransformersChatBOT(ChatBOT):
 
         return input_dict
     
-    def generate(self, input_dict):
-        return self.model.generate(**input_dict, **self.gen_kwargs)
+    def generate(self, input_dict, gen_kwargs):
+        """
+        Generate a sentence from ``input_dict``
+
+        :param input_dict: dict. It is from ``get_input``.
+        :param gen_kwargs: dict. Parameters used for generating.
+        :return:
+        """
+        return self.model.generate(**input_dict, **gen_kwargs)
     
     def get_response(self, output, input_dict):
         """
@@ -83,7 +98,7 @@ class TransformersChatBOT(ChatBOT):
         config = AutoConfig.from_pretrained(
             self.model_name, trust_remote_code=True)
         
-        if torch.cuda.device_count() >= 1:
+        if torch.cuda.device_count() > 1:
             with init_empty_weights():
                 self.model = self.model_cls._from_config(
                     config=config, torch_dtype=torch.float16
@@ -95,14 +110,11 @@ class TransformersChatBOT(ChatBOT):
                 dtype=self.config.dtype
             )
         else:
-            self.model = self.model_cls._from_config(
-                config=config, torch_dtype=self.config.dtype
-            )
-            load_checkpoint_and_dispatch(
-                self.model, self.config.pretrained_path, device_map=None,
-                no_split_module_classes=self.no_split_module_classes,
-                dtype=self.config.dtype
-            )
+            self.model = self.model_cls.from_pretrained(self.model)
+            if self.config.dtype == torch.float16:
+                self.model.half()
+            if torch.cuda.device_count() != 0:
+                self.model.cuda()
 
     def load_from_s3(self):
         """
