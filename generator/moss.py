@@ -2,7 +2,7 @@ from .models import MossForCausalLM
 
 from .transformersbot import TransformersChatBOT
 
-class MOSSBOTTransformersChatBOT
+class MOSSBOT(TransformersChatBOT):
     def __init__(self, config):
         super(MOSSBOT, self).__init__(config)
 

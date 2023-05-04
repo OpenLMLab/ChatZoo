@@ -1,9 +1,9 @@
 import torch
 from transformers import AutoTokenizer, AutoConfig
-from accelerate import init_empty_weights #, load_checkpoint_and_dispatch
+from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
 from .chatbot import ChatBOT
-from .utils import load_checkpoint_and_dispatch
+from .utils import load_checkpoint_and_dispatch_from_s3
 
 class TransformersChatBOT(ChatBOT):
     """
@@ -15,15 +15,6 @@ class TransformersChatBOT(ChatBOT):
     def load_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.config.tokenizer_path, trust_remote_code=True)
-
-    @property
-    def model_cls(self):
-        raise NotImplementedError(
-            "Every model should set its own model class."
-        )
-    
-    def generate(self, input_dict):
-        return self.model.generate(**input_dict, **self.gen_kwargs)
     
     def get_prompt(self, query):
         """
@@ -40,7 +31,7 @@ class TransformersChatBOT(ChatBOT):
         raise NotImplementedError(
             "Every model should implement its own `get_prompt` method."
         )
-
+    
     def get_input(self, prompt):
         """
         Get input dict of model.generate.
@@ -58,6 +49,9 @@ class TransformersChatBOT(ChatBOT):
 
         return input_dict
     
+    def generate(self, input_dict):
+        return self.model.generate(**input_dict, **self.gen_kwargs)
+    
     def get_response(self, output, input_dict):
         """
         Get models's response of the dialog.
@@ -74,16 +68,15 @@ class TransformersChatBOT(ChatBOT):
 
     def process_response(self, response):
         """
-        Post process, such as decode response to string.
+        Post process, such as replace some special tokens.
         
         :param response: String decoded by tokenizer.
         :return: str. It will be passed to the frontend as the latest
             reply og the model
         """
-        response = self.tokenizer.decode(response, skip_special_tokens=True)
         return response
     
-    def _load_model(self):
+    def load_model(self):
         """
         Load model through transformers.
         """
@@ -111,7 +104,7 @@ class TransformersChatBOT(ChatBOT):
                 dtype=self.config.dtype
             )
 
-    def load_model(self):
+    def load_from_s3(self):
         """
         Load weights from hdd:s3
         """
@@ -146,7 +139,7 @@ class TransformersChatBOT(ChatBOT):
                 self.model = self.model_cls._from_config(
                     config=config, torch_dtype=self.config.dtype
                 )
-            load_checkpoint_and_dispatch(
+            load_checkpoint_and_dispatch_from_s3(
                 self.model, model_list, device_map="auto",
                 no_split_module_classes=self.no_split_module_classes,
                 dtype=self.config.dtype
@@ -155,11 +148,17 @@ class TransformersChatBOT(ChatBOT):
             self.model = self.model_cls._from_config(
                 config=config, torch_dtype=self.config.dtype
             )
-            load_checkpoint_and_dispatch(
+            load_checkpoint_and_dispatch_from_s3(
                 self.model, model_list, device_map=None,
                 no_split_module_classes=self.no_split_module_classes,
                 dtype=self.config.dtype
             )
+
+    @property
+    def model_cls(self):
+        raise NotImplementedError(
+            "Every model should set its own model class."
+        )
 
     @property
     def no_split_module_classes(self):
