@@ -1,8 +1,8 @@
 from transformers import T5ForConditionalGeneration
 
-from .chatbot import ChatBOT
+from .transformersbot import TransformersChatBOT
 
-class GODELBOT(ChatBOT):
+class GODELBOT(TransformersChatBOT):
     def __init__(self, config):
         super(GODELBOT, self).__init__(config)
 

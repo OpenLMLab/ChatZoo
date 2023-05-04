@@ -3,8 +3,6 @@ Launch a server for a single model.
 """
 import os
 import argparse
-import asyncio
-import traceback
 
 import uvicorn
 from fastapi import FastAPI
@@ -55,8 +53,8 @@ bot = None
 @app.on_event('startup')
 def init_bot():
     print(f"Initializing model...")
-    print("Config:", config)
     print("Using devices:", args.devices)
+    print("Config:", config)
     global bot
     bot = choose_bot(config)
 
@@ -65,7 +63,6 @@ config = ModelConfig(
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
     from_s3=args.from_s3
 )
-
 
 @app.post("/")
 async def generate(dialogue: list):

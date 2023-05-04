@@ -1,9 +1,9 @@
 import re
 
 from .models import ChatGLMForConditionalGeneration
-from .chatbot import ChatBOT
+from .transformersbot import TransformersChatBOT
 
-class ChatGLMBOT(ChatBOT):
+class ChatGLMBOT(TransformersChatBOT):
     def __init__(self, config):
         super(ChatGLMBOT, self).__init__(config)
 
