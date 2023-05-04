@@ -1,8 +1,8 @@
 from transformers import BloomForCausalLM
 
-from .chatbot import ChatBOT
+from .transformersbot import TransformersChatBOT
 
-class FireflyBOT(ChatBOT):
+class FireflyBOT(TransformersChatBOT):
     def __init__(self, config):
         super(FireflyBOT, self).__init__(config)
 

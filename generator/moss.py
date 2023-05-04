@@ -1,8 +1,8 @@
 from .models import MossForCausalLM
 
-from .chatbot import ChatBOT
+from .transformersbot import TransformersChatBOT
 
-class MOSSBOT(ChatBOT):
+class MOSSBOTTransformersChatBOT
     def __init__(self, config):
         super(MOSSBOT, self).__init__(config)
 
