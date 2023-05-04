@@ -40,7 +40,7 @@ parser.add_argument(
     help="Whether to load model from s3. Only for testing purpose."
 )
 args = parser.parse_args()
-os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -57,6 +57,7 @@ def init_bot():
     print(f"Initializing model...")
     print("Config:", config)
     print("Using devices:", args.devices)
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
     global bot
     bot = choose_bot(config)
 
