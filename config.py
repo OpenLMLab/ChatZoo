@@ -45,7 +45,7 @@ class ModelConfig:
     dtype: str = "float16"
     from_s3: bool = False
     # for lora-finetuned model such as baize
-    base_model: str = "decapoda-research/llama-7b-hf"
+    base_model: str = None
 
     def __post_init__(self):
         if self.tokenizer_path is None:

@@ -2,8 +2,8 @@ import os
 
 import torch
 from transformers import AutoTokenizer, AutoConfig
-from huggingface_hub import snapshot_download
-from accelerate import init_empty_weights, load_checkpoint_and_dispatch
+from transformers.models.auto.modeling_auto import _BaseAutoModelClass
+from accelerate import init_empty_weights
 
 from .chatbot import ChatBOT
 from .utils import load_checkpoint_and_dispatch_from_s3
@@ -98,29 +98,14 @@ class TransformersChatBOT(ChatBOT):
         """
         Load model through transformers.
         """
-        config = AutoConfig.from_pretrained(
-            self.model_name, trust_remote_code=True)
-        model_path = self.model_name
-        if not os.path.exists(self.model_name):
-            model_path = snapshot_download(self.model_name)
-        
-        if torch.cuda.device_count() > 1:
-            with init_empty_weights():
-                self.model = self.model_cls._from_config(
-                    config=config, torch_dtype=torch.float16
-                )
-
-            load_checkpoint_and_dispatch(
-                self.model, model_path, device_map="auto",
-                no_split_module_classes=self.no_split_module_classes,
-                dtype=self.config.dtype
-            )
-        else:
-            self.model = self.model_cls.from_pretrained(model_path)
-            if self.config.dtype == torch.float16:
-                self.model.half()
-            if torch.cuda.device_count() != 0:
-                self.model.cuda()
+        # mute warning
+        trust_remote_code = not issubclass(
+            self.model_cls, _BaseAutoModelClass
+        )
+        self.model = self.model_cls.from_pretrained(
+            self.model_name, torch_dtype=self.config.dtype,
+            device_map="auto", trust_remote_code=trust_remote_code
+        )
 
     def load_from_s3(self):
         """
@@ -130,7 +115,6 @@ class TransformersChatBOT(ChatBOT):
         import io
         import json
         from petrel_client.client import Client
-        from tqdm import tqdm
         client = Client()
 
         # get model_index
