@@ -25,15 +25,15 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 				 --port 8081
 ```
 
-我们目前支持的模型可以参见 [目前支持的模型](##目前支持的模型)，想要添加自己的模型可以参照 [添加自己的模型](###添加自己的模型)。
+我们目前支持的模型可以参见 [目前支持的模型](#目前支持的模型)，想要添加自己的模型可以参照 [添加自己的模型](#添加自己的模型)。
 
 ### 3. 使用
 
-在您完成以上两步操作后，您可以正式开始使用 ChatZoo。首先在浏览器地址栏中输入执行 [第一步](###1.%20启动前端) 的主机 ip 地址和端口号（本例中为 ``http://localhost:8080``）可打开前端页面：
+在您完成以上两步操作后，您可以正式开始使用 ChatZoo。首先在浏览器地址栏中输入执行 [第一步](#1.%20启动前端) 的主机 ip 地址和端口号（本例中为 ``http://localhost:8080``）可打开前端页面：
 
 ![](./pics/readme1.png)
 
-此时页面中并未加载任何模型，那么可以点击右下角的加号图标，输入模型名称（方便您自己区分）和 [第二步](###2.%20启动后端) 得到的 ip 地址和端口号，并点击立即注册：
+此时页面中并未加载任何模型，那么可以点击右下角的加号图标，输入模型名称（方便您自己区分）和 [第二步](#2.%20启动后端) 得到的 ip 地址和端口号，并点击立即注册：
 
 ![](./pics/readme2.png)
 
@@ -89,6 +89,6 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 #### 2. 构建映射关系
 
-接下来，您需要在 [./generator/__init__.py](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/__init__.py) 的字典中将您的 ChatBOT 类导入并添加进字典 `MODEL_DICT` 中。该字典的 key 为模型的类型名称，value 为您的 ChatBOT 类。这样，您就可以通过参数 `--pretrained_path` 和 `--type` 以及 `--tokenizer_path`（可选）参数来加载您的模型了。
+接下来，您需要在 [./generator/\_\_init\_\_.py](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/__init__.py) 的字典中将您的 ChatBOT 类导入并添加进字典 `MODEL_DICT` 中。该字典的 key 为模型的类型名称，value 为您的 ChatBOT 类。这样，您就可以通过参数 `--pretrained_path` 和 `--type` 以及 `--tokenizer_path`（可选）参数来加载您的模型了。
 
 如果您想更加一劳永逸一些，您还可以在 [config.py](https://github.com/OpenLMLab/ChatZoo/blob/main/config.py) 中将您的预训练路径与类型名称的对应关系添加到 `MODEL_NAME_TO_MODEL_DICT` 字典中。这样您在启动后端时就不必使用 `--type` 参数了。
