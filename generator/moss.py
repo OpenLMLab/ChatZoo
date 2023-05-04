@@ -9,6 +9,11 @@ class MOSSBOT(TransformersChatBOT):
     @property
     def model_cls(self):
         return MossForCausalLM
+    
+    def extra_settings(self):
+
+        return {"eos_token_id": 106068,
+                "pad_token_id": self.tokenizer.pad_token_id}
 
     def get_prompt(self, query):
         """

@@ -10,9 +10,8 @@ class FireflyBOT(TransformersChatBOT):
     def model_cls(self):
         return BloomForCausalLM
     
-    def set_generate_params(self):
-        super().set_generate_params()
-        self.gen_kwargs["eos_token_id"] = self.tokenizer.eos_token_id
+    def extra_settings(self):
+        return {"eos_token_id": self.tokenizer.eos_token_id}
     
     def get_prompt(self, query):
         """

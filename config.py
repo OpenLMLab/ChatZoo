@@ -44,14 +44,6 @@ class ModelConfig:
     tokenizer_path: str = None
     dtype: str = "float16"
     from_s3: bool = False
-    # generation
-    max_length: int = 2048
-    num_beams: int = 1
-    do_sample: bool = True
-    top_k: int = 1
-    top_p: float = 0.7
-    temperature: float = 0.95
-    repetition_penalty: float = 1.02
     # for lora-finetuned model such as baize
     base_model: str = "decapoda-research/llama-7b-hf"
 

@@ -15,6 +15,14 @@ class TransformersChatBOT(ChatBOT):
     def load_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.config.tokenizer_path, trust_remote_code=True)
+        
+    def default_settings(self):
+
+        return {
+            "max_length": 2048, "num_beams": 1, "do_sample": True,
+            "top_p": 0.9, "top_k": 1, "temperature": 0.95,
+            "repetition_penalty": 1.02
+        }
     
     def get_prompt(self, query):
         """
@@ -49,8 +57,15 @@ class TransformersChatBOT(ChatBOT):
 
         return input_dict
     
-    def generate(self, input_dict):
-        return self.model.generate(**input_dict, **self.gen_kwargs)
+    def generate(self, input_dict, gen_kwargs):
+        """
+        Generate a sentence from ``input_dict``
+
+        :param input_dict: dict. It is from ``get_input``.
+        :param gen_kwargs: dict. Parameters used for generating.
+        :return:
+        """
+        return self.model.generate(**input_dict, **gen_kwargs)
     
     def get_response(self, output, input_dict):
         """

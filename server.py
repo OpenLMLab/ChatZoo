@@ -66,13 +66,17 @@ config = ModelConfig(
 )
 
 @app.post("/")
-async def generate(dialogue: list):
-    response = bot.chat(dialogue)
+async def generate(post: dict):
+    response = bot.chat(post)
     if response is not None:
         status = 0
     else:
         status = 1
     return {"status": status, "response": response}
+
+@app.post("/parameters")
+async def default_settings():
+    return bot.default_settings()
 
 if __name__ == "__main__":
     uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)

@@ -12,38 +12,55 @@ class ChatBOT:
             self.load_from_s3()
         else:
             self.load_model()
-        self.set_generate_params()
 
     def load_tokenizer(self):
         raise NotImplementedError(
             "Every model should implement its own `load_tokenizer` method."
         )
 
-    def set_generate_params(self):
+    def default_settings(self):
+        """
+        Parameters for generation such as ``top_k``, ``top+p``.
 
-        self.gen_kwargs = {
-            "max_length": self.config.max_length,
-            "num_beams": self.config.num_beams,
-            "do_sample": self.config.do_sample, "top_p": self.config.top_p,
-            "top_k": self.config.top_k, "temperature": self.config.temperature,
-            "repetition_penalty": self.config.repetition_penalty
-        }
+        :return: dict. The website will set different components according to
+            this dict.
+        """
+        return {}
+    
+    def extra_settings(self):
+        """
+        Extra settings for generation such as ``eos_token_id``.
 
-    def chat(self, query):
+        :return: dict. It will be passed to ``generate`` together with
+            ``gen_kwargs``.
+        """
+        return {}
+
+    def chat(self, post):
         """
 
-        :param query: list of dict
-            [
-                {"role": "BOT", "content": "hello"}
-                {"role": "HUMAN", "content": "hello, bot"},
-                ...
-            ]
+        :param post: dict
+            {
+                "query": [
+                    {"role": "BOT", "content": "hello"}
+                    {"role": "HUMAN", "content": "hello, bot"},
+                    ...
+                ],
+                "params": {
+                    "top_p": 0.9,
+                    "top_k": 1,
+                    ...
+                }
+            }
         """
         print("Start generating...")
         try:
+            query = post["query"]
+            gen_kwargs = post["params"]
+            gen_kwargs.update(self.extra_settings())
             prompt = self.get_prompt(query)
             input_dict = self.get_input(prompt)
-            output = self.generate(input_dict)
+            output = self.generate(input_dict, gen_kwargs)
             response = self.get_response(output, input_dict)
             response = self.process_response(response)
         except Exception as e:
@@ -79,11 +96,12 @@ class ChatBOT:
             "Every model should implement its own `get_input` method."
         )
     
-    def generate(self, input_dict):
+    def generate(self, input_dict, gen_kwargs):
         """
         Generate a sentence from ``input_dict``
 
         :param input_dict: dict. It is from ``get_input``.
+        :param gen_kwargs: dict. Parameters used for generating.
         :return:
         """
         raise NotImplementedError(

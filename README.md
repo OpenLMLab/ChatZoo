@@ -79,8 +79,9 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 ```
 
 - `get_input(self, prompt)`：从 `prompt` 中获取输入的函数。`prompt` 即为 `get_prompt` 函数的返回值，您需要在该函数中返回一个字典作为模型生成的输入。比如在 `TransformersChatBOT` 中，该函数返回的是调用 `tokenizer` 后得到的字典。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
-- `set_generate_params(self)`：设置其它参数的函数。比如 `num_beams`、`top_k`、`top_p` 等决定生成策略的函数。我们在 `ChatBOT` 中已经实现了这一函数，您可以参考其中的内容决定是否需要重写该函数。
-- `generate(self, input_dict)`：执行生成步骤的函数。`input_dict` 是 `get_input` 返回的字典，这一步主要调用模型的生成方法进行生成。比如在 `TransformersChatBOT` 中，该函数会调用 `model.generate` 方法，然后将结果返回。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
+- `default_settings(self)`：配置生成参数的函数，比如 `num_beams`、`top_k`、`top_p` 等决定生成策略的函数。返回一个字典，key 为参数名，value 为默认值，前端界面会根据这些信息来定制生成配置的控件。如果您继承的是 `TransformersChatBOT`，那么大部分情况下该函数您无需重写。
+- `extra_settings(self)`: 配置其它参数的函数，比如 `eos_token_id` 等固定的额外参数。返回一个字典，key 为参数名，value 为默认值，该字典会与网页中设置的参数一起作为 `gen_kwargs` 传入到生成函数中。
+- `generate(self, input_dict, gen_kwargs)`：执行生成步骤的函数。`input_dict` 是 `get_input` 返回的字典，`gen_kwargs` 是生成配置，这一步主要调用模型的生成方法进行生成。比如在 `TransformersChatBOT` 中，该函数会调用 `model.generate` 方法，然后将结果返回。如果您继承的是 `TransformersChatBOT`，那么大部分情况下该函数您无需重写。
 - `get_response(self, output, input_dict)`：获取模型当轮回复的函数，并返回一个字符串。`output` 是 `generate` 函数的返回值，`input_dict` 是 `get_input` 函数的返回值。这个函数主要用于提取模型的回复，比如从生成结果中删除前面的历史记录部分并使用 `tokenizer` 进行解码。如果您继承的是 `TransformersChatBOT`，那么大部分情况下该函数您无需重写。
 - `process_response(self, response)`：对模型回复进行处理的函数，返回一个字符串。`response` 是 `get_response` 函数的返回值，该函数主要用于替换 `response` 中的一些特殊字符，比如 `<s>` `<eoh>` 等。聊天界面中展示的模型当轮回复就是该函数返回的字符串。如果您不需要对生成的字符串进行特殊处理，那么该函数您无需重写。
 - `load_model(self)`：从 `config.pretrained_path` 中加载模型的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
