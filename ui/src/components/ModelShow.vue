@@ -1,25 +1,17 @@
 <template>
     <el-container>
         <el-header style="height: 10%; margin-top: 0; display: flex;">
-            <h1 style="font-size: 2rem; font-weight: bold; color: #333; align-items: center; display: flex; flex:1; justify-content: flex-end;">Collie    评测界面</h1>
-            <div class="testConnect" style="display:flex; flex:1; align-items: center;justify-content: flex-start; padding-left: 10px; ">
-              <el-button @click="testConnect" type="success" size="mini">测试连接</el-button>
-            </div>
+            <h1 style="font-size: 2rem; font-weight: bold; color: #333; align-items: center; display: flex; flex:1; justify-content: center;">Collie    评测界面</h1>
         </el-header>
         <el-main style="height: 80%; width: 100%;">
-          <div style="width: 80%;" @touchmove.prevent>
+          <div style="width: 100%;" @touchmove.prevent>
             <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
               <slide v-for="(model, index) in models" :key="index">
                 <div class="slide-content">
-                  <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue" :status="model.status" :url="model.url" @delete="deleteBox(model)" @chat-response="handleChatResponse" @linkResponse="handleLink"/>
+                  <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue"  :url="model.url" @delete="deleteBox(model)" @chat-response="handleChatResponse" />
                 </div>
               </slide>
             </carousel>
-          </div>
-          <div class="console">
-            <div class="newbox">
-              <NewBox @new-box-data="handleNewBoxData" />
-            </div>
           </div>
         </el-main>
         <el-footer style="height: 10%;">
@@ -27,17 +19,20 @@
                 <button class="clear-button" @click="clearDialogue"><i class="iconfont">&#xe946;</i></button>
                 <input class="input-box" type="text" placeholder="一起来聊聊天吧~" @keyup.enter="sendMessage" v-model="newMessage">
                 <button class="send-button" @click="sendMessage" ><i class="iconfont">&#xe604;</i></button>
-                <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button>                
+                <button class="send-button" @click="downloadIt"><i class="iconfont">&#xe623;</i></button> 
+                <button class="send-button" @click="drawer=true"><i class="iconfont">&#xe614;</i></button> 
+                <el-drawer :modal="false" title="" :visible.sync="drawer" :with-header="false" direction="rtl" ><NewBox @new-box-data="handleNewBoxData" /></el-drawer>               
             </div>
         </el-footer>
     </el-container>
 </template>
 
 <script>
+import { Link } from 'element-ui';
 import ChatBox from './ChatBox.vue'
 import NewBox from './NewBox.vue'
 import { Carousel, Slide } from 'vue-carousel'
-import axios from 'axios';
+// import axios from 'axios';
 
 window.onload = function() {
 };
@@ -51,17 +46,13 @@ export default {
     NewBox
   },
   methods: {
-    handleLink(id, code) {
+    // handleLink(id, code) {
+    //   const model = this.models.find((model) => model.id === id);
+    //   model.status = code
+    // },
+    handleChatResponse(data, id) {
       const model = this.models.find((model) => model.id === id);
-      model.status = code
-    },
-    handleChatResponse(data, id, code) {
-      const model = this.models.find((model) => model.id === id);
-      if(code === 'error') {
-        model.status = 'info'
-      } else {
-        model.dialogue.push(data)
-      }
+      model.dialogue.push(data)
       this.getNum += 1;
       if(this.getNum == this.models.length) {
         this.canSend = true;
@@ -69,16 +60,16 @@ export default {
     },
     sendMessage() {
         // 判断信息是否为空
-        if(this.newMessage) {
+        if(this.newMessage) {Link
           // 判断是否能发送信息
           if(this.canSend) {
             this.getNum = 0
             // 遍历每个dialogue数组
             for(let i = 0; i < this.models.length; i++) {
-              if(this.models[i].status === 'success') {
+              // if(this.models[i].status === 'success') {
                 this.models[i].dialogue.push({"role":"HUMAN", "content":this.newMessage});
                 this.canSend = false;
-              }
+              // }
               this.$refs.chat[i].chat()  
             }
             this.newMessage = '';
@@ -106,7 +97,7 @@ export default {
       let newModel = {}
       newModel.name = data.name
       newModel.dialogue = data.dialogue
-      newModel.status = data.status
+      // newModel.status = data.status
       newModel.url = data.url
       newModel.id = data.id
       this.models.push(newModel)
@@ -119,64 +110,65 @@ export default {
       this.models.splice(index, 1);
       console.log(this.models)
     },
-    testConnect() {
-      const instance = axios.create({
-        baseURL: 'http://127.0.0.1:10030/'
-      })
-      const data = this.models.map((model) => {
-        return {
-          id: model.id,
-          name: model.name
-        }
-      })
-      console.log(data)
-      const loading = this.$loading({
-        lock: true,
-        text: '模型启动中...',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0,0,0,0.7)'
-      })
-      instance.post('/init/', data, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then((response) => {
-        console.log('返回',response.data);
-        const lenOfResponse = Object.keys(response.data).length;
-        console.log('大小',lenOfResponse)
-        for (let i = 0; i < lenOfResponse; i++) {
-          const value = response.data[Object.keys(response.data)[i]]
-          if (value === 0) {
-            this.models[i].status = 'success'
-          } else {
-            this.models[i].status = 'info'
-          }
-        }
-        console.log(this.models)
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        const failModels = this.models.filter(model => model.status === 'info')
-        let failStr = ''
-        for(let i=0; i<failModels.length; i++) {
-          failStr += failModels[i].name
-        }
-        if(failModels.length != 0){
-            this.$message({
-            'type': 'error',
-            'message': '模型'+failStr+'未加载成功',
-            'duration': 5000
-          })
-        }
-        loading.close();
-      })
-    }
+    // testConnect() {
+    //   const instance = axios.create({
+    //     baseURL: 'http://127.0.0.1:10030/'
+    //   })
+    //   const data = this.models.map((model) => {
+    //     return {
+    //       id: model.id,
+    //       name: model.name
+    //     }
+    //   })
+    //   console.log(data)
+    //   const loading = this.$loading({
+    //     lock: true,
+    //     text: '模型启动中...',
+    //     spinner: 'el-icon-loading',
+    //     background: 'rgba(0,0,0,0.7)'
+    //   })
+    //   instance.post('/init/', data, {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //   })
+    //   .then((response) => {
+    //     console.log('返回',response.data);
+    //     const lenOfResponse = Object.keys(response.data).length;
+    //     console.log('大小',lenOfResponse)
+    //     // for (let i = 0; i < lenOfResponse; i++) {
+    //     //   const value = response.data[Object.keys(response.data)[i]]
+    //     //   if (value === 0) {
+    //     //     this.models[i].status = 'success'
+    //     //   } else {
+    //     //     this.models[i].status = 'info'
+    //     //   }
+    //     // }
+    //     console.log(this.models)
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
+    //   })
+    //   .finally(() => {
+    //     const failModels = this.models.filter(model => model.status === 'info')
+    //     let failStr = ''
+    //     for(let i=0; i<failModels.length; i++) {
+    //       failStr += failModels[i].name
+    //     }
+    //     if(failModels.length != 0){
+    //         this.$message({
+    //         'type': 'error',
+    //         'message': '模型'+failStr+'未加载成功',
+    //         'duration': 5000
+    //       })
+    //     }
+    //     loading.close();
+    //   })
+    // }
   },
   data() {
     return {
+        drawer: false,
         showNewBox: false,
         models:[
           {
@@ -186,13 +178,13 @@ export default {
                           {"role":"BOT", "content": "Hello"},
                           {"role":"HUMAN", "content": "Hello，我是人类"},
                         ],
-            "status": "info",
+            // "status": "info",
             "url": "/generate/0"
           },
           {
             "id": "1",
             "name": "THUDM/chatglm-6b",
-            "status": "info",
+            // "status": "info",
             "dialogue": [
                           {"role":"BOT", "content": "Hello"},
                           {"role":"HUMAN", "content": "Hello，我是人类"},
@@ -206,7 +198,7 @@ export default {
                           {"role":"BOT", "content": "Hello"},
                           {"role":"HUMAN", "content": "Hello，我是人类"},
                         ],
-            "status": "info",
+            // "status": "info",
             "url": "/generate/2"
           }
         ],
@@ -305,13 +297,10 @@ body > .el-container {
 
 .chat-input input {
   flex: 1;
-  border: none;
   outline: none;
   font-size: 1rem;
   padding: 8px;
-  padding-left: 20px;
   margin-right: 10px;
-  margin-left: 10px;
 }
 
 .chat-input button {

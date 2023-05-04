@@ -1,22 +1,24 @@
 <template>
     <div class="box-card" v-loading="loading">
-        <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
-            <div style="padding: 10px;">
-                <el-tag size="mini" effect="dark" :type="currstatus">{{statusClass}}</el-tag>
+        <!-- <el-button @click="drawer=true" type="primary">菜单</el-button> -->
+        <!-- <el-drawer :modal="false" title="参数控制" :visible.sync="drawer" direction="ltr" >看看</el-drawer> -->
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative">
+            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                <div>
+                    <el-button type="danger" icon="el-icon-delete" size="mini" @click.prevent="deleteChatBox" circle></el-button>
+                </div>
             </div>
-            <div>
+            <div style="display: flex;">
                 <h4>{{ model }}</h4>
-            </div>
-            <div class="btn-container">
-                <el-button type="danger" size="mini" @click.prevent="deleteChatBox" >删除</el-button>
-                <el-button type="success" size="mini" @click.prevent="linkToBox" :loading="link_loading">连接</el-button>
+                <!-- <el-tag size="mini" effect="dark" :type="currstatus" style="margin-left: 10px;">{{statusClass}}</el-tag> -->
             </div>
         </div>
-        <div class="chat-container">
+        <div id="chatContainer" class="chat-container">
             <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
-                <div :class="(message.role) === 'BOT' ? 'left' : 'right'">
-                    <p :style="{'white-space': 'pre-line'}">{{ message.content }}</p>
-                </div>
+                <div  :class="(message.role) === 'BOT' ? 'left' : 'right'">
+                    <p>{{ message.content }}</p>
+                    <!-- <MarkdownPreview :initialValue=message.content :copyCode="true" /> -->
+                </div>  
             </div>
         </div>
     </div>
@@ -24,8 +26,13 @@
   
 <script>
 import axios from 'axios';
+// import { MarkdownPreview } from 'vue-meditor'
+
 export default {
     name: 'ChatBox',
+    // components: {
+    //     MarkdownPreview
+    // },
     props: {
         name: {
             type: String,
@@ -35,10 +42,10 @@ export default {
             type: Array,
             required: true
         },
-        status: {
-            type: String,
-            required: true
-        },
+        // status: {
+        //     type: String,
+        //     required: true
+        // },
         url: {
             type: String,
             required: true
@@ -50,56 +57,63 @@ export default {
     },
     data() {
         return {
+            drawer: false,
             model: this.name,
             dialogue: this.conversations,
-            currstatus: this.status,
+            // currstatus: this.status,
             loading: false,
             link_loading: false
         };
     },
     watch: {
-        status(newVal) {
-            this.currstatus = newVal;  
-        }
+        // status(newVal) {
+        //     this.currstatus = newVal;  
+        // }
+    },
+    updated: function() {
+        this.$nextTick(() => {
+            const chatContainer = this.$el.querySelector('.chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
     },
     methods: {
         deleteChatBox() {
             this.$emit('delete');
         },
-        linkToBox() {
-            const instance = axios.create({
-                baseURL: 'http://127.0.0.1:10030/'
-            })
-            const data = [{id: this.id, name:this.name}]
-            this.link_loading = true
-            instance.post('/init/', data, {
-                    headers: {
-                    'Content-Type': 'application/json',
-                    },
-            })
-            .then((response) => {
-                const value = response.data[Object.keys(response.data)[0]]
-                if (value === 0) {
-                    this.$emit('linkResponse', this.id, "success");
-                } else {
-                    this.$emit('linkResponse', this.id,"info");
-                }
-                this.link_loading = false;
-            })
-            .catch(() => {
-                this.link_loading = false;
-            })
-        },
+        // linkToBox() {
+        //     const instance = axios.create({
+        //         baseURL: ''
+        //     })
+        //     const data = [{id: this.id, name:this.name}]
+        //     this.link_loading = true
+        //     instance.post('/init/', data, {
+        //             headers: {
+        //             'Content-Type': 'application/json',
+        //             },
+        //     })
+        //     .then((response) => {
+        //         const value = response.data[Object.keys(response.data)[0]]
+        //         if (value === 0) {
+        //             this.$emit('linkResponse', this.id, "success");
+        //         } else {
+        //             this.$emit('linkResponse', this.id,"info");
+        //         }
+        //         this.link_loading = false;
+        //     })
+        //     .catch(() => {
+        //         this.link_loading = false;
+        //     })
+        // },
         chat() {
             // 如果节点状态为info，则直接返回
-            if(this.status === 'info') {
-                const res = {}
-                this.$emit('chat-response', res, this.id, 'error');
-            } else {
+            // if(this.status === 'info') {
+            //     const res = {}
+            //     this.$emit('chat-response', res, this.id, 'error');
+            // } else {
                 console.log(this.model,'发送消息')
                 console.log(this.chat)
                 const instance = axios.create({
-                    baseURL: 'http://127.0.0.1:10030/'
+                    baseURL: ''
                 })
                 const data = this.dialogue
                 this.loading = true
@@ -110,34 +124,37 @@ export default {
                     },
                 })
                 .then((response) => {
-                    console.log('返回',response.data.response);
                     const res = {"role": "BOT", "content": response.data.response}
-                    this.$emit('chat-response', res, this.id, 'success');
+                    this.$emit('chat-response', res, this.id);
                     this.loading = false;
                 })
                 .catch((error) => {
                     this.$message.error('模型'+this.model+'未收到信息，请查看连接！')
                     console.error(error);
-                    const res = {}
-                    this.$emit('chat-response', res, this.id, 'error');
+                    const res = {"role": "BOT", "content": '网络错误'}
+                    this.$emit('chat-response', res, this.id);
                     this.loading = false;
                 })
-            }
+        },
+        scrollToBottom() {
+            const chatContainer = this.$el.querySelector('.chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
     },
     mounted() {
+        this.scrollToBottom();
     },
     computed: {
-        statusClass() {
-            switch(this.currstatus) {
-                case 'success':
-                    return '在线';
-                case 'info':
-                    return '离线';
-                default:
-                    return '离线';
-            }
-        }
+        // statusClass() {
+        //     switch(this.currstatus) {
+        //         case 'success':
+        //             return '在线';
+        //         case 'info':
+        //             return '离线';
+        //         default:
+        //             return '离线';
+        //     }
+        // }
     }
 };
 </script>
@@ -255,4 +272,5 @@ clear: both
   margin: 0;
   line-height: 1.5;
 }
+
 </style>

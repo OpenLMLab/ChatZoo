@@ -43,6 +43,7 @@ class ModelConfig:
     type: str = None # type of model. 'moss', 'chatglm' etc.
     tokenizer_path: str = None
     dtype: str = "float16"
+    from_s3: bool = False
     # generation
     max_length: int = 2048
     num_beams: int = 1

@@ -11,7 +11,10 @@ class ChatBOT:
         self.port = find_free_network_port()
         self.model_name = config.pretrained_path
         self.load_tokenizer()
-        self.load_model()
+        if config.from_s3:
+            self.load_from_s3()
+        else:
+            self.load_model()
         self.set_generate_params()
 
     def load_tokenizer(self):
@@ -118,9 +121,13 @@ class ChatBOT:
         :return: str. It will be passed to the frontend as the latest
             reply og the model
         """
+<<<<<<< HEAD
         raise NotImplementedError(
             "Every model should implement its own `process_response` method."
         )
+=======
+        return response
+>>>>>>> 69f15275c519f57c499567b12bc0ce9a7598d102
     
     def load_model(self):
         raise NotImplementedError(

@@ -1,13 +1,15 @@
 <template>
     <div class="new-box-card">
-        <div class="chat-header clearfix" style="display: flex; flex-direction: column;">
-            <h4>控制台</h4>
-            <span>注册你自己的模型！</span>
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <h4>新建模型</h4>
         </div>
         <div class="box-main">
-            <el-form :model="form" label-width="120px" >
+            <el-form :model="form">
                 <el-form-item label="模型名称">
-                <el-input v-model="form.name"></el-input>
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item label="模型URL">
+                    <el-input v-model="form.url"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button :loading="loading" type="primary" @click.prevent="register">
@@ -41,14 +43,8 @@ export default {
                 data.dialogue = [{'role':'BOT','content':'我是机器人' + data.name}]
                 const uuidv4 = uuid.v4({format:'N'})
                 data.id = uuidv4
-                data.status = 'info'
-                data.url = '/generate' + data.id
-                // // 直接测试
-                // const instance = axios.create({
-                //     baseURL: 'http://127.0.0.1:10030/'
-                // })
-                // const params = 
-
+                // data.status = 'info'
+                data.url = this.form.url
                 this.$emit('new-box-data', data)
             } else {
                 this.$message.error('模型名称不能为空！')
@@ -58,7 +54,6 @@ export default {
 };
 </script>
 <style>
-
 .chat-header {
     background-color: #333;
     color: #fff;
@@ -79,6 +74,24 @@ font-size: 0.8rem;
 opacity: 0.7;
 }
 
+.el-input {
+    width: 100%;
+    padding: 0%;
+}
+
+.chat-input input {
+    padding-left: 0px;
+}
+
+.el-form-item {
+    padding: 10%;
+}
+
+.el-input__inner {
+    padding: 0%;
+    width: 100%;
+}
+
 .new-box-card {
     width: 100%;
     border: 1px solid #ccc;
@@ -91,6 +104,7 @@ opacity: 0.7;
 
 .box-main {
     flex: 15;
+    justify-content: center;
     align-items: center;
 }
 
@@ -99,39 +113,5 @@ opacity: 0.7;
     width: 100%;
 }
 
-
-
-.el-form-item {
-    display: flex;
-    padding: 20px;
-}
-
-.el-form-item__label {
-    color: #333;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    font-size: medium;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-    font-weight: bolder;
-}
-
-.button {
-  display: inline-block;
-  padding: 10px 20px;
-  border-radius: 5px;
-  background-color: #2196F3;
-  color: #fff;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.button:hover {
-  background-color: #0D47A1;
-}
 
 </style>

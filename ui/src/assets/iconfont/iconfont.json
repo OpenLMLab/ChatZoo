@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "12732490",
+      "name": "创建",
+      "font_class": "chuangjian",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
       "icon_id": "16563853",
       "name": "下载盘点单、下载打印模板",
       "font_class": "cangpeitubiao_xiazaipandiandanxiazaidayinmoban",
