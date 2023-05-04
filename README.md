@@ -52,9 +52,13 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
     - [moss-moon-003-sft-plugin-int4](https://huggingface.co/fnlp/moss-moon-003-sft-plugin-int4)
 - [ChatGLM](https://github.com/THUDM/ChatGLM-6B)
     - [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+- [BELLE](https://github.com/LianjiaTech/BELLE)
+    - [BELLE-7B-2M](https://huggingface.co/BelleGroup/BELLE-7B-2M)
 - [Firefly](https://github.com/yangjianxin1/Firefly)
     - [firefly-1b4](https://huggingface.co/YeungNLP/firefly-1b4)
     - [firefly-2b6](https://huggingface.co/YeungNLP/firefly-2b6)
+- [Baize](https://github.com/project-baize/baize-chatbot)
+    - [baize-lora-7b](https://huggingface.co/project-baize/baize-lora-7B)
 - [GODEL](https://github.com/microsoft/GODEL)
     - [GODEL-v1_1-base-seq2seq](https://huggingface.co/microsoft/GODEL-v1_1-base-seq2seq)
     - [GODEL-v1_1-large-seq2seq](https://huggingface.co/microsoft/GODEL-v1_1-large-seq2seq)
@@ -86,7 +90,6 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 - `process_response(self, response)`：对模型回复进行处理的函数，返回一个字符串。`response` 是 `get_response` 函数的返回值，该函数主要用于替换 `response` 中的一些特殊字符，比如 `<s>` `<eoh>` 等。聊天界面中展示的模型当轮回复就是该函数返回的字符串。如果您不需要对生成的字符串进行特殊处理，那么该函数您无需重写。
 - `load_model(self)`：从 `config.pretrained_path` 中加载模型的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
 - `model_cls`：`TransformersChatBOT` 需要的属性，需要添加 `@property` 装饰器。用于指定您的模型类。
-- `no_split_module_classes`：`TransformersChatBOT` 需要的属性，需要添加 `@property` 装饰器。用于标识不需要被切分的模型成员，您可以参考 [load_checkpoint_and_dispatch](https://huggingface.co/docs/accelerate/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch) 的文档。
 
 #### 2. 构建映射关系（可选）
 
