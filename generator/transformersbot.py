@@ -1,5 +1,8 @@
+import os
+
 import torch
 from transformers import AutoTokenizer, AutoConfig
+from huggingface_hub import snapshot_download
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
 from .chatbot import ChatBOT
@@ -97,6 +100,9 @@ class TransformersChatBOT(ChatBOT):
         """
         config = AutoConfig.from_pretrained(
             self.model_name, trust_remote_code=True)
+        model_path = self.model_name
+        if not os.path.exists(self.model_name):
+            model_path = snapshot_download(self.model_name)
         
         if torch.cuda.device_count() > 1:
             with init_empty_weights():
@@ -105,12 +111,12 @@ class TransformersChatBOT(ChatBOT):
                 )
 
             load_checkpoint_and_dispatch(
-                self.model, self.config.pretrained_path, device_map="auto",
+                self.model, model_path, device_map="auto",
                 no_split_module_classes=self.no_split_module_classes,
                 dtype=self.config.dtype
             )
         else:
-            self.model = self.model_cls.from_pretrained(self.model)
+            self.model = self.model_cls.from_pretrained(model_path)
             if self.config.dtype == torch.float16:
                 self.model.half()
             if torch.cuda.device_count() != 0:
