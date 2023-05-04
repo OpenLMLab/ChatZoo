@@ -3,8 +3,8 @@ Configs of supported models.
 
 contains generation configs and paths of a model.
 """
-from typing import List
-from dataclasses import dataclass, field
+import os
+from dataclasses import dataclass
 
 import torch
 
@@ -70,7 +70,7 @@ class ModelConfig:
                 self.dtype = torch.float32
 
     def __repr__(self) -> str:
-        import os
+
         width = os.get_terminal_size().columns // 2 * 2
         single_side = (width - 8) // 2
         r = f"\n{'-' * single_side} CONFIG {'-' * single_side}\n"

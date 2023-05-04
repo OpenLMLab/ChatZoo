@@ -65,7 +65,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 #### 1. 继承 ChatBOT 类
 
-您还可以通过继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
+您还可以通过在 `generator/` 路径下新建一个文件，继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
 
 - `load_tokenizer(self)`：从 `config.tokenizer_path` 中加载 `tokenizer` 的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
 - `get_prompt(self, query)`：从聊天记录 `query` 中构造模型输入的 prompt。`query` 是一个列表，每个成员是一个字典，代表一条聊天记录。其格式为：
@@ -88,8 +88,8 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 - `model_cls`：`TransformersChatBOT` 需要的属性，需要添加 `@property` 装饰器。用于指定您的模型类。
 - `no_split_module_classes`：`TransformersChatBOT` 需要的属性，需要添加 `@property` 装饰器。用于标识不需要被切分的模型成员，您可以参考 [load_checkpoint_and_dispatch](https://huggingface.co/docs/accelerate/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch) 的文档。
 
-#### 2. 构建映射关系
+#### 2. 构建映射关系（可选）
 
-接下来，您需要在 [./generator/\_\_init\_\_.py](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/__init__.py) 的字典中将您的 ChatBOT 类导入并添加进字典 `MODEL_DICT` 中。该字典的 key 为模型的类型名称，value 为您的 ChatBOT 类。这样，您就可以通过参数 `--pretrained_path` 和 `--type` 以及 `--tokenizer_path`（可选）参数来加载您的模型了。
+当您定义了您自己的 `ChatBOT` 后，您就可以通过参数 `--type` `--pretrained_path` 和 `--tokenizer_path`（可选）来使用您自己的聊天机器人了。其中 `--type` 的值应为您自己的 `ChatBOT` 所在的文件名，启动时 `ChatZoo` 会自动根据文件名匹配并导入合适的类。
 
-如果您想更加一劳永逸一些，您还可以在 [config.py](https://github.com/OpenLMLab/ChatZoo/blob/main/config.py) 中将您的预训练路径与类型名称的对应关系添加到 `MODEL_NAME_TO_MODEL_DICT` 字典中。这样您在启动后端时就不必使用 `--type` 参数了。
+如果您想一劳永逸，那么您还可以在 [config.py](https://github.com/OpenLMLab/ChatZoo/blob/main/config.py) 中将您的预训练路径与 `ChatBOT` 文件名的对应关系添加到 `MODEL_NAME_TO_MODEL_DICT` 字典中。这样您在启动后端时就不必使用 `--type` 参数了。
