@@ -1,25 +1,29 @@
 <template>
-    <div class="box-card" v-loading="loading">
+    <div class="box-card" v-loading="loading" >
         <!-- <el-button @click="drawer=true" type="primary">菜单</el-button> -->
         <!-- <el-drawer :modal="false" title="参数控制" :visible.sync="drawer" direction="ltr" >看看</el-drawer> -->
-        <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative">
-            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center;">
+                    <h4 style="width: auto; margin: 0;">{{ model }}</h4>
+                </div>
                 <div>
                     <el-button type="danger" icon="el-icon-delete" size="mini" @click.prevent="deleteChatBox" circle></el-button>
                 </div>
             </div>
-            <div style="display: flex;">
-                <h4>{{ model }}</h4>
-                <!-- <el-tag size="mini" effect="dark" :type="currstatus" style="margin-left: 10px;">{{statusClass}}</el-tag> -->
-            </div>
         </div>
-        <div id="chatContainer" class="chat-container">
+        <div id="chatContainer" class="chat-container" v-if="!isiframe">
             <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
                 <div :class="[message.role === 'BOT' ? 'left' : 'right']" ref="preview">
                     <VueMarkdown :source="message.content" v-highlight></VueMarkdown>
                 </div>
             </div>
         </div>
+        <div v-if="isiframe" style="height: 100%;">
+            <iframe style="height: 100%;" :src="url" width="100%"></iframe>
+        </div>
+        
+
     </div>
 </template>
   
@@ -86,6 +90,10 @@ export default {
             type: String,
             required: true
         },
+        isiframe: {
+            type: Boolean,
+            required: true
+        }
     },
     data() {
         return {
@@ -116,7 +124,10 @@ export default {
     updated: function() {
         this.$nextTick(() => {
             const chatContainer = this.$el.querySelector('.chat-container');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if(!this.isiframe) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
         });
     },
     methods: {
@@ -174,6 +185,12 @@ export default {
                 const data = this.dialogue
                 this.loading = true
                 console.log('连接', this.url)
+                if(this.isiframe) {
+                    const res = {}
+                    this.loading = false
+                    this.$emit('chat-response', res, this.id);
+                    return;
+                }
                 instance.post(this.url, data, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -194,11 +211,17 @@ export default {
         },
         scrollToBottom() {
             const chatContainer = this.$el.querySelector('.chat-container');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if(!this.isiframe) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
         }
     },
     mounted() {
-        this.scrollToBottom();
+        if(!this.isiframe) {
+            this.scrollToBottom();
+        }
+        
         // 在每个消息的预览元素上调用 mermaidRender 方法
         // this.dialogue.forEach((message) => {
         //     // const previewElement = this.$refs.preview[index];
