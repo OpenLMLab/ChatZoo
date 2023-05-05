@@ -1,38 +1,78 @@
 <template>
-    <div class="box-card" v-loading="loading">
+    <div class="box-card" v-loading="loading" >
         <!-- <el-button @click="drawer=true" type="primary">菜单</el-button> -->
         <!-- <el-drawer :modal="false" title="参数控制" :visible.sync="drawer" direction="ltr" >看看</el-drawer> -->
-        <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative">
-            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+        <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center;">
+                    <h4 style="width: auto; margin: 0;">{{ model }}</h4>
+                </div>
                 <div>
                     <el-button type="danger" icon="el-icon-delete" size="mini" @click.prevent="deleteChatBox" circle></el-button>
                 </div>
             </div>
-            <div style="display: flex;">
-                <h4>{{ model }}</h4>
-                <!-- <el-tag size="mini" effect="dark" :type="currstatus" style="margin-left: 10px;">{{statusClass}}</el-tag> -->
-            </div>
         </div>
-        <div id="chatContainer" class="chat-container">
+        <div id="chatContainer" class="chat-container" v-if="!isiframe">
             <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
-                <div  :class="(message.role) === 'BOT' ? 'left' : 'right'">
-                    <p>{{ message.content }}</p>
-                    <!-- <MarkdownPreview :initialValue=message.content :copyCode="true" /> -->
-                </div>  
+                <div :class="[message.role === 'BOT' ? 'left' : 'right']" ref="preview">
+                    <VueMarkdown :source="message.content" v-highlight></VueMarkdown>
+                </div>
             </div>
         </div>
+        <div v-if="isiframe" style="height: 100%;">
+            <iframe style="height: 100%;" :src="url" width="100%"></iframe>
+        </div>
+        
+
     </div>
 </template>
   
 <script>
 import axios from 'axios';
-// import { MarkdownPreview } from 'vue-meditor'
+import VueMarkdown from 'vue-markdown';
+import Vue from 'vue';
+import hljs from 'highlight.js'
+hljs.initHighlightingOnLoad();
+Vue.use(VueMarkdown, {
+  // 启用代码块渲染
+  highlight: true,
+  // 代码块高亮样式
+  // stylesheet: '/path/to/highlight.js/styles/github.min.css',
+  // 代码块高亮语言
+  // preprocess: (code, lang) => { /* ... */ return [code, lang]; },
+  // sanitize: false,
+  // breaks: false,
+  // smartLists: true,
+  // silent: false,
+  // smartypants: false,
+});
+
+
+// 如果开启了typescript 需要额外安装 npm install @types/highlight.js
+// 通过 import * as hljs from 'highlight.js' 引入
+Vue.directive('highlight', {
+  inserted: function (el) {
+    const blocks = el.querySelectorAll('code');
+    blocks.forEach(block => {
+      hljs.highlightBlock(block);
+      block.addEventListener('click', () => {
+        const codeText = block.innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          console.log('代码已复制到剪贴板');
+        }, () => {
+            console.error('代码复制失败');
+        });
+      });
+    });
+  },
+});
+
 
 export default {
     name: 'ChatBox',
-    // components: {
-    //     MarkdownPreview
-    // },
+    components: {
+        VueMarkdown
+    },
     props: {
         name: {
             type: String,
@@ -42,10 +82,6 @@ export default {
             type: Array,
             required: true
         },
-        // status: {
-        //     type: String,
-        //     required: true
-        // },
         url: {
             type: String,
             required: true
@@ -54,6 +90,10 @@ export default {
             type: String,
             required: true
         },
+        isiframe: {
+            type: Boolean,
+            required: true
+        }
     },
     data() {
         return {
@@ -62,21 +102,48 @@ export default {
             dialogue: this.conversations,
             // currstatus: this.status,
             loading: false,
-            link_loading: false
+            link_loading: false,
+            vditor: null,
+            counter: 0
         };
     },
     watch: {
+        // dialogue(newDialogue) {
+        //     newDialogue.forEach((message, index) => {
+        //         const previewElement = this.$refs.preview[index]
+        //         VditorPreview.preview(previewElement, message.content)
+        //     });
+        // }
         // status(newVal) {
         //     this.currstatus = newVal;  
+        // }
+        // 'dialogue.*.content'() {
+        //     this.renderMarkdown()
         // }
     },
     updated: function() {
         this.$nextTick(() => {
             const chatContainer = this.$el.querySelector('.chat-container');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if(!this.isiframe) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
         });
     },
     methods: {
+        // // 为消息对象生成唯一的 cacheid 属性
+        // generateCacheId() {
+        // this.counter += 1;
+        // return `message_${this.counter}`;
+        // },
+        // // 渲染 Markdown
+        // renderMarkdown() {
+        // this.dialogue.forEach((message) => {
+        //     const cacheid = message.cacheid || this.generateCacheId();
+        //     const preview = this.$refs[`preview_${cacheid}`];
+        //     preview.innerHTML = this.vditor.preview(message.content);
+        // });
+        // },
         deleteChatBox() {
             this.$emit('delete');
         },
@@ -118,6 +185,12 @@ export default {
                 const data = this.dialogue
                 this.loading = true
                 console.log('连接', this.url)
+                if(this.isiframe) {
+                    const res = {}
+                    this.loading = false
+                    this.$emit('chat-response', res, this.id);
+                    return;
+                }
                 instance.post(this.url, data, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -138,11 +211,62 @@ export default {
         },
         scrollToBottom() {
             const chatContainer = this.$el.querySelector('.chat-container');
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if(!this.isiframe) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
         }
     },
     mounted() {
-        this.scrollToBottom();
+        if(!this.isiframe) {
+            this.scrollToBottom();
+        }
+        
+        // 在每个消息的预览元素上调用 mermaidRender 方法
+        // this.dialogue.forEach((message) => {
+        //     // const previewElement = this.$refs.preview[index];
+        //     Vditor.preview(this.$refs.preview, message.content,
+        //         {
+        //             hljs: {style: "github"}
+        //         }
+        //     );
+        //     // console.log(previewElement)
+        // });
+        // 创建 Vditor 实例
+        // this.vditor = new Vditor(document.createElement('div'), {
+        //     mode: 'preview',
+        //     cache: {
+        //         enable: false
+        //     }
+        // });
+        // 渲染已有消息
+        // this.renderMarkdown();
+
+        // console.log('创建', this.vditor)
+        // // 渲染已有消息
+        // this.renderMarkdown()
+        // // 监听 dialogue 数组的变化并渲染每个消息
+        // this.$watch('dialogue', (newVal) => {
+        //     newVal.forEach((message, index) => {
+        //         const previewElement = this.$refs.preview[index];
+        //         VditorPreview.preview(previewElement, message.content);
+        //     });
+        // }, { deep: true });
+        // this.dialogue.forEach((message, index) => {
+        //     console.log('消息体', message.content)
+        //     this.vditors[index] = new Vditor(this.$refs.vditor[index], {
+        //         value: message.content,
+        //         mode: 'preview',
+        //         "toolbarConfig": {
+        //             "hide": true
+        //         },
+        //         height: 'auto',
+        //         cache: {
+        //             enable: false
+        //         }
+        //     })
+        //     console.log(this.vditors[index])
+        // })
     },
     computed: {
         // statusClass() {
@@ -234,6 +358,7 @@ clear: both
     font-family: Arial, sans-serif, "Times New Roman";
     margin-right: 30px;
     height: 100%;
+    max-width: 480px;
 }
 
 .left, .right {
@@ -271,6 +396,10 @@ clear: both
 .left p, .right p {
   margin: 0;
   line-height: 1.5;
+}
+
+.code.hljs {
+  white-space: pre-wrap;
 }
 
 </style>

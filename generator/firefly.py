@@ -1,8 +1,8 @@
 from transformers import BloomForCausalLM
 
-from .chatbot import ChatBOT
+from .transformersbot import TransformersChatBOT
 
-class FireflyBOT(ChatBOT):
+class FireflyBOT(TransformersChatBOT):
     def __init__(self, config):
         super(FireflyBOT, self).__init__(config)
 
@@ -10,9 +10,8 @@ class FireflyBOT(ChatBOT):
     def model_cls(self):
         return BloomForCausalLM
     
-    def set_generate_params(self):
-        super().set_generate_params()
-        self.gen_kwargs["eos_token_id"] = self.tokenizer.eos_token_id
+    def extra_settings(self):
+        return {"eos_token_id": self.tokenizer.eos_token_id}
     
     def get_prompt(self, query):
         """

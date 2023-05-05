@@ -3,8 +3,8 @@ Configs of supported models.
 
 contains generation configs and paths of a model.
 """
-from typing import List
-from dataclasses import dataclass, field
+import os
+from dataclasses import dataclass
 
 import torch
 
@@ -44,16 +44,8 @@ class ModelConfig:
     tokenizer_path: str = None
     dtype: str = "float16"
     from_s3: bool = False
-    # generation
-    max_length: int = 2048
-    num_beams: int = 1
-    do_sample: bool = True
-    top_k: int = 1
-    top_p: float = 0.7
-    temperature: float = 0.95
-    repetition_penalty: float = 1.02
     # for lora-finetuned model such as baize
-    base_model: str = "decapoda-research/llama-7b-hf"
+    base_model: str = None
 
     def __post_init__(self):
         if self.tokenizer_path is None:
@@ -76,3 +68,14 @@ class ModelConfig:
                     "We will set `config.dtype` to `torch.float32`."
                 )
                 self.dtype = torch.float32
+
+    def __repr__(self) -> str:
+
+        width = os.get_terminal_size().columns // 2 * 2
+        single_side = (width - 8) // 2
+        r = f"\n{'-' * single_side} CONFIG {'-' * single_side}\n"
+        for k, v in self.__dict__.items():
+            r += f"{k}: {v}\n"
+        r += f"{'-' * width}\n"
+
+        return r

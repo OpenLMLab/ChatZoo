@@ -24,18 +24,7 @@ from accelerate.utils import (set_module_tensor_to_device,
                               save_offload_index, offload_weight)
 from accelerate import dispatch_model
 
-def find_free_network_port() -> str:
-    """
-    Find a free port from localhost.
-    """
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
-    s.listen(1)
-    port = s.getsockname()[1]
-    s.close()
-    return port
-
-def load_checkpoint_and_dispatch(
+def load_checkpoint_and_dispatch_from_s3(
     model: nn.Module,
     checkpoints: List[str],
     device_map: Optional[Union[str, Dict[str, Union[int, str, torch.device]]]] = None,
