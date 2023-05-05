@@ -8,7 +8,7 @@
           <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
             <slide v-for="(model, index) in models" :key="index">
               <div class="slide-content">
-                <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue"  :url="model.url" :isiframe=model.isiframe @delete="deleteBox(model)" @chat-response="handleChatResponse" />
+                <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue"  :url="model.url" :isiframe="model.isiframe" @delete="deleteBox(model)" @chat-response="handleChatResponse" />
               </div>
             </slide>
           </carousel>
