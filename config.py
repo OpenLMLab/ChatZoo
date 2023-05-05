@@ -3,8 +3,8 @@ Configs of supported models.
 
 contains generation configs and paths of a model.
 """
-from typing import List
-from dataclasses import dataclass, field
+import os
+from dataclasses import dataclass
 
 import torch
 
@@ -29,6 +29,9 @@ MODEL_NAME_TO_MODEL_DICT = {
     "microsoft/GODEL-v1_1-large-seq2seq": "godel",
     # belle
     "BelleGroup/BELLE-7B-2M": "belle",
+    # stablelm
+    "stabilityai/stablelm-tuned-alpha-3b": "stablelm",
+    "stabilityai/stablelm-tuned-alpha-7b": "stablelm",
 }
 
 DTYPE_DICT = {
@@ -45,7 +48,7 @@ class ModelConfig:
     dtype: str = "float16"
     from_s3: bool = False
     # for lora-finetuned model such as baize
-    base_model: str = "decapoda-research/llama-7b-hf"
+    base_model: str = None
 
     def __post_init__(self):
         if self.tokenizer_path is None:
@@ -70,7 +73,7 @@ class ModelConfig:
                 self.dtype = torch.float32
 
     def __repr__(self) -> str:
-        import os
+
         width = os.get_terminal_size().columns // 2 * 2
         single_side = (width - 8) // 2
         r = f"\n{'-' * single_side} CONFIG {'-' * single_side}\n"

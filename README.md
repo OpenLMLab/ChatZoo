@@ -52,12 +52,19 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
     - [moss-moon-003-sft-plugin-int4](https://huggingface.co/fnlp/moss-moon-003-sft-plugin-int4)
 - [ChatGLM](https://github.com/THUDM/ChatGLM-6B)
     - [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+- [BELLE](https://github.com/LianjiaTech/BELLE)
+    - [BELLE-7B-2M](https://huggingface.co/BelleGroup/BELLE-7B-2M)
 - [Firefly](https://github.com/yangjianxin1/Firefly)
     - [firefly-1b4](https://huggingface.co/YeungNLP/firefly-1b4)
     - [firefly-2b6](https://huggingface.co/YeungNLP/firefly-2b6)
+- [Baize](https://github.com/project-baize/baize-chatbot)
+    - [baize-lora-7b](https://huggingface.co/project-baize/baize-lora-7B)
 - [GODEL](https://github.com/microsoft/GODEL)
     - [GODEL-v1_1-base-seq2seq](https://huggingface.co/microsoft/GODEL-v1_1-base-seq2seq)
     - [GODEL-v1_1-large-seq2seq](https://huggingface.co/microsoft/GODEL-v1_1-large-seq2seq)
+- [StableLM](https://github.com/Stability-AI/StableLM)
+    - [stablelm-tuned-alpha-3b](https://huggingface.co/stabilityai/stablelm-tuned-alpha-3b)
+    - [stablelm-tuned-alpha-7b](https://huggingface.co/stabilityai/stablelm-tuned-alpha-7b)
 
 ### 添加自己的模型
 
@@ -65,7 +72,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 #### 1. 继承 ChatBOT 类
 
-您还可以通过继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
+您还可以通过在 `generator/` 路径下新建一个文件，继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
 
 - `load_tokenizer(self)`：从 `config.tokenizer_path` 中加载 `tokenizer` 的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
 - `get_prompt(self, query)`：从聊天记录 `query` 中构造模型输入的 prompt。`query` 是一个列表，每个成员是一个字典，代表一条聊天记录。其格式为：
@@ -86,10 +93,9 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 - `process_response(self, response)`：对模型回复进行处理的函数，返回一个字符串。`response` 是 `get_response` 函数的返回值，该函数主要用于替换 `response` 中的一些特殊字符，比如 `<s>` `<eoh>` 等。聊天界面中展示的模型当轮回复就是该函数返回的字符串。如果您不需要对生成的字符串进行特殊处理，那么该函数您无需重写。
 - `load_model(self)`：从 `config.pretrained_path` 中加载模型的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
 - `model_cls`：`TransformersChatBOT` 需要的属性，需要添加 `@property` 装饰器。用于指定您的模型类。
-- `no_split_module_classes`：`TransformersChatBOT` 需要的属性，需要添加 `@property` 装饰器。用于标识不需要被切分的模型成员，您可以参考 [load_checkpoint_and_dispatch](https://huggingface.co/docs/accelerate/package_reference/big_modeling#accelerate.load_checkpoint_and_dispatch) 的文档。
 
-#### 2. 构建映射关系
+#### 2. 构建映射关系（可选）
 
-接下来，您需要在 [./generator/\_\_init\_\_.py](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/__init__.py) 的字典中将您的 ChatBOT 类导入并添加进字典 `MODEL_DICT` 中。该字典的 key 为模型的类型名称，value 为您的 ChatBOT 类。这样，您就可以通过参数 `--pretrained_path` 和 `--type` 以及 `--tokenizer_path`（可选）参数来加载您的模型了。
+当您定义了您自己的 `ChatBOT` 后，您就可以通过参数 `--type` `--pretrained_path` 和 `--tokenizer_path`（可选）来使用您自己的聊天机器人了。其中 `--type` 的值应为您自己的 `ChatBOT` 所在的文件名，启动时 `ChatZoo` 会自动根据文件名匹配并导入合适的类。
 
-如果您想更加一劳永逸一些，您还可以在 [config.py](https://github.com/OpenLMLab/ChatZoo/blob/main/config.py) 中将您的预训练路径与类型名称的对应关系添加到 `MODEL_NAME_TO_MODEL_DICT` 字典中。这样您在启动后端时就不必使用 `--type` 参数了。
+如果您想一劳永逸，那么您还可以在 [config.py](https://github.com/OpenLMLab/ChatZoo/blob/main/config.py) 中将您的预训练路径与 `ChatBOT` 文件名的对应关系添加到 `MODEL_NAME_TO_MODEL_DICT` 字典中。这样您在启动后端时就不必使用 `--type` 参数了。

@@ -12,6 +12,10 @@
                     <el-input v-model="form.url"></el-input>
                 </el-form-item>
                 <el-form-item>
+                    <el-radio v-model="form.isiframe" label="iframe">iframe</el-radio>
+                    <el-radio v-model="form.isiframe" label="box">box</el-radio>
+                </el-form-item>
+                <el-form-item>
                     <el-button :loading="loading" type="primary" @click.prevent="register">
                         立即注册！
                     </el-button>
@@ -30,7 +34,8 @@ export default {
             form: {
                 name: '',
                 dialogue: '',
-                url: ''
+                url: '',
+                isiframe: 'box'
             }
         }
     },
@@ -40,9 +45,16 @@ export default {
                 const uuid = require('uuid');
                 let data = {}
                 data.name = this.form.name
-                data.dialogue = [{'role':'BOT','content':'我是机器人' + data.name}]
+                data.dialogue = []
                 const uuidv4 = uuid.v4({format:'N'})
                 data.id = uuidv4
+                data.isiframe = this.form.isiframe
+                console.log('这个', data.isiframe)
+                if(data.isiframe === 'iframe') {
+                    data.isiframe = true
+                } else {
+                    data.isiframe = false
+                }
                 // data.status = 'info'
                 data.url = this.form.url
                 this.$emit('new-box-data', data)
