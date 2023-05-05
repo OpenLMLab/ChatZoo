@@ -115,8 +115,7 @@ class BaizeBOT(TransformersChatBOT):
             response = response[: response.index("[|Human|]")].strip()
         if "[|AI|]" in response:
             response = response[: response.index("[|AI|]")].strip()
-        
-        return response.strip()
+        return response.strip(" ")
     
     def load_tokenizer(self):
         self.tokenizer = LlamaTokenizer.from_pretrained(
