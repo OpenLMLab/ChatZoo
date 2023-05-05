@@ -8,7 +8,7 @@
           <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
             <slide v-for="(model, index) in models" :key="index">
               <div class="slide-content">
-                <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue"  :url="model.url" @delete="deleteBox(model)" @chat-response="handleChatResponse" />
+                <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue"  :url="model.url" :isiframe=model.isiframe @delete="deleteBox(model)" @chat-response="handleChatResponse" />
               </div>
             </slide>
           </carousel>
@@ -23,6 +23,7 @@
               <button class="send-button" @click="drawer=true"><i class="iconfont">&#xe614;</i></button> 
               <el-drawer :modal="false" title="" :visible.sync="drawer" :with-header="false" direction="rtl" ><NewBox @new-box-data="handleNewBoxData" /></el-drawer>               
           </div>
+
       </el-footer>
   </el-container>
 </template>
@@ -105,6 +106,7 @@ methods: {
     // newModel.status = data.status
     newModel.url = data.url
     newModel.id = data.id
+    newModel.isiframe = data.isiframe
     this.models.push(newModel)
     console.log('新的数据', this.models)
   },
