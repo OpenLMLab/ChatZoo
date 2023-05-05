@@ -56,6 +56,9 @@ class ChatBOT:
         print("Start generating...")
         try:
             query = post["query"]
+            gen_kwargs = self.default_settings()
+            gen_kwargs.update(post["params"])
+            gen_kwargs.update(self.extra_settings())
             gen_kwargs = post["params"]
             gen_kwargs.update(self.extra_settings())
             prompt = self.get_prompt(query)
