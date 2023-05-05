@@ -55,7 +55,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ui-v${{ steps.version.outputs.value }}
-          release_name: Release refs/heads/ui
+          release_name: Release refs/heads/ui-v${{ steps.version.outputs.value }}
           body: UI version ${{ steps.version.outputs.value }}.
           draft: false
           prerelease: false
