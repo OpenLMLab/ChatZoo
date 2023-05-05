@@ -12,8 +12,8 @@
                     <el-input v-model="form.url"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-radio v-model="form.isiframe" label="iframe">iframe</el-radio>
-                    <el-radio v-model="form.isiframe" label="box">box</el-radio>
+                    <el-radio v-model="form.isiframe" label="iframe">外部网页接入</el-radio>
+                    <el-radio v-model="form.isiframe" label="box">本地模型</el-radio>
                 </el-form-item>
                 <el-form-item>
                     <el-button :loading="loading" type="primary" @click.prevent="register">
