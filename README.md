@@ -62,6 +62,9 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 - [GODEL](https://github.com/microsoft/GODEL)
     - [GODEL-v1_1-base-seq2seq](https://huggingface.co/microsoft/GODEL-v1_1-base-seq2seq)
     - [GODEL-v1_1-large-seq2seq](https://huggingface.co/microsoft/GODEL-v1_1-large-seq2seq)
+- [StableLM]
+    - [stablelm-tuned-alpha-3b](https://huggingface.co/stabilityai/stablelm-tuned-alpha-3b)
+    - [stablelm-tuned-alpha-7b](https://huggingface.co/stabilityai/stablelm-tuned-alpha-7b)
 
 ### 添加自己的模型
 

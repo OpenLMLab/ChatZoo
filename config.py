@@ -29,6 +29,9 @@ MODEL_NAME_TO_MODEL_DICT = {
     "microsoft/GODEL-v1_1-large-seq2seq": "godel",
     # belle
     "BelleGroup/BELLE-7B-2M": "belle",
+    # stablelm
+    "stabilityai/stablelm-tuned-alpha-3b": "stablelm",
+    "stabilityai/stablelm-tuned-alpha-7b": "stablelm",
 }
 
 DTYPE_DICT = {
