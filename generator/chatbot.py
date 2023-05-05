@@ -59,7 +59,6 @@ class ChatBOT:
             gen_kwargs = self.default_settings()
             gen_kwargs.update(post["params"])
             gen_kwargs.update(self.extra_settings())
-            gen_kwargs.update(self.extra_settings())
             prompt = self.get_prompt(query)
             input_dict = self.get_input(prompt)
             output = self.generate(input_dict, gen_kwargs)
