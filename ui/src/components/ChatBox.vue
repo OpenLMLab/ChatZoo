@@ -4,8 +4,8 @@
         <!-- <el-drawer :modal="false" title="参数控制" :visible.sync="drawer" direction="ltr" >看看</el-drawer> -->
         <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative;">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <div style="display: flex; align-items: center;">
-                    <h4 style="width: auto; margin: 0;">{{ model }}</h4>
+                <div style="display: flex; align-items: center; justify-content: center; flex: 1;">
+                    <h4 style="margin: 0;">{{ model }}</h4>
                 </div>
                 <div>
                     <el-button type="danger" icon="el-icon-delete" size="mini" @click.prevent="deleteChatBox" circle></el-button>
@@ -182,7 +182,10 @@ export default {
                 const instance = axios.create({
                     baseURL: ''
                 })
-                const data = this.dialogue
+                const data = {
+                    "query": this.dialogue,
+                    "params": {}
+                }
                 this.loading = true
                 console.log('连接', this.url)
                 if(this.isiframe) {
