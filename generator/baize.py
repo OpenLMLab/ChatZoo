@@ -1,13 +1,11 @@
 import torch
-from transformers import LlamaForCausalLM, LlamaTokenizer, LlamaConfig
-from accelerate import init_empty_weights
+from transformers import LlamaForCausalLM
 try:
     from peft import PeftModel
 except:
     PeftModel = None
 
 from .transformersbot import TransformersChatBOT
-from .utils import load_checkpoint_and_dispatch_from_s3
 
 class BaizeBOT(TransformersChatBOT):
     def __init__(self, config):
@@ -17,7 +15,7 @@ class BaizeBOT(TransformersChatBOT):
             )
         if config.base_model is None:
             raise ValueError(
-                "Base model's path of Baize should be set."
+                "Base model(llama)'s path of Baize should be set."
             )
         super(BaizeBOT, self).__init__(config)
 
@@ -117,11 +115,6 @@ class BaizeBOT(TransformersChatBOT):
             response = response[: response.index("[|AI|]")].strip()
         return response.strip(" ")
 
-    def load_tokenizer(self):
-        self.tokenizer = LlamaTokenizer.from_pretrained(
-            self.config.tokenizer_path
-        )
-    
     def load_model(self):
         
         llama = self.model_cls.from_pretrained(
@@ -138,6 +131,9 @@ class BaizeBOT(TransformersChatBOT):
         import io
         import json
         from petrel_client.client import Client
+        from accelerate import init_empty_weights
+        from transformers import LlamaConfig
+        from .utils import load_checkpoint_and_dispatch_from_s3
         client = Client()
 
         # get config

@@ -3,10 +3,8 @@ import os
 import torch
 from transformers import AutoTokenizer, AutoConfig
 from transformers.models.auto.modeling_auto import _BaseAutoModelClass
-from accelerate import init_empty_weights
 
 from .chatbot import ChatBOT
-from .utils import load_checkpoint_and_dispatch_from_s3
 
 class TransformersChatBOT(ChatBOT):
     """
@@ -115,6 +113,8 @@ class TransformersChatBOT(ChatBOT):
         import io
         import json
         from petrel_client.client import Client
+        from accelerate import init_empty_weights
+        from .utils import load_checkpoint_and_dispatch_from_s3
         client = Client()
 
         # get model_index

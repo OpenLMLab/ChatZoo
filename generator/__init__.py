@@ -1,3 +1,4 @@
+import os
 import importlib
 import inspect
 
@@ -8,7 +9,11 @@ def choose_bot(config):
     classes = inspect.getmembers(mod, inspect.isclass)
     name, bot_cls = None, None
     for name, bot_cls in classes:
-        if issubclass(bot_cls, ChatBOT):
+        _, filename = os.path.split(inspect.getsourcefile(bot_cls))
+        file_mod, _ = os.path.splitext(filename)
+        # bot_cls may be class that is imported from other files
+        # ex. ChatBOT
+        if file_mod == config.type and issubclass(bot_cls, ChatBOT):
             break
 
     print(f"Choose ChatBOT: {name}")
