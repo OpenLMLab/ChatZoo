@@ -15,10 +15,9 @@
         </div>
         <div id="chatContainer" class="chat-container">
             <div class="chat-body" v-for="(message, index) in dialogue" :key="index">
-                <div  :class="(message.role) === 'BOT' ? 'left' : 'right'">
-                    <p>{{ message.content }}</p>
-                    <!-- <MarkdownPreview :initialValue=message.content :copyCode="true" /> -->
-                </div>  
+                <div :class="[message.role === 'BOT' ? 'left' : 'right']" ref="preview">
+                    <VueMarkdown :source="message.content" v-highlight></VueMarkdown>
+                </div>
             </div>
         </div>
     </div>
@@ -26,13 +25,50 @@
   
 <script>
 import axios from 'axios';
-// import { MarkdownPreview } from 'vue-meditor'
+import VueMarkdown from 'vue-markdown';
+import Vue from 'vue';
+import hljs from 'highlight.js'
+hljs.initHighlightingOnLoad();
+Vue.use(VueMarkdown, {
+  // 启用代码块渲染
+  highlight: true,
+  // 代码块高亮样式
+  // stylesheet: '/path/to/highlight.js/styles/github.min.css',
+  // 代码块高亮语言
+  // preprocess: (code, lang) => { /* ... */ return [code, lang]; },
+  // sanitize: false,
+  // breaks: false,
+  // smartLists: true,
+  // silent: false,
+  // smartypants: false,
+});
+
+
+// 如果开启了typescript 需要额外安装 npm install @types/highlight.js
+// 通过 import * as hljs from 'highlight.js' 引入
+Vue.directive('highlight', {
+  inserted: function (el) {
+    const blocks = el.querySelectorAll('code');
+    blocks.forEach(block => {
+      hljs.highlightBlock(block);
+      block.addEventListener('click', () => {
+        const codeText = block.innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+          console.log('代码已复制到剪贴板');
+        }, () => {
+            console.error('代码复制失败');
+        });
+      });
+    });
+  },
+});
+
 
 export default {
     name: 'ChatBox',
-    // components: {
-    //     MarkdownPreview
-    // },
+    components: {
+        VueMarkdown
+    },
     props: {
         name: {
             type: String,
@@ -42,10 +78,6 @@ export default {
             type: Array,
             required: true
         },
-        // status: {
-        //     type: String,
-        //     required: true
-        // },
         url: {
             type: String,
             required: true
@@ -62,12 +94,23 @@ export default {
             dialogue: this.conversations,
             // currstatus: this.status,
             loading: false,
-            link_loading: false
+            link_loading: false,
+            vditor: null,
+            counter: 0
         };
     },
     watch: {
+        // dialogue(newDialogue) {
+        //     newDialogue.forEach((message, index) => {
+        //         const previewElement = this.$refs.preview[index]
+        //         VditorPreview.preview(previewElement, message.content)
+        //     });
+        // }
         // status(newVal) {
         //     this.currstatus = newVal;  
+        // }
+        // 'dialogue.*.content'() {
+        //     this.renderMarkdown()
         // }
     },
     updated: function() {
@@ -77,6 +120,19 @@ export default {
         });
     },
     methods: {
+        // // 为消息对象生成唯一的 cacheid 属性
+        // generateCacheId() {
+        // this.counter += 1;
+        // return `message_${this.counter}`;
+        // },
+        // // 渲染 Markdown
+        // renderMarkdown() {
+        // this.dialogue.forEach((message) => {
+        //     const cacheid = message.cacheid || this.generateCacheId();
+        //     const preview = this.$refs[`preview_${cacheid}`];
+        //     preview.innerHTML = this.vditor.preview(message.content);
+        // });
+        // },
         deleteChatBox() {
             this.$emit('delete');
         },
@@ -143,6 +199,51 @@ export default {
     },
     mounted() {
         this.scrollToBottom();
+        // 在每个消息的预览元素上调用 mermaidRender 方法
+        // this.dialogue.forEach((message) => {
+        //     // const previewElement = this.$refs.preview[index];
+        //     Vditor.preview(this.$refs.preview, message.content,
+        //         {
+        //             hljs: {style: "github"}
+        //         }
+        //     );
+        //     // console.log(previewElement)
+        // });
+        // 创建 Vditor 实例
+        // this.vditor = new Vditor(document.createElement('div'), {
+        //     mode: 'preview',
+        //     cache: {
+        //         enable: false
+        //     }
+        // });
+        // 渲染已有消息
+        // this.renderMarkdown();
+
+        // console.log('创建', this.vditor)
+        // // 渲染已有消息
+        // this.renderMarkdown()
+        // // 监听 dialogue 数组的变化并渲染每个消息
+        // this.$watch('dialogue', (newVal) => {
+        //     newVal.forEach((message, index) => {
+        //         const previewElement = this.$refs.preview[index];
+        //         VditorPreview.preview(previewElement, message.content);
+        //     });
+        // }, { deep: true });
+        // this.dialogue.forEach((message, index) => {
+        //     console.log('消息体', message.content)
+        //     this.vditors[index] = new Vditor(this.$refs.vditor[index], {
+        //         value: message.content,
+        //         mode: 'preview',
+        //         "toolbarConfig": {
+        //             "hide": true
+        //         },
+        //         height: 'auto',
+        //         cache: {
+        //             enable: false
+        //         }
+        //     })
+        //     console.log(this.vditors[index])
+        // })
     },
     computed: {
         // statusClass() {
@@ -234,6 +335,7 @@ clear: both
     font-family: Arial, sans-serif, "Times New Roman";
     margin-right: 30px;
     height: 100%;
+    max-width: 480px;
 }
 
 .left, .right {
@@ -271,6 +373,10 @@ clear: both
 .left p, .right p {
   margin: 0;
   line-height: 1.5;
+}
+
+.code.hljs {
+  white-space: pre-wrap;
 }
 
 </style>
