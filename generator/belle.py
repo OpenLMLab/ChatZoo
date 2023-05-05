@@ -1,9 +1,7 @@
 import torch
-from transformers import BloomForCausalLM, AutoConfig
-from accelerate import init_empty_weights
+from transformers import BloomForCausalLM
 
 from .transformersbot import TransformersChatBOT
-from .utils import load_checkpoint_and_dispatch_from_s3
 
 class BELLEBOT(TransformersChatBOT):
     def __init__(self, config):
@@ -42,7 +40,9 @@ class BELLEBOT(TransformersChatBOT):
         import io
         import json
         from petrel_client.client import Client
-        from tqdm import tqdm
+        from accelerate import init_empty_weights
+        from transformers import AutoConfig
+        from .utils import load_checkpoint_and_dispatch_from_s3
         client = Client()
 
         # get model_index
