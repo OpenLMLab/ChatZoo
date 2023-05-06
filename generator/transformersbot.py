@@ -97,7 +97,7 @@ class TransformersChatBOT(ChatBOT):
         Load model through transformers.
         """
         # mute warning
-        trust_remote_code = not issubclass(
+        trust_remote_code = issubclass(
             self.model_cls, _BaseAutoModelClass
         )
         self.model = self.model_cls.from_pretrained(
