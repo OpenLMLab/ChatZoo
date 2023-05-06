@@ -3,6 +3,8 @@ Launch a server for a single model.
 """
 import os
 import argparse
+import asyncio
+import traceback
 
 import uvicorn
 from fastapi import FastAPI
@@ -34,15 +36,11 @@ parser.add_argument(
     help="Dtype to load model."
 )
 parser.add_argument(
-    "--base_model", type=str,
-    help="Path to load base model for lora model."
-)
-parser.add_argument(
     "--from_s3", default=False, action="store_true",
     help="Whether to load model from s3. Only for testing purpose."
 )
 args = parser.parse_args()
-os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -57,29 +55,27 @@ bot = None
 @app.on_event('startup')
 def init_bot():
     print(f"Initializing model...")
-    print("Using devices:", args.devices)
     print("Config:", config)
+    print("Using devices:", args.devices)
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
     global bot
     bot = choose_bot(config)
 
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
-    from_s3=args.from_s3, base_model=args.base_model
+    from_s3=args.from_s3
 )
 
+
 @app.post("/")
-async def generate(post: dict):
-    response = bot.chat(post)
+async def generate(dialogue: list):
+    response = bot.chat(dialogue)
     if response is not None:
         status = 0
     else:
         status = 1
     return {"status": status, "response": response}
-
-@app.post("/parameters")
-async def default_settings():
-    return bot.default_settings()
 
 if __name__ == "__main__":
     uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)
