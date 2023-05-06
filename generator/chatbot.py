@@ -20,7 +20,7 @@ class ChatBOT:
 
     def default_settings(self):
         """
-        Parameters for generation such as ``top_k``, ``top+p``.
+        Parameters for generation such as ``top_k``, ``top_p``.
 
         :return: dict. The website will set different components according to
             this dict.
