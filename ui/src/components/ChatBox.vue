@@ -22,8 +22,6 @@
         <div v-if="isiframe" style="height: 100%;">
             <iframe style="height: 100%;" :src="url" width="100%"></iframe>
         </div>
-        
-
     </div>
 </template>
   
@@ -104,7 +102,8 @@ export default {
             loading: false,
             link_loading: false,
             vditor: null,
-            counter: 0
+            counter: 0,
+            responseData: null
         };
     },
     watch: {
@@ -177,8 +176,6 @@ export default {
             //     const res = {}
             //     this.$emit('chat-response', res, this.id, 'error');
             // } else {
-                console.log(this.model,'发送消息')
-                console.log(this.chat)
                 const instance = axios.create({
                     baseURL: ''
                 })
@@ -187,7 +184,6 @@ export default {
                     "params": {}
                 }
                 this.loading = true
-                console.log('连接', this.url)
                 if(this.isiframe) {
                     const res = {}
                     this.loading = false
@@ -223,6 +219,13 @@ export default {
     mounted() {
         if(!this.isiframe) {
             this.scrollToBottom();
+        } else {
+            const script = document.createElement('script');
+            script.src = this.url ;
+            document.head.appendChild(script);
+            window.handleJsonResponse = (response) => {
+                this.$refs['web-page'].innerHTML = response
+            }
         }
         
         // 在每个消息的预览元素上调用 mermaidRender 方法
@@ -270,6 +273,9 @@ export default {
         //     })
         //     console.log(this.vditors[index])
         // })
+    },
+    beforeDestroy() {
+        delete window.handleJsonResponse;
     },
     computed: {
         // statusClass() {
