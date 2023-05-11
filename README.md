@@ -10,11 +10,14 @@
 
 我们提供了一个轻量级的工具，可以将您的模型或者来自 [🤗huggingface](https://huggingface.co/models) 的模型轻松部署到网页中。ChatZoo 还可以将一句提示同时发送到多个模型中进行回答生成，方便地对比模型效果。
 
+## 动态演示
+<img src="pics/demo.gif" alt="动态演示" style="zoom: 67%;" />
+
 ## 如何使用
 
 ### 1. 启动前端
 
-我们的前端代码 [./ui](https://github.com/OpenLMLab/ChatZoo/tree/main/ui) 使用 <a href="https://vuejs.org"><img width="25" src="https://vuejs.org/images/logo.png" alt="Vue logo">vue</a> 实现，您可以使用 npm 工具编译，或者使用我们预编译好的 [release](https://github.com/OpenLMLab/ChatZoo/releases)。当您当您经过下载或编译得到 dist 文件夹后，请在 dist 文件夹中执行：
+我们的前端代码 [./ui](https://github.com/OpenLMLab/ChatZoo/tree/main/ui) 使用 <a href="https://vuejs.org"><img width="25" src="https://vuejs.org/images/logo.png" alt="Vue logo">vue</a> 实现，您可以使用 npm 工具编译，或者使用我们预编译好的 [release](https://github.com/OpenLMLab/ChatZoo/releases)。当您当您经过下载或编译得到 dist 文件夹后，请在 `dist/ui/dist` 文件夹中执行：
 
 ```bash
 python -m http.server 8080
@@ -38,15 +41,34 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 在您完成以上两步操作后，您可以正式开始使用 ChatZoo。首先在浏览器地址栏中输入执行 [第一步](#1-启动前端) 的主机 ip 地址和端口号（本例中为 ``http://localhost:8080``）可打开前端页面：
 
-![](./pics/readme1.png)
+<img src="./pics/readme1.png" alt="主界面" style="zoom:33%;" />
 
 此时页面中并未加载任何模型，那么可以点击右下角的加号图标，输入模型名称（方便您自己区分）和 [第二步](#2-启动后端) 得到的 ip 地址和端口号，并点击立即注册：
 
-![](./pics/readme2.png)
+<img src="./pics/readme2.png" alt="新建模型" style="zoom:33%;" />
+
 
 此时模型便会以聊天窗口的形式出现在屏幕中央。此时不断重复前一步操作可以添加多个模型，并可通过屏幕正下方的文本输入区域将同一句提示同时发送给多个模型：
 
-![](./pics/readme3.png)
+<img src="./pics/readme3.png" alt="样例图" style="zoom:33%;" />
+
+## 更多玩法
+1. 将对话数据下载到本地
+   
+   点击右下角“下载”按钮，即可下载json格式的对话文件。
+2. 一键清空对话数据
+   
+   点击左下角的“清空”按钮，即可一键清空对话数据。
+
+3. 一键复制代码块
+   
+   对于对话中的代码块，点击即可拷贝到粘贴板。
+
+4. 添加自己的模型
+   
+   可以参考[添加自己的模型](#添加自己的模型)，自定义模型接口，欢迎在PR中提交你的模型。
+
+5. 敬请期待...
 
 ## 目前支持的模型
 
