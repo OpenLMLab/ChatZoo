@@ -45,12 +45,12 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 此时页面中并未加载任何模型，那么可以点击右下角的加号图标，输入模型名称（方便您自己区分）和 [第二步](#2-启动后端) 得到的 ip 地址和端口号，并点击立即注册：
 
-<img src="./pics/readme2.png" alt="新建模型" style="zoom:33%;" />
+<img src="./pics/readme2.png" alt="新建模型" style="width:66%;" />
 
 
 此时模型便会以聊天窗口的形式出现在屏幕中央。此时不断重复前一步操作可以添加多个模型，并可通过屏幕正下方的文本输入区域将同一句提示同时发送给多个模型：
 
-<img src="./pics/readme3.png" alt="样例图" style="zoom:33%;" />
+<img src="./pics/readme3.png" alt="样例图" style="width:88%;" />
 
 ## 更多玩法
 1. 将对话数据下载到本地
