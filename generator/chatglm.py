@@ -7,8 +7,8 @@ from .transformersbot import TransformersChatBOT
 
 class ChatGLMBOT(TransformersChatBOT):
     def __init__(self, config):
-        assert config.dtype != torch.float16, \
-            "`float16` is invalid for ChatGLM due to the structure design."
+        assert config.dtype != torch.float32, \
+            "`float32` is invalid for ChatGLM due to its structure."
         super(ChatGLMBOT, self).__init__(config)
 
     @property
