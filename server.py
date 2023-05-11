@@ -30,7 +30,7 @@ parser.add_argument(
          "`pretrained_path`."
 )
 parser.add_argument(
-    "--dtype", type=str, default="float16",
+    "--dtype", type=str, default="float32",
     help="Dtype to load model."
 )
 parser.add_argument(
@@ -43,7 +43,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,

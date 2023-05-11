@@ -32,6 +32,11 @@ MODEL_NAME_TO_MODEL_DICT = {
     # stablelm
     "stabilityai/stablelm-tuned-alpha-3b": "stablelm",
     "stabilityai/stablelm-tuned-alpha-7b": "stablelm",
+    # vicuna
+    "lmsys/vicuna-7b-delta-v1.1": "vicuna",
+    "lmsys/vicuna-13b-delta-v1.1": "vicuna",
+    # fastchat t5
+    "lmsys/fastchat-t5-3b-v1.0": "fastchat-t5"
 }
 
 DTYPE_DICT = {
@@ -45,7 +50,7 @@ class ModelConfig:
     pretrained_path: str # path of pretrained model.
     type: str = None # type of model. 'moss', 'chatglm' etc.
     tokenizer_path: str = None
-    dtype: str = "float16"
+    dtype: str = "float32"
     from_s3: bool = False
     # for lora-finetuned model such as baize
     base_model: str = None

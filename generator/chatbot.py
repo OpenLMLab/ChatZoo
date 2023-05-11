@@ -20,7 +20,7 @@ class ChatBOT:
 
     def default_settings(self):
         """
-        Parameters for generation such as ``top_k``, ``top+p``.
+        Parameters for generation such as ``top_k``, ``top_p``.
 
         :return: dict. The website will set different components according to
             this dict.
@@ -56,7 +56,8 @@ class ChatBOT:
         print("Start generating...")
         try:
             query = post["query"]
-            gen_kwargs = post["params"]
+            gen_kwargs = self.default_settings()
+            gen_kwargs.update(post["params"])
             gen_kwargs.update(self.extra_settings())
             prompt = self.get_prompt(query)
             input_dict = self.get_input(prompt)
