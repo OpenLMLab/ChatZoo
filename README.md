@@ -1,4 +1,11 @@
-<center># ChatZoo</center>
+<p align="center" width="100%">
+    <img src="pics/logo.png" alt="ChatZoo" style="width: 50%; min-width: 300px; display: block; margin: auto;">
+</p>
+
+# ChatZoo
+[![Code License](https://img.shields.io/badge/Code%20License-Apache%202.0-red)](https://github.com/OpenLMLab/ChatZoo/blob/main/LICENSE)
+[![node 18.15.0](https://img.shields.io/badge/node-18.15.0-green)](https://nodejs.org/en/download/releases)
+
 对话语言模型横向对比工具。
 
 我们提供了一个轻量级的工具，可以将您的模型或者来自 [🤗huggingface](https://huggingface.co/models) 的模型轻松部署到网页中。ChatZoo 还可以将一句提示同时发送到多个模型中进行回答生成，方便地对比模型效果。
@@ -65,11 +72,6 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 - [StableLM](https://github.com/Stability-AI/StableLM)
     - [stablelm-tuned-alpha-3b](https://huggingface.co/stabilityai/stablelm-tuned-alpha-3b)
     - [stablelm-tuned-alpha-7b](https://huggingface.co/stabilityai/stablelm-tuned-alpha-7b)
-- [Vicuna](https://github.com/lm-sys/FastChat)
-    - [vicuna-7b-delta-v1.1](https://huggingface.co/lmsys/vicuna-7b-delta-v1.1)
-    - [vicuna-13b-delta-v1.1](https://huggingface.co/lmsys/vicuna-13b-delta-v1.1)
-- [FastChat-T5]
-    - [fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
 
 ### 添加自己的模型
 
@@ -77,7 +79,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 #### 1. 继承 ChatBOT 类
 
-您还可以通过在 `generator/` 路径下新建一个文件，继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型（最好一个文件仅包含一个 ChatBOT）。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
+您还可以通过在 `generator/` 路径下新建一个文件，继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
 
 - `load_tokenizer(self)`：从 `config.tokenizer_path` 中加载 `tokenizer` 的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
 - `get_prompt(self, query)`：从聊天记录 `query` 中构造模型输入的 prompt。`query` 是一个列表，每个成员是一个字典，代表一条聊天记录。其格式为：
