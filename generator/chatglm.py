@@ -1,10 +1,14 @@
 import re
 
+import torch
+
 from .models import ChatGLMForConditionalGeneration
 from .transformersbot import TransformersChatBOT
 
 class ChatGLMBOT(TransformersChatBOT):
     def __init__(self, config):
+        assert config.dtype != torch.float16, \
+            "`float16` is invalid for ChatGLM due to the structure design."
         super(ChatGLMBOT, self).__init__(config)
 
     @property

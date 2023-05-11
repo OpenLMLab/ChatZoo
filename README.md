@@ -68,7 +68,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 - [Vicuna](https://github.com/lm-sys/FastChat)
     - [vicuna-7b-delta-v1.1](https://huggingface.co/lmsys/vicuna-7b-delta-v1.1)
     - [vicuna-13b-delta-v1.1](https://huggingface.co/lmsys/vicuna-13b-delta-v1.1)
-- [FastChat-T5]
+- [FastChat-T5](https://github.com/lm-sys/FastChat)
     - [fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
 
 ### 添加自己的模型
