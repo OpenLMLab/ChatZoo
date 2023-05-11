@@ -49,7 +49,6 @@ components: {
 methods: {
   saveModels() {
     localStorage.setItem('models', JSON.stringify(this.models));
-    console.log('method', this.models)
   },
   beforeUnload() {
     this.saveModels()
@@ -108,14 +107,11 @@ methods: {
     newModel.id = data.id
     newModel.isiframe = data.isiframe
     this.models.push(newModel)
-    console.log('新的数据', this.models)
   },
   deleteBox(model) {
     // 删除models数组中的元素
     const index = this.models.indexOf(model); 
-    console.log(index)
     this.models.splice(index, 1);
-    console.log(this.models)
   },
   // testConnect() {
   //   const instance = axios.create({
@@ -219,7 +215,6 @@ created() {
   if(saveModels) {
     this.models = JSON.parse(saveModels)
   }
-  console.log('create', saveModels)
 },
 mounted() {
   window.addEventListener('beforeunload', this.beforeUnload);
@@ -239,7 +234,6 @@ computed: {
     const innerHeight = window.innerHeight * 0.8 * 0.9;
     // 理想的每页的个数
     let idelNum = Math.floor(window.innerWidth * 0.8 / (innerHeight / 2));
-    console.log('理想',idelNum)
     // 如果理想的个数 大于总个数
     let lenOfModels = 0
     if(this.models) {
@@ -248,12 +242,8 @@ computed: {
       lenOfModels = 0
     }
     if (idelNum >= lenOfModels) {
-      console.log('最大个数',lenOfModels)
-      console.log('每个的宽度', innerHeight / 2)
       return lenOfModels;
     } else {
-      console.log('理想数量',idelNum)
-      console.log('每个的宽度', innerHeight / 2)
       return idelNum;
     }
   }

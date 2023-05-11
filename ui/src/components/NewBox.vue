@@ -49,7 +49,6 @@ export default {
                 const uuidv4 = uuid.v4({format:'N'})
                 data.id = uuidv4
                 data.isiframe = this.form.isiframe
-                console.log('这个', data.isiframe)
                 if(data.isiframe === 'iframe') {
                     data.isiframe = true
                 } else {

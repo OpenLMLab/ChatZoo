@@ -1,4 +1,4 @@
-# ChatZoo
+<center># ChatZoo</center>
 对话语言模型横向对比工具。
 
 我们提供了一个轻量级的工具，可以将您的模型或者来自 [🤗huggingface](https://huggingface.co/models) 的模型轻松部署到网页中。ChatZoo 还可以将一句提示同时发送到多个模型中进行回答生成，方便地对比模型效果。
