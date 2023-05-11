@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-    <img src="pics/logo.png" alt="ChatZoo" style="width: 50%; min-width: 300px; display: block; margin: auto;">
+    <img src="pics/logo.png" alt="ChatZoo" style=" min-width: 300px; display: block; margin: auto;">
 </p>
 
 # ChatZoo
