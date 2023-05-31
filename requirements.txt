@@ -1,4 +1,4 @@
 fastapi
 uvicorn
-transformers
+transformers>=4.26
 accelerate
