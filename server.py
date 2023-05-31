@@ -41,6 +41,11 @@ parser.add_argument(
     "--from_s3", default=False, action="store_true",
     help="Whether to load model from s3. Only for testing purpose."
 )
+parser.add_argument("--openai_api_key", default=None, type=str,
+    help="Api keys for using openai GPT")
+parser.add_argument("--openai_api_key_file_path", default=None, type=str,
+    help="txt file for saving some openai aip keys")
+    
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
 app = FastAPI()
@@ -65,7 +70,8 @@ def init_bot():
 config = ModelConfig(
     pretrained_path=args.pretrained_path, type=args.type,
     tokenizer_path=args.tokenizer_path, dtype=args.dtype,
-    from_s3=args.from_s3, base_model=args.base_model
+    from_s3=args.from_s3, base_model=args.base_model,
+    api_key=args.openai_api_key, api_key_file_path=args.openai_api_key_file_path
 )
 
 @app.post("/")
