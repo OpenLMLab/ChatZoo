@@ -18,6 +18,8 @@ from accelerate.utils import (
     retie_parameters,
 )
 
+OVERLENGTH = "当前对话字数已经超过限制，将开启新一轮对话，请重新输入。"
+
 # from accelerate import load_checkpoint_and_dispatch
 from accelerate.utils import (set_module_tensor_to_device,
                               load_offloaded_weights, is_torch_version,

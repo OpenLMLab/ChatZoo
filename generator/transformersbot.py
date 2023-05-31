@@ -5,6 +5,7 @@ from transformers import AutoTokenizer, AutoConfig
 from transformers.models.auto.modeling_auto import _BaseAutoModelClass
 
 from .chatbot import ChatBOT
+from .utils import OVERLENGTH
 
 class TransformersChatBOT(ChatBOT):
     """
@@ -12,6 +13,7 @@ class TransformersChatBOT(ChatBOT):
     """
     def __init__(self, config):
         super(TransformersChatBOT, self).__init__(config)
+        self.max_tokens = 0
 
     def load_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -64,8 +66,11 @@ class TransformersChatBOT(ChatBOT):
 
         :param input_dict: dict. It is from ``get_input``.
         :param gen_kwargs: dict. Parameters used for generating.
-        :return:
+        :return: None if too long.
         """
+        if "max_length" in gen_kwargs and \
+            input_dict["input_ids"].shape[1] >= gen_kwargs["max_length"]:
+                return None
         return self.model.generate(**input_dict, **gen_kwargs)
     
     def get_response(self, output, input_dict):
