@@ -8,7 +8,10 @@ from typing import Dict, List, Optional, Union
 
 import torch
 import torch.nn as nn
-from petrel_client.client import Client
+try:
+    from petrel_client.client import Client
+except ModuleNotFoundError:
+    Client = None
 
 from accelerate.utils import (
     find_tied_parameters,
