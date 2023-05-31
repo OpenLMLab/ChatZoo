@@ -17,7 +17,7 @@
 
 ### 1. 启动前端
 
-我们的前端代码 [./ui](https://github.com/OpenLMLab/ChatZoo/tree/main/ui) 使用 <a href="https://vuejs.org"><img width="25" src="https://vuejs.org/images/logo.png" alt="Vue logo">vue</a> 实现，您可以使用 npm 工具编译，或者使用我们预编译好的 [release](https://github.com/OpenLMLab/ChatZoo/releases)。当您当您经过下载或编译得到 dist 文件夹后，请在 `dist/ui/dist` 文件夹中执行：
+我们的前端代码 [./ui](https://github.com/OpenLMLab/ChatZoo/tree/main/ui) 使用 <a href="https://vuejs.org"><img width="25" src="https://vuejs.org/images/logo.png" alt="Vue logo">vue</a> 实现，您可以使用 npm 工具编译，或者使用我们预编译好的 [release](https://github.com/OpenLMLab/ChatZoo/releases)。当您经过下载或编译得到 dist 文件夹后，请在 `dist/ui/dist` 文件夹中执行：
 
 ```bash
 python -m http.server 8080
