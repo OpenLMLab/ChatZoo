@@ -1,5 +1,7 @@
 import traceback
 
+from .utils import OVERLENGTH
+
 class ChatBOT:
     """
     Parent class of all ChatBOT.
@@ -62,7 +64,10 @@ class ChatBOT:
             prompt = self.get_prompt(query)
             input_dict = self.get_input(prompt)
             output = self.generate(input_dict, gen_kwargs)
-            response = self.get_response(output, input_dict)
+            if output is None:
+                response = OVERLENGTH
+            else:
+                response = self.get_response(output, input_dict)
             response = self.process_response(response)
         except Exception as e:
             response = None

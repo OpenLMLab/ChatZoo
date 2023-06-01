@@ -6,6 +6,7 @@ except:
     PeftModel = None
 
 from .transformersbot import TransformersChatBOT
+from .utils import OVERLENGTH
 
 class BaizeBOT(TransformersChatBOT):
     def __init__(self, config):
@@ -25,7 +26,7 @@ class BaizeBOT(TransformersChatBOT):
     
     def default_settings(self):
         return {
-            "max_length": 2048,"top_p": 0.9, "top_k": 1, "temperature": 0.95,
+            "max_length": 2048, "top_p": 0.9, "top_k": 1, "temperature": 0.95,
         }
     
     def get_prompt(self, query):
@@ -64,6 +65,8 @@ class BaizeBOT(TransformersChatBOT):
         generated_tokens = []
         past_key_values = None
         input_ids = input_dict["input_ids"]
+        if input_ids.shape[1] > gen_kwargs["max_length"]:
+            return None
         stop_words=["[|Human|]", "[|AI|]"]
         for i in range(gen_kwargs["max_length"]):
             with torch.no_grad():

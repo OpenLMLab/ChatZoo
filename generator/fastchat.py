@@ -49,6 +49,8 @@ class FastChatBOT(TransformersChatBOT):
             max_src_len = context_len
         else:
             max_src_len = context_len - max_new_tokens - 8
+        if input_echo_len >= max_src_len:
+            return None
         input_ids = input_ids[:, -max_src_len:]
 
         if self.model.config.is_encoder_decoder:

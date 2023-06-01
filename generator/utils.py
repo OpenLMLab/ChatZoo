@@ -8,7 +8,10 @@ from typing import Dict, List, Optional, Union
 
 import torch
 import torch.nn as nn
-from petrel_client.client import Client
+try:
+    from petrel_client.client import Client
+except ModuleNotFoundError:
+    Client = None
 
 from accelerate.utils import (
     find_tied_parameters,
@@ -17,6 +20,8 @@ from accelerate.utils import (
     load_checkpoint_in_model,
     retie_parameters,
 )
+
+OVERLENGTH = "当前对话字数已经超过限制，将开启新一轮对话，请重新输入。"
 
 # from accelerate import load_checkpoint_and_dispatch
 from accelerate.utils import (set_module_tensor_to_device,

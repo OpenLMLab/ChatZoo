@@ -36,7 +36,9 @@ MODEL_NAME_TO_MODEL_DICT = {
     "lmsys/vicuna-7b-delta-v1.1": "vicuna",
     "lmsys/vicuna-13b-delta-v1.1": "vicuna",
     # fastchat t5
-    "lmsys/fastchat-t5-3b-v1.0": "fastchat-t5"
+    "lmsys/fastchat-t5-3b-v1.0": "fastchat-t5",
+    # OpenAi
+    "openai/chatgpt3.5": "chatgpt"
 }
 
 DTYPE_DICT = {
@@ -54,6 +56,10 @@ class ModelConfig:
     from_s3: bool = False
     # for lora-finetuned model such as baize
     base_model: str = None
+
+    # for openai
+    api_key: str = None
+    api_key_file_path: str = None
 
     def __post_init__(self):
         if self.tokenizer_path is None:
@@ -76,6 +82,17 @@ class ModelConfig:
                     "We will set `config.dtype` to `torch.float32`."
                 )
                 self.dtype = torch.float32
+
+        if self.api_key_file_path is not None:
+            if not os.path.exists(self.api_key_file_path):
+                raise RuntimeError(f"Openai api key file path :{self.api_key_file_path} is not exists!"
+                                    "Please check it again!")
+            else:
+                api_key_list = []
+                with open(self.api_key_file_path, "r", encoding="utf8") as fp:
+                    for item in fp:
+                        api_key_list.append(item.strip().strip("\n"))
+                self.api_key_file_path = api_key_list
 
     def __repr__(self) -> str:
 
