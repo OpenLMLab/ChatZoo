@@ -1,7 +1,5 @@
 <template>
     <div class="box-card" v-loading="loading" >
-        <!-- <el-button @click="drawer=true" type="primary">菜单</el-button> -->
-        <!-- <el-drawer :modal="false" title="参数控制" :visible.sync="drawer" direction="ltr" >看看</el-drawer> -->
         <div class="chat-header clearfix" style="display: flex; flex-direction: column; position:relative;">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                 <div style="display: flex; align-items: center; justify-content: center; flex: 1;">
@@ -17,11 +15,38 @@
                 <div :class="[message.role === 'BOT' ? 'left' : 'right']" ref="preview">
                     <VueMarkdown :source="message.content" v-highlight></VueMarkdown>
                 </div>
+                
             </div>
         </div>
         <div v-if="isiframe" style="height: 100%;">
             <iframe style="height: 100%;" :src="url" width="100%"></iframe>
         </div>
+        <el-button type="text" @click="dialogFormVisible=true">设置</el-button>  
+        <el-dialog 
+            title="参数设置" 
+            :modal=false
+            :visible.sync="dialogFormVisible"
+        >
+            <el-form 
+            :model="params" 
+            ref="form" 
+            label-position="left"
+            label-width="20px"
+            >
+                <el-form-item 
+                    v-for="(value, key) in params" 
+                    :key="key"
+                    :label="key"
+                    label-width="auto"
+                >
+                    <el-input v-model="params[key]" :placeholder="key">
+                    </el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="setParams">保存设置</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
   
@@ -34,15 +59,6 @@ hljs.initHighlightingOnLoad();
 Vue.use(VueMarkdown, {
   // 启用代码块渲染
   highlight: true,
-  // 代码块高亮样式
-  // stylesheet: '/path/to/highlight.js/styles/github.min.css',
-  // 代码块高亮语言
-  // preprocess: (code, lang) => { /* ... */ return [code, lang]; },
-  // sanitize: false,
-  // breaks: false,
-  // smartLists: true,
-  // silent: false,
-  // smartypants: false,
 });
 
 
@@ -91,6 +107,10 @@ export default {
         isiframe: {
             type: Boolean,
             required: true
+        },
+        parameters: {
+            type: Object,
+            required: true
         }
     },
     data() {
@@ -98,27 +118,16 @@ export default {
             drawer: false,
             model: this.name,
             dialogue: this.conversations,
-            // currstatus: this.status,
             loading: false,
             link_loading: false,
             vditor: null,
             counter: 0,
-            responseData: null
+            responseData: null,
+            params: this.parameters,
+            dialogFormVisible: false
         };
     },
     watch: {
-        // dialogue(newDialogue) {
-        //     newDialogue.forEach((message, index) => {
-        //         const previewElement = this.$refs.preview[index]
-        //         VditorPreview.preview(previewElement, message.content)
-        //     });
-        // }
-        // status(newVal) {
-        //     this.currstatus = newVal;  
-        // }
-        // 'dialogue.*.content'() {
-        //     this.renderMarkdown()
-        // }
     },
     updated: function() {
         this.$nextTick(() => {
@@ -130,83 +139,45 @@ export default {
         });
     },
     methods: {
-        // // 为消息对象生成唯一的 cacheid 属性
-        // generateCacheId() {
-        // this.counter += 1;
-        // return `message_${this.counter}`;
-        // },
-        // // 渲染 Markdown
-        // renderMarkdown() {
-        // this.dialogue.forEach((message) => {
-        //     const cacheid = message.cacheid || this.generateCacheId();
-        //     const preview = this.$refs[`preview_${cacheid}`];
-        //     preview.innerHTML = this.vditor.preview(message.content);
-        // });
-        // },
+        setParams() {
+            this.dialogFormVisible = false
+            this.$emit('update:parameters', this.parameters)
+        },
         deleteChatBox() {
             this.$emit('delete');
         },
-        // linkToBox() {
-        //     const instance = axios.create({
-        //         baseURL: ''
-        //     })
-        //     const data = [{id: this.id, name:this.name}]
-        //     this.link_loading = true
-        //     instance.post('/init/', data, {
-        //             headers: {
-        //             'Content-Type': 'application/json',
-        //             },
-        //     })
-        //     .then((response) => {
-        //         const value = response.data[Object.keys(response.data)[0]]
-        //         if (value === 0) {
-        //             this.$emit('linkResponse', this.id, "success");
-        //         } else {
-        //             this.$emit('linkResponse', this.id,"info");
-        //         }
-        //         this.link_loading = false;
-        //     })
-        //     .catch(() => {
-        //         this.link_loading = false;
-        //     })
-        // },
         chat() {
-            // 如果节点状态为info，则直接返回
-            // if(this.status === 'info') {
-            //     const res = {}
-            //     this.$emit('chat-response', res, this.id, 'error');
-            // } else {
-                const instance = axios.create({
-                    baseURL: ''
-                })
-                const data = {
-                    "query": this.dialogue,
-                    "params": {}
-                }
-                this.loading = true
-                if(this.isiframe) {
-                    const res = {}
-                    this.loading = false
-                    this.$emit('chat-response', res, this.id);
-                    return;
-                }
-                instance.post(this.url, data, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then((response) => {
-                    const res = {"role": "BOT", "content": response.data.response}
-                    this.$emit('chat-response', res, this.id);
-                    this.loading = false;
-                })
-                .catch((error) => {
-                    this.$message.error('模型'+this.model+'未收到信息，请查看连接！')
-                    console.error(error);
-                    const res = {"role": "BOT", "content": '网络错误'}
-                    this.$emit('chat-response', res, this.id);
-                    this.loading = false;
-                })
+            const instance = axios.create({
+                baseURL: ''
+            })
+            const data = {
+                "query": this.dialogue,
+                "params": this.params
+            }
+            this.loading = true
+            if(this.isiframe) {
+                const res = {}
+                this.loading = false
+                this.$emit('chat-response', res, this.id);
+                return;
+            }
+            instance.post(this.url, data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then((response) => {
+                const res = {"role": "BOT", "content": response.data.response}
+                this.$emit('chat-response', res, this.id);
+                this.loading = false;
+            })
+            .catch((error) => {
+                this.$message.error('模型'+this.model+'未收到信息，请查看连接！')
+                console.error(error);
+                const res = {"role": "BOT", "content": '网络错误'}
+                this.$emit('chat-response', res, this.id);
+                this.loading = false;
+            })
         },
         scrollToBottom() {
             const chatContainer = this.$el.querySelector('.chat-container');
@@ -227,70 +198,16 @@ export default {
                 this.$refs['web-page'].innerHTML = response
             }
         }
-        
-        // 在每个消息的预览元素上调用 mermaidRender 方法
-        // this.dialogue.forEach((message) => {
-        //     // const previewElement = this.$refs.preview[index];
-        //     Vditor.preview(this.$refs.preview, message.content,
-        //         {
-        //             hljs: {style: "github"}
-        //         }
-        //     );
-        //     // console.log(previewElement)
-        // });
-        // 创建 Vditor 实例
-        // this.vditor = new Vditor(document.createElement('div'), {
-        //     mode: 'preview',
-        //     cache: {
-        //         enable: false
-        //     }
-        // });
-        // 渲染已有消息
-        // this.renderMarkdown();
-
-        // console.log('创建', this.vditor)
-        // // 渲染已有消息
-        // this.renderMarkdown()
-        // // 监听 dialogue 数组的变化并渲染每个消息
-        // this.$watch('dialogue', (newVal) => {
-        //     newVal.forEach((message, index) => {
-        //         const previewElement = this.$refs.preview[index];
-        //         VditorPreview.preview(previewElement, message.content);
-        //     });
-        // }, { deep: true });
-        // this.dialogue.forEach((message, index) => {
-        //     console.log('消息体', message.content)
-        //     this.vditors[index] = new Vditor(this.$refs.vditor[index], {
-        //         value: message.content,
-        //         mode: 'preview',
-        //         "toolbarConfig": {
-        //             "hide": true
-        //         },
-        //         height: 'auto',
-        //         cache: {
-        //             enable: false
-        //         }
-        //     })
-        //     console.log(this.vditors[index])
-        // })
     },
     beforeDestroy() {
         delete window.handleJsonResponse;
     },
     computed: {
-        // statusClass() {
-        //     switch(this.currstatus) {
-        //         case 'success':
-        //             return '在线';
-        //         case 'info':
-        //             return '离线';
-        //         default:
-        //             return '离线';
-        //     }
-        // }
     }
 };
 </script>
+
+
 <style>
 .btn-container {
   display: flex;

@@ -8,7 +8,18 @@
           <carousel :key="models.length" ref="carouselRef" style="display: flex; flex: 1;" :per-page="itemPerPage" :autoplay="false" :navigation-enabled="true" :loop="true" no-touch>
             <slide v-for="(model, index) in models" :key="index">
               <div class="slide-content">
-                <ChatBox ref="chat" :name="model.name" :id="model.id" :conversations="model.dialogue"  :url="model.url" :isiframe="model.isiframe" @delete="deleteBox(model)" @chat-response="handleChatResponse" />
+                <ChatBox
+                ref="chat" 
+                :name="model.name" 
+                :id="model.id" 
+                :conversations="model.dialogue"  
+                :url="model.url" 
+                :isiframe="model.isiframe" 
+                :parameters="model.parameters"
+                @update:data="model.parameters=$event"
+                @delete="deleteBox(model)"
+                @chat-response="handleChatResponse" 
+              />
               </div>
             </slide>
           </carousel>
@@ -102,10 +113,10 @@ methods: {
     let newModel = {}
     newModel.name = data.name
     newModel.dialogue = data.dialogue
-    // newModel.status = data.status
     newModel.url = data.url
     newModel.id = data.id
     newModel.isiframe = data.isiframe
+    newModel.parameters = data.parameters
     this.models.push(newModel)
   },
   deleteBox(model) {
@@ -113,98 +124,12 @@ methods: {
     const index = this.models.indexOf(model); 
     this.models.splice(index, 1);
   },
-  // testConnect() {
-  //   const instance = axios.create({
-  //     baseURL: 'http://127.0.0.1:10030/'
-  //   })
-  //   const data = this.models.map((model) => {
-  //     return {
-  //       id: model.id,
-  //       name: model.name
-  //     }
-  //   })
-  //   console.log(data)
-  //   const loading = this.$loading({
-  //     lock: true,
-  //     text: '模型启动中...',
-  //     spinner: 'el-icon-loading',
-  //     background: 'rgba(0,0,0,0.7)'
-  //   })
-  //   instance.post('/init/', data, {
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //   })
-  //   .then((response) => {
-  //     console.log('返回',response.data);
-  //     const lenOfResponse = Object.keys(response.data).length;
-  //     console.log('大小',lenOfResponse)
-  //     // for (let i = 0; i < lenOfResponse; i++) {
-  //     //   const value = response.data[Object.keys(response.data)[i]]
-  //     //   if (value === 0) {
-  //     //     this.models[i].status = 'success'
-  //     //   } else {
-  //     //     this.models[i].status = 'info'
-  //     //   }
-  //     // }
-  //     console.log(this.models)
-  //   })
-  //   .catch((error) => {
-  //     console.error(error);
-  //   })
-  //   .finally(() => {
-  //     const failModels = this.models.filter(model => model.status === 'info')
-  //     let failStr = ''
-  //     for(let i=0; i<failModels.length; i++) {
-  //       failStr += failModels[i].name
-  //     }
-  //     if(failModels.length != 0){
-  //         this.$message({
-  //         'type': 'error',
-  //         'message': '模型'+failStr+'未加载成功',
-  //         'duration': 5000
-  //       })
-  //     }
-  //     loading.close();
-  //   })
-  // }
 },
 data() {
   return {
       drawer: false,
       showNewBox: false,
-      models:[
-        // {
-        //   'id': "0",
-        //   "name": "fnlp/moss-moon-003-base", 
-        //   "dialogue": [
-        //                 {"role":"BOT", "content": "Hello"},
-        //                 {"role":"HUMAN", "content": "Hello，我是人类"},
-        //               ],
-        //   // "status": "info",
-        //   "url": "/generate/0"
-        // },
-        // {
-        //   "id": "1",
-        //   "name": "THUDM/chatglm-6b",
-        //   // "status": "info",
-        //   "dialogue": [
-        //                 {"role":"BOT", "content": "Hello"},
-        //                 {"role":"HUMAN", "content": "Hello，我是人类"},
-        //               ],
-        //   "url": "/generate/1"
-        // },
-        // {
-        //   "id": "2",
-        //   "name": "YeungNLP/firefly-1b4",
-        //   "dialogue": [
-        //                 {"role":"BOT", "content": "Hello"},
-        //                 {"role":"HUMAN", "content": "Hello，我是人类"},
-        //               ],
-        //   // "status": "info",
-        //   "url": "/generate/2"
-        // }
-      ],
+      models:[],
       newMessage: '',
       canSend: true,
       getNum: 0

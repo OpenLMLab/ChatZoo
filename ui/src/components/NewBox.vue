@@ -26,6 +26,7 @@
   </template>
   
 <script>
+import axios from 'axios';
 export default {
     name: 'NewBox',
     data() {
@@ -40,7 +41,17 @@ export default {
         }
     },
     methods: {
-        register() {
+        async getParams(url) {
+            const instance = axios.create({baseURL:''})
+            try {
+                const response = await instance.post(url+'/parameters')
+                console.log('获取参数', response.data)
+                return response.data
+            } catch (error) {
+                console.error(error)
+            }
+        },
+        async register() {
             if(this.form.name) {
                 const uuid = require('uuid');
                 let data = {}
@@ -54,8 +65,10 @@ export default {
                 } else {
                     data.isiframe = false
                 }
-                // data.status = 'info'
                 data.url = this.form.url
+                const parameters = await this.getParams(this.form.url)
+                data.parameters = parameters
+                console.log('新的模型', data)
                 this.$emit('new-box-data', data)
             } else {
                 this.$message.error('模型名称不能为空！')
