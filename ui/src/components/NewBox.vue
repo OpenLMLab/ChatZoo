@@ -42,6 +42,9 @@ export default {
     },
     methods: {
         async getParams(url) {
+            if(url.indexOf("http://")==-1 && url.indexOf("https://")==-1){
+                url = "http://" + url
+            }
             const instance = axios.create({baseURL:''})
             try {
                 const response = await instance.post(url+'/parameters')

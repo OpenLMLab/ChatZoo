@@ -21,17 +21,18 @@
         <div v-if="isiframe" style="height: 100%;">
             <iframe style="height: 100%;" :src="url" width="100%"></iframe>
         </div>
-        <el-button type="text" @click="dialogFormVisible=true">设置</el-button>  
         <el-dialog 
             title="参数设置" 
             :modal=false
             :visible.sync="dialogFormVisible"
+            width="480px"
         >
             <el-form 
             :model="params" 
             ref="form" 
             label-position="left"
-            label-width="20px"
+            label-width="10px"
+            size="medium"
             >
                 <el-form-item 
                     v-for="(value, key) in params" 
@@ -39,7 +40,7 @@
                     :label="key"
                     label-width="auto"
                 >
-                    <el-input v-model="params[key]" :placeholder="key">
+                    <el-input size="medium" v-model="params[key]" :placeholder="key">
                     </el-input>
                 </el-form-item>
                 <el-form-item>
@@ -47,6 +48,8 @@
                 </el-form-item>
             </el-form>
         </el-dialog>
+        <el-button type="text" @click="dialogFormVisible=true">设置</el-button>  
+        
     </div>
 </template>
   
@@ -141,6 +144,7 @@ export default {
     methods: {
         setParams() {
             this.dialogFormVisible = false
+            console.log(this.parameters)
             this.$emit('update:parameters', this.parameters)
         },
         deleteChatBox() {
@@ -282,7 +286,7 @@ clear: both
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif, "Times New Roman";
-    margin-right: 30px;
+    /* margin-right: 30px; */
     height: 100%;
     max-width: 480px;
 }
@@ -327,5 +331,48 @@ clear: both
 .code.hljs {
   white-space: pre-wrap;
 }
+.el-dialog__wrapper {
+    position: relative !important;
+    height: 100%;
+}
+.el-dialog{
+    display: flex;
+    display: -ms-flex; /* 兼容IE */
+    flex-direction: column;
+    -ms-flex-direction: column; /* 兼容IE */
+    margin:0 !important;
+    position:relative;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    max-height:calc(100% - 30px);
+    max-width:calc(100% - 30px);
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    box-sizing: border-box;
+}
+.el-dialog .el-dialog__body{
+    max-height: 100%;
+    flex: 1;
+    -ms-flex: 1 1 auto; /* 兼容IE */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 
+.el-form-item {
+    margin-bottom: 0;
+    padding: 3% 10% 0 10% !important;
+}
+.el-form-item__label{
+    color: rgb(15, 15, 15);
+    font-size: 18px;
+}
+.el-input__inner{
+    font-size: 16px;
+    padding-left: 2px!important;
+}
+.el-dialog__title {
+    line-height: 30px;
+    font-size: 20px;
+}
 </style>
