@@ -68,7 +68,12 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
    
    可以参考[添加自己的模型](#添加自己的模型)，自定义模型接口，欢迎在PR中提交你的模型。
 
-5. 敬请期待...
+5. 参数设置
+   
+   点击下方的设置按钮，可以打开“参数设置”对话框，从中选择需要调整的参数。
+   
+
+6. 敬请期待...
 
 ## 目前支持的模型
 
@@ -99,6 +104,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
     - [vicuna-13b-delta-v1.1](https://huggingface.co/lmsys/vicuna-13b-delta-v1.1)
 - [FastChat-T5](https://github.com/lm-sys/FastChat)
     - [fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
+
 
 ### 添加自己的模型
 
