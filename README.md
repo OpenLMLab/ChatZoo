@@ -70,8 +70,9 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
 
 5. 参数设置
    
-   点击下方的设置按钮，可以打开“参数设置”对话框，从中选择需要调整的参数。
-   
+   点击下方的设置按钮，可以打开“参数设置”对话框，从中修改需要调整的参数，点击保存设置，即可应用参数修改。
+
+   <img src="./pics/settings.bmp" alt="样例图" style="width:50%; height:50%" />
 
 6. 敬请期待...
 
