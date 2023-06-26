@@ -7,6 +7,12 @@ class FastChatT5BOT(FastChatBOT):
         super(FastChatT5BOT, self).__init__(config)
         self.stop_str = "###"
         self.decoder_start_token_id = 0
+        
+        prompt = "A chat between a curious human and an artificial " \
+                 "intelligence assistant. " \
+                 "The assistant gives helpful, detailed, and polite answers " \
+                 "to the human's questions.\n###"
+        self.prompt = prompt
 
     @property
     def model_cls(self):
@@ -18,10 +24,11 @@ class FastChatT5BOT(FastChatBOT):
         }
     
     def get_prompt(self, query):
-        prompt = "A chat between a curious human and an artificial " \
-                 "intelligence assistant. " \
-                 "The assistant gives helpful, detailed, and polite answers " \
-                 "to the human's questions.\n###"
+        # prompt = "A chat between a curious human and an artificial " \
+        #          "intelligence assistant. " \
+        #          "The assistant gives helpful, detailed, and polite answers " \
+        #          "to the human's questions.\n###"
+        prompt = self.prompt
         prompt_dict = {
             "BOT": "Assistant: {}\n###",
             "HUMAN": "Human: {}\n###"

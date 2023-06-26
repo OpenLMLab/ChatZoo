@@ -8,6 +8,7 @@ class ChatBOT:
     """
     def __init__(self, config):
         self.config = config
+        self.prompt = None
         self.model_name = config.pretrained_path
         self.load_tokenizer()
         if config.from_s3:
@@ -57,6 +58,8 @@ class ChatBOT:
         """
         print("Start generating...")
         try:
+            if "prompt" in post:
+                self.set_prompt(post.pop("prompt"))
             query = post["query"]
             gen_kwargs = self.default_settings()
             gen_kwargs.update(post["params"])
@@ -75,6 +78,9 @@ class ChatBOT:
     
         return response
 
+    def set_prompt(self, new_prompt):
+        self.prompt = new_prompt
+    
     def get_prompt(self, query):
         """
         Get different prompt for different model.

@@ -12,6 +12,11 @@ class VicunaBOT(FastChatBOT):
     """
     def __init__(self, config):
         super(VicunaBOT, self).__init__(config)
+        prompt = "A chat between a curious user and an artificial " \
+                 "intelligence assistant. " \
+                 "The assistant gives helpful, detailed, and polite " \
+                 "answers to the user's questions. "
+        self.prompt = prompt
 
     @property
     def model_cls(self):

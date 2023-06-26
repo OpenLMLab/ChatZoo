@@ -19,6 +19,21 @@ class BaizeBOT(TransformersChatBOT):
                 "Base model(llama)'s path of Baize should be set."
             )
         super(BaizeBOT, self).__init__(config)
+        
+        prompt = "The following is a conversation between a human and an " \
+                 "AI assistant named Baize (named after a mythical creature " \
+                 "in Chinese folklore). "
+        prompt += "Baize is an open-source AI assistant developed by UCSD " \
+                  "and Sun Yat-Sen University. The human and the AI " \
+                  "assistant take turns chatting. Human statements start " \
+                  "with [|Human|] and AI assistant statements start with " \
+                  "[|AI|]. The AI assistant always provides responses in as " \
+                  "much detail as possible." #, and in Markdown format. "
+        prompt += "The AI assistant always declines to engage with topics, " \
+                  "questions and instructions related to unethical, " \
+                  "controversial, or sensitive issues. Complete the " \
+                  "transcript in exactly that format.\n"
+        self.prompt = prompt
 
     @property
     def model_cls(self):
@@ -36,19 +51,20 @@ class BaizeBOT(TransformersChatBOT):
         Reference to https://github.com/project-baize/baize-chatbot/blob/main/demo/
         """
         
-        prompt = "The following is a conversation between a human and an " \
-                 "AI assistant named Baize (named after a mythical creature " \
-                 "in Chinese folklore). "
-        prompt += "Baize is an open-source AI assistant developed by UCSD " \
-                  "and Sun Yat-Sen University. The human and the AI " \
-                  "assistant take turns chatting. Human statements start " \
-                  "with [|Human|] and AI assistant statements start with " \
-                  "[|AI|]. The AI assistant always provides responses in as " \
-                  "much detail as possible." #, and in Markdown format. "
-        prompt += "The AI assistant always declines to engage with topics, " \
-                  "questions and instructions related to unethical, " \
-                  "controversial, or sensitive issues. Complete the " \
-                  "transcript in exactly that format.\n"
+        # prompt = "The following is a conversation between a human and an " \
+        #          "AI assistant named Baize (named after a mythical creature " \
+        #          "in Chinese folklore). "
+        # prompt += "Baize is an open-source AI assistant developed by UCSD " \
+        #           "and Sun Yat-Sen University. The human and the AI " \
+        #           "assistant take turns chatting. Human statements start " \
+        #           "with [|Human|] and AI assistant statements start with " \
+        #           "[|AI|]. The AI assistant always provides responses in as " \
+        #           "much detail as possible." #, and in Markdown format. "
+        # prompt += "The AI assistant always declines to engage with topics, " \
+        #           "questions and instructions related to unethical, " \
+        #           "controversial, or sensitive issues. Complete the " \
+        #           "transcript in exactly that format.\n"
+        prompt = self.prompt
         
         prompt_dict = {
             "HUMAN": "[|Human|]{}\n",

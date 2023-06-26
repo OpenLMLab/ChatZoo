@@ -87,5 +87,9 @@ async def generate(post: dict):
 async def default_settings():
     return bot.default_settings()
 
+@app.post("/get_prompt")
+async def default_prompt():
+    return bot.prompt if bot.prompt is not None else "Null"
+
 if __name__ == "__main__":
     uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)

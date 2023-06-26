@@ -8,11 +8,10 @@ from .transformersbot import TransformersChatBOT
 
 class ChatGPT35BOT(TransformersChatBOT):
 
-    def __init(self, config):
-        super(self, TransformersChatBOT).__init__(config)
+    def __init__(self, config):
+        super().__init__(config)
         # openai.api_key = config.openai_api_key
-        
-    
+
     def default_settings(self):
         temp = getattr(self, "single_turn", None)
         print(temp)

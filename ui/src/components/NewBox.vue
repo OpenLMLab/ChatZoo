@@ -54,6 +54,20 @@ export default {
                 console.error(error)
             }
         },
+        async getPrompt(url) {
+            // 获取 prompt 参数
+            if(url.indexOf("http://")==-1 && url.indexOf("https://")==-1){
+                url = "http://" + url
+            }
+            const instance = axios.create({baseURL:''})
+            try {
+                const response = await instance.post(url+'/get_prompt')
+                console.log('获取参数', response.data)
+                return response.data
+            } catch (error) {
+                console.error(error)
+            }
+        },
         async register() {
             if(this.form.name) {
                 const uuid = require('uuid');
@@ -70,6 +84,10 @@ export default {
                 }
                 data.url = this.form.url
                 const parameters = await this.getParams(this.form.url)
+                const prompt = await this.getPrompt(data.url)
+                if(prompt != "Null"){
+                    parameters['prompt'] = prompt
+                }
                 data.parameters = parameters
                 console.log('新的模型', data)
                 this.$emit('new-box-data', data)

@@ -40,7 +40,9 @@
                     :label="key"
                     label-width="auto"
                 >
-                    <el-input size="medium" v-model="params[key]" :placeholder="key">
+                    <el-input v-if="key!='prompt'" size="medium" v-model="params[key]" :placeholder="key" clearable>
+                    </el-input>
+                    <el-input v-if="key=='prompt'" size="medium" v-model="params[key]" :placeholder="key" clearable type="textarea" :rows="2" autosize>
                     </el-input>
                 </el-form-item>
                 <el-form-item>
@@ -145,7 +147,50 @@ export default {
         setParams() {
             this.dialogFormVisible = false
             console.log(this.parameters)
-            this.$emit('update:parameters', this.parameters)
+            // 将某些字符串改为 数值型
+            
+            // fastchat-t5
+            if (Object.prototype.hasOwnProperty.call(this.parameters, "max_new_tokens")){
+                this.params['max_new_tokens'] = parseInt(this.parameters['max_new_tokens'])
+            }
+            if (Object.prototype.hasOwnProperty.call(this.parameters, "context_len")){
+                this.params['context_len'] = parseInt(this.parameters['context_len'])
+            }
+            // chatgpt
+            if (Object.prototype.hasOwnProperty.call(this.parameters, "n")){
+                this.params['n'] = parseInt(this.parameters['n'])
+            }
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "max_tokens")){
+                this.params['max_tokens'] = parseInt(this.parameters['max_tokens'])
+            }
+            // baize
+            if (Object.prototype.hasOwnProperty.call(this.parameters, "max_length")){
+                this.params['max_length'] = parseInt(this.parameters['max_length'])
+            }
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "num_beams")){
+                this.params['num_beams'] = parseInt(this.parameters['num_beams'])
+            }
+
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "temperature")){
+                this.params['temperature'] = parseFloat(this.parameters['temperature'])
+            }
+            
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "top_p")){
+                this.params['top_p'] = parseFloat(this.parameters['top_p'])
+            }
+
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "top_k")){
+                this.params['top_k'] = parseFloat(this.parameters['top_k'])
+            }
+
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "repetition_penalty")){
+                this.params['repetition_penalty'] = parseFloat(this.parameters['repetition_penalty'])
+            }
+
+            if(Object.prototype.hasOwnProperty.call(this.parameters, "frequency_penalty")){
+                this.params['frequency_penalty'] = parseFloat(this.parameters['frequency_penalty'])
+            }
+            this.$emit('update:parameters', this.params)
         },
         deleteChatBox() {
             this.$emit('delete');
