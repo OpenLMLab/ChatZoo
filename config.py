@@ -19,6 +19,7 @@ MODEL_NAME_TO_MODEL_DICT = {
     "fnlp/moss-moon-003-sft-plugin-int8": "moss",
     # chatglm
     "THUDM/chatglm-6b": "chatglm",
+    "THUDM/chatglm2-6b": "chatglm2",
     # firefly
     "YeungNLP/firefly-1b4": "firefly",
     "YeungNLP/firefly-2b6": "firefly",
