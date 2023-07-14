@@ -82,7 +82,11 @@ export default {
                 } else {
                     data.isiframe = false
                 }
-                data.url = this.form.url
+                if(this.form.url.indexOf("http://")==-1 && this.form.url.indexOf("https://")==-1){
+                    data.url = "http://" + this.form.url
+                }else{
+                    data.url = this.form.url
+                }
                 const parameters = await this.getParams(this.form.url)
                 const prompt = await this.getPrompt(data.url)
                 if(prompt != "Null"){
