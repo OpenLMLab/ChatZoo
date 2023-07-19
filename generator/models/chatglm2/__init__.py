@@ -1,3 +1,0 @@
-from .modeling_chatglm import ChatGLMModel as ChatGLM2Model
-from .modeling_chatglm import ChatGLMForConditionalGeneration as ChatGLM2ForConditionalGeneration
-from .configuration_chatglm import ChatGLMConfig as ChatGLM2Config
