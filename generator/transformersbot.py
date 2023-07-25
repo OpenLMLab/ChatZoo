@@ -4,7 +4,7 @@ import torch
 from transformers import AutoTokenizer, AutoConfig
 from transformers.models.auto.modeling_auto import _BaseAutoModelClass
 
-from .chatbot import ChatBOT
+from .chatbot import ChatBOT, no_proxy
 from .utils import OVERLENGTH
 
 class TransformersChatBOT(ChatBOT):
@@ -16,6 +16,7 @@ class TransformersChatBOT(ChatBOT):
         self.max_tokens = 0
 
     def load_tokenizer(self):
+        print("debug", self.config.tokenizer_path)
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.config.tokenizer_path, trust_remote_code=True)
         
@@ -71,7 +72,43 @@ class TransformersChatBOT(ChatBOT):
         if "max_length" in gen_kwargs and \
             input_dict["input_ids"].shape[1] >= gen_kwargs["max_length"]:
                 return None
-        return self.model.generate(**input_dict, **gen_kwargs)
+        from transformers.generation.streamers import TextStreamer
+        from threading import Thread
+        import threading
+        from queue import Queue
+        class TextIteratorStreamer(TextStreamer):  
+            def __init__(
+                self, tokenizer, skip_prompt: bool = False, timeout = None, **decode_kwargs
+            ):
+                super().__init__(tokenizer, skip_prompt, **decode_kwargs)
+                self.text_queue = Queue()
+                self.stop_signal = None
+                self.timeout = timeout
+                self.loack = threading.Lock()
+
+            def on_finalized_text(self, text: str, stream_end: bool = False):
+                """Put the new text in the queue. If the stream is ending, also put a stop signal in the queue."""
+                self.text_queue.put(text, timeout=self.timeout)
+                if stream_end:
+                    self.text_queue.put(self.stop_signal, timeout=self.timeout)
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                if self.loack:
+                    value = self.text_queue.get(timeout=self.timeout)
+                    if value == self.stop_signal:
+                        raise StopIteration()
+                    else:
+                        return value
+        streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True)
+        generation_kwargs = dict(input_dict, streamer=streamer, **gen_kwargs)
+        thread = Thread(target=self.model.generate, kwargs=generation_kwargs)
+        thread.start()
+        
+        return streamer
+        # return self.model.generate(**input_dict, **gen_kwargs)
     
     def get_response(self, output, input_dict):
         """
@@ -120,46 +157,48 @@ class TransformersChatBOT(ChatBOT):
         from petrel_client.client import Client
         from accelerate import init_empty_weights
         from .utils import load_checkpoint_and_dispatch_from_s3
-        client = Client()
-
-        # get model_index
-        model_list = []
-        if client.contains(f"{prefix}pytorch_model.bin.index.json"):
-            buffer = io.BytesIO()
-            buffer.write(client.get(f"{prefix}pytorch_model.bin.index.json"))
-            buffer.seek(0)
-            model_index = json.load(buffer)
-            buffer.close()
-            for weight, filename in model_index["weight_map"].items():
-                filepath = f"{prefix}{filename}"
-                if filepath not in model_list:
-                    model_list.append(filepath)
-        else:
-            model_list.append(f"{prefix}pytorch_model.bin")
-
+        
         # get config
         config = AutoConfig.from_pretrained(
             self.model_name, trust_remote_code=True)
-        
+        with no_proxy():
+            client = Client()
+            # get model_index
+            model_list = []
+            if client.contains(f"{prefix}pytorch_model.bin.index.json"):
+                buffer = io.BytesIO()
+                buffer.write(client.get(f"{prefix}pytorch_model.bin.index.json"))
+                buffer.seek(0)
+                model_index = json.load(buffer)
+                buffer.close()
+                for weight, filename in model_index["weight_map"].items():
+                    filepath = f"{prefix}{filename}"
+                    if filepath not in model_list:
+                        model_list.append(filepath)
+            else:
+                model_list.append(f"{prefix}pytorch_model.bin")
+            
         if torch.cuda.device_count() >= 1:
             with init_empty_weights():
                 self.model = self.model_cls._from_config(
                     config=config, torch_dtype=self.config.dtype
                 )
-            load_checkpoint_and_dispatch_from_s3(
-                self.model, model_list, device_map="auto",
-                no_split_module_classes=self.no_split_module_classes,
-                dtype=self.config.dtype
-            )
+            with no_proxy():
+                load_checkpoint_and_dispatch_from_s3(
+                    self.model, model_list, device_map="auto",
+                    no_split_module_classes=self.no_split_module_classes,
+                    dtype=self.config.dtype
+                )
         else:
             self.model = self.model_cls._from_config(
                 config=config, torch_dtype=self.config.dtype
             )
-            load_checkpoint_and_dispatch_from_s3(
-                self.model, model_list, device_map=None,
-                no_split_module_classes=self.no_split_module_classes,
-                dtype=self.config.dtype
-            )
+            with no_proxy():
+                load_checkpoint_and_dispatch_from_s3(
+                    self.model, model_list, device_map=None,
+                    no_split_module_classes=self.no_split_module_classes,
+                    dtype=self.config.dtype
+                )
 
     @property
     def model_cls(self):

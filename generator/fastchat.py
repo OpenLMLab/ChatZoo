@@ -114,6 +114,7 @@ class FastChatBOT(TransformersChatBOT):
                     if pos != -1:
                         output = output[:pos]
                         stopped = True
+                yield output
 
             if stopped:
                 break

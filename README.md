@@ -87,6 +87,7 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
     - [moss-moon-003-sft-plugin-int4](https://huggingface.co/fnlp/moss-moon-003-sft-plugin-int4)
 - [ChatGLM](https://github.com/THUDM/ChatGLM-6B)
     - [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+    - [chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
 - [BELLE](https://github.com/LianjiaTech/BELLE)
     - [BELLE-7B-2M](https://huggingface.co/BelleGroup/BELLE-7B-2M)
 - [Firefly](https://github.com/yangjianxin1/Firefly)
@@ -105,7 +106,8 @@ python server.py --pretrained_path fnlp/moss-moon-003-sft
     - [vicuna-13b-delta-v1.1](https://huggingface.co/lmsys/vicuna-13b-delta-v1.1)
 - [FastChat-T5](https://github.com/lm-sys/FastChat)
     - [fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
-
+- [Openai](https://chat.openai.com)
+    - [chatgpt3.5](https://platform.openai.com/playground)
 
 ### 添加自己的模型
 
