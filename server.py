@@ -7,6 +7,8 @@ import argparse
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from sse_starlette.sse import EventSourceResponse
 
 from config import ModelConfig
 from generator import choose_bot
@@ -51,13 +53,14 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*", "localhost:8081", "10.140.0.133:8081"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 bot = None
+stream_response = None
 
 @app.on_event('startup')
 def init_bot():
@@ -76,12 +79,16 @@ config = ModelConfig(
 
 @app.post("/")
 async def generate(post: dict):
+    global stream_response
     response = bot.chat(post)
     if response is not None:
         status = 0
     else:
         status = 1
-    return {"status": status, "response": response}
+    stream_response = response
+    return {"status": status, "response": "正在努力搜索中，请稍等一下哦~"}
+    # print("response", response)
+    # return StreamingResponse(response, media_type='text/plain')
 
 @app.post("/parameters")
 async def default_settings():
@@ -90,6 +97,19 @@ async def default_settings():
 @app.post("/get_prompt")
 async def default_prompt():
     return bot.prompt if bot.prompt is not None else "Null"
+
+
+@app.get("/stream")
+async def message_stream():
+    global stream_response
+    async def response_generator(stream_response):
+        # print("stream_response", stream_response)
+        if stream_response is not None:
+            for response in stream_response:
+                    # If client closes connection, stop sending events
+                yield response
+            stream_response = None
+    return EventSourceResponse(response_generator(stream_response))
 
 if __name__ == "__main__":
     uvicorn.run(app="server:app", host=args.host, port=args.port, reload=True)

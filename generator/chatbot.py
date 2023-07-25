@@ -1,6 +1,28 @@
 import traceback
+import os
+from contextlib import contextmanager
 
 from .utils import OVERLENGTH
+
+
+@contextmanager
+def no_proxy():
+    backup = {}
+    if "http_proxy" in os.environ:
+        backup["http_proxy"] = os.environ["http_proxy"]
+        del os.environ["http_proxy"]
+    if "https_proxy" in os.environ:
+        backup["https_proxy"] = os.environ["https_proxy"]
+        del os.environ["https_proxy"]
+    if "HTTP_PROXY" in os.environ:
+        backup["HTTP_PROXY"] = os.environ["HTTP_PROXY"]
+        del os.environ["HTTP_PROXY"]
+    if "HTTPS_PROXY" in os.environ:
+        backup["HTTPS_PROXY"] = os.environ["HTTPS_PROXY"]
+        del os.environ["HTTPS_PROXY"]
+    yield
+    for key, value in backup.items():
+        os.environ[key] = value
 
 class ChatBOT:
     """
@@ -12,6 +34,7 @@ class ChatBOT:
         self.model_name = config.pretrained_path
         self.load_tokenizer()
         if config.from_s3:
+            # with no_proxy():
             self.load_from_s3()
         else:
             self.load_model()
@@ -59,19 +82,29 @@ class ChatBOT:
         print("Start generating...")
         try:
             if "prompt" in post:
-                self.set_prompt(post.pop("prompt"))
+                self.set_prompt(post["params"].pop("prompt"))
             query = post["query"]
             gen_kwargs = self.default_settings()
             gen_kwargs.update(post["params"])
             gen_kwargs.update(self.extra_settings())
             prompt = self.get_prompt(query)
             input_dict = self.get_input(prompt)
-            output = self.generate(input_dict, gen_kwargs)
-            if output is None:
-                response = OVERLENGTH
-            else:
-                response = self.get_response(output, input_dict)
-            response = self.process_response(response)
+            response = ''
+            if 'prompt' in gen_kwargs:
+                gen_kwargs.pop("prompt")
+            for output in self.generate(input_dict, gen_kwargs):
+                # response = self.get_response(output, input_dict)
+                print(output)
+                response += output
+                response = self.process_response(response)
+                print(response)
+                yield response
+            # output = self.generate(input_dict, gen_kwargs)
+            # if output is None:
+            #     response = OVERLENGTH
+            # else:
+            #     response = self.get_response(output, input_dict)
+            # response = self.process_response(response)
         except Exception as e:
             response = None
             traceback.print_exc()
