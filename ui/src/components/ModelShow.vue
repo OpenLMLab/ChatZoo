@@ -64,9 +64,13 @@ methods: {
   beforeUnload() {
     this.saveModels()
   },
-  handleChatResponse(data, id) {
+  handleChatResponse(data, id, stream_begin) {
     const model = this.models.find((model) => model.id === id);
-    model.dialogue.push(data)
+    // model.dialogue.push(data)
+    if(stream_begin)
+        model.dialogue.push(data)
+    else
+        model.dialogue.splice(model.dialogue.length-1, 1, data)
     this.getNum += 1;
     if(this.getNum == this.models.length) {
       this.canSend = true;

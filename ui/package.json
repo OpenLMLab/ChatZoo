@@ -18,7 +18,8 @@
     "vue": "^2.6.14",
     "vue-carousel": "^0.18.0",
     "vue-dragscroll": "^4.0.5",
-    "vue-markdown": "^2.2.4"
+    "vue-markdown": "^2.2.4",
+    "vue-sse": "^2.5.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

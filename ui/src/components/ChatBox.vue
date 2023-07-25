@@ -210,6 +210,15 @@ export default {
                 this.$emit('chat-response', res, this.id);
                 return;
             }
+            let sseClient = this.$sse.create(this.url+'/stream')
+            
+            sseClient.on('message', (msg) => {
+                const res = {"role": "BOT", "content": msg}
+                console.info('Message:', res)
+                this.$emit('chat-response', res, this.id, false);
+            })
+            
+            console.log("request", this.url, data)
             instance.post(this.url, data, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -217,8 +226,12 @@ export default {
             })
             .then((response) => {
                 const res = {"role": "BOT", "content": response.data.response}
-                this.$emit('chat-response', res, this.id);
-                this.loading = false;
+                this.$emit('chat-response', res, this.id, true);
+                // this.loading = false;
+                console.log(res, this.id)
+                sseClient.connect().then(()=>{
+                    console.log("connect")
+                })
             })
             .catch((error) => {
                 this.$message.error('模型'+this.model+'未收到信息，请查看连接！')
@@ -227,6 +240,8 @@ export default {
                 this.$emit('chat-response', res, this.id);
                 this.loading = false;
             })
+            sseClient.disconnect()
+            this.loading = false;
         },
         scrollToBottom() {
             const chatContainer = this.$el.querySelector('.chat-container');
