@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.less";
-import Login from "./components/login/login"
+// import Login from "./components/login/login"
+import App from "./App"
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <Login />
+    <App />
   </React.StrictMode>,
 );

@@ -1,4 +1,5 @@
 import style from "./App.module.less";
+import Mode from "./components/mode/mode"
 import { Col, Row } from 'antd';
 
 
@@ -9,7 +10,7 @@ function App() {
           <h1 className={style.logo}>ChatZoo</h1>
       </Col>
       <Col span={20} className={style.main}>
-        Model
+        <Mode></Mode>
       </Col>
     </Row>
   );
