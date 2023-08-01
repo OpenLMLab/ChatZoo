@@ -68,35 +68,38 @@ class ChatGLM2ChatBot(TransformersChatBotBase):
     #     thread.start()
     #     return streamer
     
-    def chat(self, post):
-        """
-        post 的格式为 {"prompt": str, "is_stream": bool, "query": dict, "query": dict}
-        """
-        print("Start generating...")
-        try:
-            is_stream = False
-            if "prompt" in post:
-                self.set_input_prompt(post.pop("prompt"))
-            if "is_stream" in post:
-                is_stream = post.pop("is_stream")
-            query = post["query"]
-            gen_kwargs = self.get_generation_setting()
-            gen_kwargs.update(post["params"])
-            prompt = self.get_query_prompt(query)
-            input_dict = self.get_query_tensor(prompt)
-            if is_stream:
-                response = ''
-                for output in self.stream_generate(input_dict, gen_kwargs):
-                    response += output
-                    response = self.process_response(response)
-                    yield response
-            else:
-                output = self.generate(input_dict, gen_kwargs)
-                response = self.get_response(output, input_dict)
-                response = self.process_response(response)
-                return response
-        except Exception as e:
-            response = None
-            import traceback
-            traceback.print_exc()
-    
+    # def chat(self, post):
+    #     """
+    #     post 的格式为 {"prompt": str, "is_stream": bool, "query": dict, "query": dict}
+    #     """
+    #     print("Start generating...")
+    #     try:
+    #         is_stream = False
+    #         if "prompt" in post:
+    #             self.set_input_prompt(post.pop("prompt"))
+    #         if "is_stream" in post:
+    #             is_stream = post.pop("is_stream")
+    #         query = post["query"]
+    #         gen_kwargs = self.get_generation_setting()
+    #         gen_kwargs.update(post["params"])
+    #         prompt = self.get_query_prompt(query)
+    #         input_dict = self.get_query_tensor(prompt)
+    #         if is_stream:
+    #             response = ''
+    #             for output in self.stream_generate(input_dict, gen_kwargs):
+    #                 response += output
+    #                 response = self.process_response(response)
+    #                 yield response
+    #         else:
+    #             output = self.generate(input_dict, gen_kwargs)
+    #             response = self.get_response(output, input_dict)
+    #             response = self.process_response(response)
+    #             yield response
+    #     except Exception as e:
+    #         response = None
+    #         import traceback
+    #         traceback.print_exc()
+
+    @property
+    def no_split_module_classes(self):
+        return ["GLMBlock"]

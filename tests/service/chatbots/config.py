@@ -15,6 +15,7 @@ class ModelConfig:
     type: str = None
     dtype: str = "float32"
     base_model: str = None
+    from_s3: bool = False
     
     def __post_init__(self):
         if self.tokenizer_path is None:
