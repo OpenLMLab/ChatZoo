@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
 import "./index.less";
-import Login from "./components/login/login"
+import router from "./utils/router";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <Login />
+    <RouterProvider router={router}/>
   </React.StrictMode>,
 );
