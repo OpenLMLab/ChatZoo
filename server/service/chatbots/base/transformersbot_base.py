@@ -9,10 +9,11 @@ from .chatbot_base import ChatBotBase
 class TransformersChatBotBase(ChatBotBase):
     def __init__(self, config):
         super().__init__(config)
+        self.load_tokenizer()
         if config.from_s3:
             self.load_model_from_s3()
         else:
-            self.load_model
+            self.load_model()
     
     @property
     def model_cls(self):
@@ -27,6 +28,9 @@ class TransformersChatBotBase(ChatBotBase):
             "repetition_penalty": 1.02
         }
     
+    def extra_settings(self):
+        return {}
+    
     def load_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.config.tokenizer_path, trust_remote_code=True)
@@ -37,18 +41,62 @@ class TransformersChatBotBase(ChatBotBase):
             self.model_cls, _BaseAutoModelClass
         )
         self.model = self.model_cls.from_pretrained(
-            self.model_name, torch_dtype=self.config.dtype,
+            self.config.pretrained_path, torch_dtype=self.config.dtype,
             device_map="auto", trust_remote_code=trust_remote_code
         )
     
     def load_model_from_s3(self):
         """for testing"""
-        prefix = f"hdd:s3://opennlplab_hdd_models/{self.config.model_name}/"
+        prefix = f"hdd:s3://opennlplab_hdd/models/{self.config.pretrained_path}/"
+        print(prefix)
         import io
         import json
         from petrel_client.client import Client
         from accelerate import init_empty_weights
+        from ..utils import load_checkpoint_and_dispatch_from_s3, no_proxy
         
+        # get config
+        config = AutoConfig.from_pretrained(
+            self.config.pretrained_path, trust_remote_code=True)
+        with no_proxy():
+            client = Client()
+            # get model_index
+            model_list = []
+            if client.contains(f"{prefix}pytorch_model.bin.index.json"):
+                buffer = io.BytesIO()
+                buffer.write(client.get(f"{prefix}pytorch_model.bin.index.json"))
+                buffer.seek(0)
+                model_index = json.load(buffer)
+                print(model_index)
+                buffer.close()
+                for weight, filename in model_index["weight_map"].items():
+                    filepath = f"{prefix}{filename}"
+                    if filepath not in model_list:
+                        model_list.append(filepath)
+            else:
+                model_list.append(f"{prefix}pytorch_model.bin")
+            
+        if torch.cuda.device_count() >= 1:
+            with init_empty_weights():
+                self.model = self.model_cls._from_config(
+                    config=config, torch_dtype=self.config.dtype
+                )
+            with no_proxy():
+                load_checkpoint_and_dispatch_from_s3(
+                    self.model, model_list, device_map="auto",
+                    no_split_module_classes=self.no_split_module_classes,
+                    dtype=self.config.dtype
+                )
+        else:
+            self.model = self.model_cls._from_config(
+                config=config, torch_dtype=self.config.dtype
+            )
+            with no_proxy():
+                load_checkpoint_and_dispatch_from_s3(
+                    self.model, model_list, device_map=None,
+                    no_split_module_classes=self.no_split_module_classes,
+                    dtype=self.config.dtype
+                )
     
     def get_query_tensor(self, prompt):
         """
@@ -105,6 +153,7 @@ class TransformersChatBotBase(ChatBotBase):
             query = post["query"]
             gen_kwargs = self.get_generation_setting()
             gen_kwargs.update(post["params"])
+            gen_kwargs.update(self.extra_settings())
             prompt = self.get_query_prompt(query)
             input_dict = self.get_query_tensor(prompt)
             if is_stream:
@@ -117,7 +166,7 @@ class TransformersChatBotBase(ChatBotBase):
                 output = self.generate(input_dict, gen_kwargs)
                 response = self.get_response(output, input_dict)
                 response = self.process_response(response)
-                return response
+                yield response
         except Exception as e:
             response = None
             import traceback
