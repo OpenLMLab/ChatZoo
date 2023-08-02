@@ -1,31 +1,13 @@
-.app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.row {
-  height: 100%;
-}
-
-.content {
-  margin-top: 64px;
-  width: 100%;
+.wrapper {
   height: 100%;
 }
 
 .sider {
-  background: rgba(76, 143, 112, 1);
+  background: #4C8F70;
   height: 100%;
   min-height: 800px;
-  box-shadow: -1px 6px 30px 0px rgba(18, 19, 22, 0.12);
 }
 
-.main {
-  background: linear-gradient(117.2deg, #518673 10.6%, #41464A 90.8%);
-  height: 100%;
-  min-height: 800px;
-}
 .logo{
   color: #FFFFFFD9;
   font-family: ".New York";
@@ -35,3 +17,45 @@
   letter-spacing: 0px;
   text-align: center;
 }
+
+.row {
+  height: 100%;
+}
+
+.main {
+  background: linear-gradient(117.2deg, #518673 10.6%, #41464A 90.8%);
+  height: 100%;
+  min-height: 800px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.mode {
+  margin-right: 5%;
+}
+
+.content {
+  flex: 8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.add {
+  display: flex;
+}
+
+.footer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
