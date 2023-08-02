@@ -6,8 +6,10 @@ import style from "./add.module.less"
 function Add() {
   return (
     <Button type='dashed' className={style.button} ghost>
-        <PlusSquareOutlined className={style.icon} />
-        <span className={style.text}> 添加1个模型</span>
+        <div className={style.box}>
+            <PlusSquareOutlined className={style.icon} />
+            <span className={style.text}> 添加1个模型</span>
+        </div>
     </Button>
   );
 }
