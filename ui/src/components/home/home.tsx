@@ -1,8 +1,9 @@
-import style from "./home.module.less";
 import Mode from "@/components/mode/mode"
 import Add from "@/components/add/add"
 import Bottom from "@/components/bottom/bottom";
 import { Col, Row } from 'antd';
+import style from "./home.module.less";
+import './home.module.less'
 
 function Home () {
     return (
