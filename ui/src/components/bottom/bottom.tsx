@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import { Button, Input, ConfigProvider, Popover } from 'antd';
 import { SendOutlined, PlusOutlined, DownloadOutlined } from '@ant-design/icons';
 import style from './bottom.module.less';
 import NewForm from '@/components/newmodel/newmodel';
+import { mode } from '@/utils/contexts'
 import Annotate from '@/components/annotate/annotate';
 
 const Bottom: React.FC = () => {
@@ -20,7 +21,7 @@ const Bottom: React.FC = () => {
     const handleOpenModal = (newOpen: any) => {
         setModal(newOpen)
     }
-    const mode = localStorage.getItem('mode')
+    const m = useContext(mode);
     return (
             <ConfigProvider
             theme={{
@@ -47,7 +48,7 @@ const Bottom: React.FC = () => {
                     </div>
                 </div>
                 <div className={style.icon}>
-                {mode === 'model' ? (
+                {m === 'model' ? (
                     <>
                         <Button
                             type="text"

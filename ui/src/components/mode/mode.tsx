@@ -1,6 +1,7 @@
 import React, {useContext, useState} from 'react';
 import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
+import { mode } from '@/utils/contexts'
 import style from './mode.module.less';  
 
 const Mode = () => {
@@ -10,7 +11,6 @@ const Mode = () => {
     const onChange = (e: RadioChangeEvent) => {
         console.log(`radio checked:${e.target.value}`);
         setValue(e.target.value)
-        localStorage.setItem('mode', e.target.value)
       };
     const fullOptions = [
         {label: '模型管理', value: 'model'},
@@ -27,15 +27,18 @@ const Mode = () => {
     } else {
         currOption = disOptions
     }
+    console.log('发出',value)
     return (
         <div className={style.radio}>
-            <Radio.Group
-                options = {currOption}
-                onChange = {onChange}
-                value = {value}
-                optionType = 'button'
-                buttonStyle = 'outline'
-            />
+            <mode.Provider value={'model'}>
+                <Radio.Group
+                    options = {currOption}
+                    onChange = {onChange}
+                    value = {value}
+                    optionType = 'button'
+                    buttonStyle = 'outline'
+                />
+            </mode.Provider>
         </div>
     )
 };
