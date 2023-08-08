@@ -1,13 +1,32 @@
 .input {
     width: 90%;
+    height: 60%;
+    display: flex;
     background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
+    :global {
+        .ant-input {
+            color: rgba(255, 255, 255, 0.95);
+            //styleName: 正文/常规text-1-regular;
+            font-family: PingFang SC;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 21px;
+            letter-spacing: 0px;
+            text-align: left;
+        }
+    }
 }
 .icon {
     object-fit: cover; /* 让图标填充整个区域并保持其宽高比 */
-    background: rgba(255, 255, 255, 0.85); 
+    background: transparent;
+    margin-left: 10px;
 }
 .wrapper {
     width: 66%;
+    height: 80%;
     display: flex;
     align-items: center;
 }

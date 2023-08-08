@@ -1,0 +1,44 @@
+.radio {
+    :global {
+        .ant-radio-button-wrapper:first-child {
+            border-inline-start: 0;
+            border-start-start-radius: 0px;
+            border-end-start-radius: 0px;
+          }
+          
+          .ant-radio-button-wrapper:last-child {
+            border-inline-start: 0;
+            border-start-end-radius: 0px;
+            border-end-end-radius: 0px;
+          }
+          
+          .ant-radio-button-wrapper{
+            background-color: transparent;
+            color: rgba(255, 255, 255, 0.25);
+            border: 0;
+            border-inline-start: 0;
+            border-start-start-radius: 0px;
+            border-end-start-radius: 0px;
+          }
+          
+          .ant-radio-button-wrapper:not(:first-child)::before {
+            display: none;
+          }
+          
+          .ant-radio-button-wrapper:hover {
+            color: yellow;
+          }
+          
+          .ant-radio-button-wrapper.ant-radio-button-wrapper-checked {
+            color: white;
+            background-color: rgba(76, 143, 112, 1);
+            border-color: white;
+            font-size: 14px;
+            font-weight: 400;
+          }
+          
+          .ant-radio-button-wrapper.ant-radio-button-wrapper-checked:hover {
+            color: yellow;
+          }
+    }
+}

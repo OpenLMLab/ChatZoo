@@ -1,35 +1,52 @@
-import style from "./App.module.less";
-import Mode from "./components/mode/mode"
-import Add from "./components/add/add"
-import Bottom from "./components/bottom/bottom";
-import { Col, Row } from 'antd';
+import { Button, Form, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import style from './App.module.less';
+import './App.module.less'
 
+function App () {
+    const navigate = useNavigate();
 
-function App() {
-  return (
-    <div className={style.wrapper}>
-      <Row  gutter={24} className={style.row}>
-        <Col span={4} className={style.sider}>
-            <h1 className={style.logo}>ChatZoo</h1>
-        </Col>
-        <Col span={20} className={style.main}>
-          <div className={style.header}>
-            <div className={style.mode}>
-              <Mode></Mode>
-            </div> 
-          </div>
-          <div className={style.content}>
-            <div className={style.add}>
-              <Add></Add>
+    const onFinish = (values: any) => {
+        const level = values['username']
+        // 更换权限设置
+        localStorage.setItem('permission', level)
+        navigate('/home');
+    };
+
+    const onFinishFailed = (errorInfo: any) => {
+        console.log('Failed:', errorInfo);
+    };
+
+    return (
+        <div className={style.container}>
+          <div className={style.form}>
+            <div className={style.title}>
+              登录
+            </div>
+            <div className={style.subform}>
+              <Form
+                    name="basic"
+                    initialValues={{ remember: true }}
+                    onFinish={onFinish}
+                    onFinishFailed={onFinishFailed}
+                    autoComplete="off"
+                    layout='vertical'
+                >
+                    <Form.Item label="用户名" name="username" rules={[{ required: true, message: '用户名不能为空' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item wrapperCol={{ offset: 9, span: 16 }}>
+                      <>
+                        <Button type="primary" htmlType="submit">
+                              提交
+                          </Button>
+                      </>
+                    </Form.Item>
+                </Form>
             </div>
           </div>
-          <div className={style.footer}>
-            <Bottom></Bottom>
-          </div>
-        </Col>
-      </Row>
-    </div>
-  );
-}
+        </div>
+    );
+};
 
 export default App;
