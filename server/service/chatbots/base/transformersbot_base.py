@@ -67,7 +67,6 @@ class TransformersChatBotBase(ChatBotBase):
                 buffer.write(client.get(f"{prefix}pytorch_model.bin.index.json"))
                 buffer.seek(0)
                 model_index = json.load(buffer)
-                print(model_index)
                 buffer.close()
                 for weight, filename in model_index["weight_map"].items():
                     filepath = f"{prefix}{filename}"

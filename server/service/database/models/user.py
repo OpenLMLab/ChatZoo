@@ -1,9 +1,12 @@
-from peewee import Model, CharField, DateTimeField, IntegerField
+from peewee import AutoField, CharField, IntegerField, DateTimeField, Model
 import datetime
 
-class User(Model):
-    user_id = CharField(primary_key=True)
+from .utils import BaseModel
+
+class User(BaseModel):
+    
+    user_id = AutoField(primary_key=True)
     user_name = CharField(unique=True)
-    create_time = DateTimeField(default=datetime.now)
+    create_time = DateTimeField(default=datetime.datetime.now)
     session_mark_num = IntegerField(default=0)
     single_mark_num = IntegerField(default=0)
