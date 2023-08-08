@@ -3,10 +3,21 @@ import Add from "@/components/add/add"
 import Bottom from "@/components/bottom/bottom";
 import { Col, Row } from 'antd';
 import style from "./home.module.less";
-import './home.module.less'
+import './home.module.less';
+import { ModeContext, ModeContextProps } from "@/utils/contexts";
+import { createContext, useState } from 'react';
 
 function Home () {
+
+    const [mode, setMode] = useState<string | null>('dialogue');
+
+    const contextValues: ModeContextProps = {
+      mode,
+      setMode,
+    };
+
     return (
+      <ModeContext.Provider value={contextValues}>
         <div className={style.wrapper}>
           <Row  gutter={24} className={style.row}>
             <Col span={4} className={style.sider}>
@@ -29,6 +40,7 @@ function Home () {
             </Col>
           </Row>
         </div>
+      </ModeContext.Provider>
       );
 }
 

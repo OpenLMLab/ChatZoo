@@ -1,15 +1,18 @@
 import React, {useContext, useState} from 'react';
 import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
-import { mode } from '@/utils/contexts'
+import {ModeContext} from '@/utils/contexts'
 import style from './mode.module.less';  
 
 const Mode = () => {
     // 获取权限
     const permission = localStorage.getItem('permission');
+    const modeContext = useContext(ModeContext);
     const [ value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
         console.log(`radio checked:${e.target.value}`);
+        console.log('现在的上下文', modeContext);
+        modeContext.setMode(e.target.value);
         setValue(e.target.value)
       };
     const fullOptions = [
@@ -27,18 +30,16 @@ const Mode = () => {
     } else {
         currOption = disOptions
     }
-    console.log('发出',value)
+
     return (
         <div className={style.radio}>
-            <mode.Provider value={'model'}>
-                <Radio.Group
-                    options = {currOption}
-                    onChange = {onChange}
-                    value = {value}
-                    optionType = 'button'
-                    buttonStyle = 'outline'
-                />
-            </mode.Provider>
+            <Radio.Group
+                options = {currOption}
+                onChange = {onChange}
+                value = {value}
+                optionType = 'button'
+                buttonStyle = 'outline'
+            />
         </div>
     )
 };

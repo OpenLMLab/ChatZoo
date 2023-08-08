@@ -3,7 +3,7 @@ import { Button, Input, ConfigProvider, Popover } from 'antd';
 import { SendOutlined, PlusOutlined, DownloadOutlined } from '@ant-design/icons';
 import style from './bottom.module.less';
 import NewForm from '@/components/newmodel/newmodel';
-import { mode } from '@/utils/contexts'
+import {ModeContext} from '@/utils/contexts';
 import Annotate from '@/components/annotate/annotate';
 
 const Bottom: React.FC = () => {
@@ -21,7 +21,7 @@ const Bottom: React.FC = () => {
     const handleOpenModal = (newOpen: any) => {
         setModal(newOpen)
     }
-    const m = useContext(mode);
+    const m = useContext(ModeContext)['mode'];
     return (
             <ConfigProvider
             theme={{
