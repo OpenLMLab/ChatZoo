@@ -4,7 +4,7 @@ import styles from './chat.module.less';
 
 import PUYUC from '@puyu/components';
 
-const App: React.FC = () => {
+export default function Chat({models})  {
   const ref = useRef<any>();
   const ref1 = useRef<any>();
 
@@ -46,25 +46,50 @@ const App: React.FC = () => {
 
   return (
     <>
-      <div className={styles.chatContainer}>
-        <PUYUC.ChatBox
-          eventName=''
-          propsSessionList={sessionList}
-          url={'/chat/generate?session_id=1234&user_id=1'}
-          ref={ref}
-        />
-        <PUYUC.ChatBox
-          propsSessionList={sessionList}
-          url={'/chat/generate?session_id=1234&user_id=2'}
-          ref={ref1}
-        /> 
-      </div>
-      <button onClick={startSse}>开始会话</button>
-      <button onClick={stopSse}>停止会话</button>
-      <button onClick={reGenerate}>重试</button>
-      <button onClick={getSseStatus}>获取状态</button>
+      {models.map((model:any, index:number) => (
+        <div key={index} className={styles.chatContainer}>
+          <div className={styles.banner}>
+            {model.nickname}
+          </div>
+          <div className={styles.main}>
+            <PUYUC.ChatBox
+              // eventName=''
+              propsSessionList={sessionList}
+              url={`/chat/generate?session_id=${index}&user_id=1`}
+              ref={ref}
+            />
+          </div>
+        </div>
+      ))}
     </>
+//     <>
+//       <div className={styles.chatContainer}>
+//         {models.map(model, index) => (
+//           <div className={styles.banner}>
+//             模型A
+//           </div>
+//           <div className={styles.main}>
+//             <PUYUC.ChatBox
+//                 // eventName=''
+//                 propsSessionList={sessionList}
+//                 url={'/chat/generate?session_id=1234&user_id=1'}
+//                 ref={ref}
+//               />
+//           </div>
+//         )}
+// {/* 
+//         <PUYUC.ChatBox
+//           propsSessionList={sessionList}
+//           url={'/chat/generate?session_id=1234&user_id=2'}
+//           ref={ref1}
+//         />  */}
+//       </div>
+//       {/* <button onClick={startSse}>开始会话</button>
+//       <button onClick={stopSse}>停止会话</button>
+//       <button onClick={reGenerate}>重试</button>
+//       <button onClick={getSseStatus}>获取状态</button> */}
+//     </>
   );
 };
 
-export default App;
+// export default Chat;

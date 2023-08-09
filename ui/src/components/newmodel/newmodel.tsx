@@ -1,8 +1,9 @@
-import Input from 'rc-input';
+import { Input } from 'antd';
 import type { RadioChangeEvent } from 'antd';
 import { Form, Modal, Radio, Space } from 'antd';
 import React, { useState } from 'react';
-import './newmodel.module.less'
+import './newmodel.module.less';
+import style from './newmodel.module.less';
 
 interface Values {
     name: string;
@@ -47,7 +48,7 @@ const NewForm: React.FC<newFormProps> = ({
             }}
             width={450}
         >
-        <div className='radio'>
+        <div className={style.radio}>
             <Radio.Group onChange={onChange} value={value}>
                 <Radio.Button value="local">本地模型</Radio.Button>
                 <Radio.Button value="foreign">外部网页接入</Radio.Button>
@@ -55,36 +56,41 @@ const NewForm: React.FC<newFormProps> = ({
             </Radio.Group>
         </div>
         {value === 'default' ? (
-            <Form form={form} layout='vertical'>
-            <Form.Item
-                name="option"
-            >
-                <Radio.Group>
-                    <Space direction='vertical'>
-                        <Radio value={'moss'}>MOSS</Radio>
-                        <Radio value={'internlm'}>InternLM</Radio>
-                        <Radio value={'chatglm'}>ChatGLM</Radio>
-                    </Space>
-                </Radio.Group>
-            </Form.Item>
-            </Form>
+            <div className={style.form}>
+                <Form form={form} layout='vertical'>
+                <Form.Item
+                    name="option"
+                    rules={[{required: true, message:'请选择预设模型！'}]}
+                >
+                    <Radio.Group>
+                        <Space direction='vertical'>
+                            <Radio value={'moss'}>MOSS</Radio>
+                            <Radio value={'internlm'}>InternLM</Radio>
+                            <Radio value={'chatglm'}>ChatGLM</Radio>
+                        </Space>
+                    </Radio.Group>
+                </Form.Item>
+                </Form>
+            </div>
         ) : (
-            <Form form={form} layout='vertical'>
-            <Form.Item
-                name="name"
-                label="模型名称"
-                rules={[{required: true, message: '请输入模型名称'}]}
-            >
-                <Input />
-            </Form.Item>
-            <Form.Item
-                name="path"
-                label="模型URL"
-                rules={[{required: true, message: '请输入模型URL'}]}
-            >
-                <Input />
-            </Form.Item>
-            </Form>
+            <div className={style.form}>
+                <Form form={form} layout='vertical'>
+                <Form.Item
+                    name="name"
+                    label="模型名称"
+                    rules={[{required: true, message: '请输入模型名称'}]}
+                >
+                    <Input placeholder='请输入模型名称' bordered={false} />
+                </Form.Item>
+                <Form.Item
+                    name="path"
+                    label="模型URL"
+                    rules={[{required: true, message: '请输入模型URL'}]}
+                >
+                    <Input placeholder='请输入模型URL' bordered={false} />
+                </Form.Item>
+                </Form>
+            </div>
         )}
         </Modal>
     );

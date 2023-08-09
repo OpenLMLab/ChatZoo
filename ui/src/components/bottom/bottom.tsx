@@ -9,12 +9,6 @@ import Annotate from '@/components/annotate/annotate';
 const Bottom: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [modal, setModal] = useState(false);
-    const hide = () => {
-        setOpen(false);
-    };
-    const hideModal = () => {
-        setModal(false);
-    };
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen);
     };

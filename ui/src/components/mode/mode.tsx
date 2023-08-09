@@ -7,11 +7,10 @@ import style from './mode.module.less';
 const Mode = () => {
     // 获取权限
     const permission = localStorage.getItem('permission');
+    console.log('权限', permission)
     const modeContext = useContext(ModeContext);
     const [ value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
-        console.log(`radio checked:${e.target.value}`);
-        console.log('现在的上下文', modeContext);
         modeContext.setMode(e.target.value);
         setValue(e.target.value)
       };

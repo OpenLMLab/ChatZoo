@@ -5,15 +5,15 @@ import axios, {
   AxiosResponse,
   AxiosError,
 } from "axios";
-import Message from "@/lib/message/message";
-import { isInWhiteList } from "./tools";
 
+// 后端返回的数据
 interface MyResponse<T> {
   msg: string;
   code?: number;
   success?: boolean;
   data: T;
 }
+
 interface MyRequest<U> extends AxiosRequestConfig {
   data?: U; // post传参
   params?: U; // get传参
@@ -21,7 +21,7 @@ interface MyRequest<U> extends AxiosRequestConfig {
 
 class Http {
   timeout: number = 7000;
-  baseURL: string = "";
+  baseURL: string = "http://10.140.0.151:8081";
   forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
 
   mergeOptions(options: AxiosRequestConfig) {
@@ -42,11 +42,11 @@ class Http {
         if (res.status === 200) {
           const ifFail = res.data.hasOwnProperty("success")
             ? !res.data.success
-            : res.data.code != 0;
+            : res.data.code != 200;
           if (ifFail) {
-            if (!isInWhiteList(url, this.forbidMsgWhiteList)) {
-              Message.error(res.data?.msg); // 注意中英文，如果要用msg，需要后台返回对应语言的msg
-            }
+            // if (!isInWhiteList(url, this.forbidMsgWhiteList)) {
+            //   error(res.data?.msg); // 注意中英文，如果要用msg，需要后台返回对应语言的msg
+            // }
             return Promise.resolve(res.data);
           }
           return Promise.resolve(res.data);
@@ -54,9 +54,10 @@ class Http {
         return Promise.resolve(res.data);
       },
       (err: AxiosError) => {
-        if (!isInWhiteList(err.request.responseURL, this.forbidMsgWhiteList)) {
-          Message.warning(err?.message || "");
-        }
+        console.log(err)
+        // if (!isInWhiteList(err.request.responseURL, this.forbidMsgWhiteList)) {
+        //   warning(err?.message || "");
+        // }
         return Promise.resolve({
           code: 9999,
           data: null,
@@ -68,7 +69,7 @@ class Http {
   request<U, T>(options: MyRequest<U>): Promise<MyResponse<T>> {
     const opts = this.mergeOptions(options);
     const axiosInstance: AxiosInstance = axios.create();
-    this.setInterceptor(axiosInstance);
+    // this.setInterceptor(axiosInstance);
     return axiosInstance(opts);
   }
 
