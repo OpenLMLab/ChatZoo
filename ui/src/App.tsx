@@ -1,16 +1,51 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import style from './App.module.less';
-import './App.module.less'
+import './App.module.less';
+import qs from 'qs';
+import http from "@/utils/axios";
+import { useState } from 'react';
 
 function App () {
-    const navigate = useNavigate();
+    const [messageApi, contextHolder] = message.useMessage();
+    // 加载
+    const [loadings, setLoadings] = useState<boolean[]>([]);
+    const enterLoading = (index: number) => {
+      setLoadings((prevLoadings) => {
+        const newLoadings = [...prevLoadings];
+        newLoadings[index] = true;
+        return newLoadings;
+      });
+  
+      setTimeout(() => {
+        setLoadings((prevLoadings) => {
+          const newLoadings = [...prevLoadings];
+          newLoadings[index] = false;
+          return newLoadings;
+        });
+      }, 7000);
+    };
 
+    const error = (msg: string) => {
+      messageApi.open({
+        type: 'error',
+        content: msg,
+      });
+    };
+    const navigate = useNavigate();
     const onFinish = (values: any) => {
-        const level = values['username']
-        // 更换权限设置
-        localStorage.setItem('permission', level)
-        navigate('/home');
+        const name = values['username']
+        const data = {
+          username: name
+        };
+        // 登录
+        http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
+          localStorage.setItem('permission', res.data.data.permission);
+          localStorage.setItem('username', res.data.data.username);
+          navigate('/home');
+        }).catch(() => {
+          error("登录失败！")
+        });
     };
 
     const onFinishFailed = (errorInfo: any) => {
@@ -18,6 +53,8 @@ function App () {
     };
 
     return (
+      <>
+        {contextHolder}
         <div className={style.container}>
           <div className={style.form}>
             <div className={style.title}>
@@ -37,7 +74,7 @@ function App () {
                     </Form.Item>
                     <Form.Item wrapperCol={{ offset: 9, span: 16 }}>
                       <>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" loading={loadings[0]} onClick={() => enterLoading(0)} >
                               提交
                           </Button>
                       </>
@@ -46,6 +83,7 @@ function App () {
             </div>
           </div>
         </div>
+      </>
     );
 };
 

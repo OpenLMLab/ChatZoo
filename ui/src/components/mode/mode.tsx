@@ -1,18 +1,17 @@
-import React, {useContext, useState} from 'react';
+import { ModeContext } from '@/utils/contexts';
 import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
-import {ModeContext} from '@/utils/contexts'
-import style from './mode.module.less';  
+import { useContext, useState } from 'react';
+import style from './mode.module.less';
 
 const Mode = () => {
     // 获取权限
     const permission = localStorage.getItem('permission');
+    console.log('权限', permission)
     const modeContext = useContext(ModeContext);
     const [ value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
-        console.log(`radio checked:${e.target.value}`);
-        console.log('现在的上下文', modeContext);
-        modeContext.setMode(e.target.value);
+        modeContext!.setMode(e.target.value);
         setValue(e.target.value)
       };
     const fullOptions = [

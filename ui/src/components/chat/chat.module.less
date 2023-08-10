@@ -1,0 +1,72 @@
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    // height: 100%;
+    // min-width: 796px;
+    max-width: 796px;
+    gap: 20px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0px 8px 26px 0px rgba(0, 0, 0, 0.12);
+    // color: #FFFFFF0F;
+}
+
+.banner {
+    display: flex;
+    // width: 796px;
+    padding: 4px 24px;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px 4px 0px 0px;
+    background: var(--main, #4C8F70);
+
+    .typo {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        flex: 1 0 0;
+        overflow: hidden;
+        color: var(--95-text-dark-5, rgba(255, 255, 255, 0.95));
+        font-feature-settings: 'clig' off, 'liga' off;
+        text-overflow: ellipsis;
+        font-family: PingFang SC;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 24px;
+    }
+
+    .func {
+        display: flex;
+        // height: 40px;
+        padding: 10px 0px 10px 6px;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        div {
+            width: 24px;
+            height: 24px;
+        }
+    }
+}
+
+.main {
+    display: flex;
+    // width: 796px;
+    width: 100%;
+    // height: 564px;
+    padding-top: 12px;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    
+    color: #FFF;
+    text-align: justify;
+    font-feature-settings: 'clig' off, 'liga' off;
+    font-family: PingFang SC;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px;
+}

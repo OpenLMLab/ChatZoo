@@ -53,10 +53,12 @@ export default defineConfig({
   server: {
     port: 8080,
     proxy: {
-      "/api/v1": {
-        target: "http://staging.opengvlab.shlab.org.cn",
+      "/chat": {
+        target: "http://10.140.0.151:8081", //jiawei
         changeOrigin: true,
       },
+
+     
     },
   },
 });
