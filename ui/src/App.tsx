@@ -40,7 +40,7 @@ function App () {
         };
         // 登录
         http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
-          localStorage.setItem('permission', res.data.data.permission);
+          localStorage.setItem('permission', res.data.data.role);
           localStorage.setItem('username', res.data.data.username);
           navigate('/home');
         }).catch(() => {
