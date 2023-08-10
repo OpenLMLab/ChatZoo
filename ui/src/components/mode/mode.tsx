@@ -1,8 +1,8 @@
-import React, {useContext, useState} from 'react';
+import { ModeContext } from '@/utils/contexts';
 import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
-import {ModeContext} from '@/utils/contexts'
-import style from './mode.module.less';  
+import { useContext, useState } from 'react';
+import style from './mode.module.less';
 
 const Mode = () => {
     // 获取权限
@@ -11,7 +11,7 @@ const Mode = () => {
     const modeContext = useContext(ModeContext);
     const [ value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
-        modeContext.setMode(e.target.value);
+        modeContext!.setMode(e.target.value);
         setValue(e.target.value)
       };
     const fullOptions = [

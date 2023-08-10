@@ -1,12 +1,12 @@
-import Mode from "@/components/mode/mode"
-import Add from "@/components/add/add"
+import Add from "@/components/add/add";
 import Bottom from "@/components/bottom/bottom";
-import { Col, Row, message } from 'antd';
-import style from "./home.module.less";
-import './home.module.less';
-import { ModeContext, ModeContextProps } from "@/utils/contexts";
-import { useState } from 'react';
 import Chat from "@/components/chat/chat";
+import Mode from "@/components/mode/mode";
+import { ModeContext, ModeContextProps } from "@/utils/contexts";
+import { Col, Row } from 'antd';
+import { useState } from 'react';
+import './home.module.less';
+import style from "./home.module.less";
 
 function Home () {
     const [mode, setMode] = useState<string | null>('dialogue');
