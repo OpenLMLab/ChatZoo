@@ -8,7 +8,7 @@ import { IdContext, IdContextProps } from "@/utils/idcontexts";
 import { FreezeContext, FreezeContextProps } from "@/utils/freezecontext";
 import Manager from "@/components/manager/manager";
 import { Col, Row } from 'antd';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import './home.module.less';
 import style from "./home.module.less";
 import ModelConfig from "@/components/model/model";
@@ -53,19 +53,22 @@ function Home () {
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
         }
-      ),
+      )
+      // ),
+      // new ModelConfig(
+      //   "fnlp/moss-moon-003-sft",
+      //   "moss_01",
+      //   "fnlp/moss-moon-003-sft",
+      //   { max_length: 2048 },
+      //   0,
+      //   8081,
+      //   {
+      //     meta_prompt: "",
+      //     user_prompt: "Human: {}\n",
+      //     bot_prompt: "\nAssistant: {}\n",
+      //   }
+      // ),
     ];
-
-    interface CustomModelConfig extends ModelConfig {
-      sessionId: string | null
-    }
-    
-    const modelsWithSessionId: CustomModelConfig[] = models.map((model) => {
-      return {
-        ...model,
-        sessionId: id, // 提供实际的会话ID
-      };
-    });
 
     interface BottomProps {
       names: string[];
@@ -76,6 +79,8 @@ function Home () {
       names: models.map((model) => model.nickname),
       sessionId: 'default'
     }
+
+    const sessionId = useContext(IdContext)?.id;
 
     return (
       <FreezeContext.Provider value={freezeValues}>
@@ -96,7 +101,7 @@ function Home () {
                     <QuestionContext.Provider value={questionValues}>
                       <div className={style.content}>
                         <div className={style.add}>
-                        {models.length === 0 ? <Add></Add> : <Chat models={modelsWithSessionId} />}
+                        {models.length === 0 ? <Add></Add> : <Chat models={models} sessionId={sessionId} />}
                         </div>
                       </div>
                       <div className={style.footer}>

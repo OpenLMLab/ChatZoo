@@ -1,5 +1,4 @@
 import { useRef, useContext } from 'react';
-
 import styles from './chat.module.less';
 import PUYUC from '@puyu/components';
 import { FreezeContext } from '@/utils/freezecontext';
@@ -9,12 +8,10 @@ import { IdContext } from '@/utils/idcontexts';
 /**
  * 除去Model原有的属性外需要SessionID
  */
-interface CustomModelConfig extends ModelConfig {
-  sessionId: string | null
-}
 
 interface ChatListProps {
-  models: CustomModelConfig[];
+  models: ModelConfig[];
+  sessionId: string | null | undefined;
   // question: string | null | undefined;
 }
 
@@ -36,8 +33,8 @@ interface sseMesage {
   question: string; // 对话问题A
 }
 
-const Chat: React.FC<ChatListProps> = ({models}) => {
-  const sessionId = useContext(IdContext)?.id;
+const Chat: React.FC<ChatListProps> = ({models, sessionId}) => {
+  console.log('进入', sessionId)
   // const [messageApi, contextHolder] = message.useMessage();
   // const freeze = useContext(FreezeContext);
   const cachedSessionList = localStorage.getItem('sessionList' + sessionId);
@@ -109,13 +106,17 @@ const Chat: React.FC<ChatListProps> = ({models}) => {
   // // };
 
   const startSse = () => {
-    refs.map((ref: any) => ref.current.startSse('hello'));
+    // refs.map((ref: any) => ref.current.startSse('hello'));
+    refs[0].current.startSse('hello')
+    console.log('当前的', refs)
   };
 
   const stopSse = () => {
     refs.map((ref: any, index:number) => sessionList[index] = ref.current.getSessionList());
+    console.log(sessionList)
     localStorage.setItem('sessionList' + sessionId, JSON.stringify(sessionList))
     console.log('更新缓存')
+    console.log('更新后', localStorage.getItem('sessionList' + sessionId))
   }
 
   // useEffect(() => {
@@ -140,8 +141,6 @@ const Chat: React.FC<ChatListProps> = ({models}) => {
               {model.nickname}
             </div>
             <div className={styles.func}>
-              {/* 图标应该怎么引入？应该不是直接复制 svg 吧？
-              有一些图标 antd icons 里没有，所以这里先写 svg */}
               <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M9.43701 7.95312C9.9893 7.95312 10.437 8.40084 10.437 8.95312V15.0786C10.437 15.6308 9.9893 16.0786 9.43701 16.0786C8.88473 16.0786 8.43701 15.6308 8.43701 15.0786V8.95312C8.43701 8.40084 8.88473 7.95312 9.43701 7.95312Z" fill="white" fill-opacity="0.85" />
@@ -158,17 +157,19 @@ const Chat: React.FC<ChatListProps> = ({models}) => {
             </div>
           </div>
           <div className={styles.main}>
-            {/* 组件库内组件的内部样式如何修改？是否有文档？ */}
             <PUYUC.ChatBox
               // eventName=''
               // className={styles.chatBox}
-              propsSessionList={sessionList[0]}
-              url={`/chat/generate?session_id=${index}&user_id=1`}
+              propsSessionList={sessionList[index]}
+              url={"http://10.140.0.151:8081/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
               ref={refs[0]}
             />
+            <div>{index}</div>
           </div>
         </div>
       ))}
+      <button onClick={startSse}>开始会话</button>
+      <button onClick={stopSse}>停止会话</button>
     </>
     //     <>
     //       <div className={styles.chatContainer}>

@@ -101,6 +101,7 @@ function Manager() {
     const selectChat = (id:string) => {
         setCurChatId(id)
         idContext?.setId(id)
+        console.log('选中', id)
     }
 
     return (
