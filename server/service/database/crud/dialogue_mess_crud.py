@@ -1,35 +1,36 @@
 import traceback
+from playhouse.shortcuts import model_to_dict
 
-from ..models.dialogue_mess import Dialogue_Mess
+from ..models.dialogue import Dialogue
 
 
-def create_dialogue_mess(user_id: int, gen_id: int, message: dict, session_id: str):
+def create_dialogue_mess(username: str, generate_config_id: int, bot_response: str, user_query: str, turn_id: str):
     try:
-        Dialogue_Mess.create(user_id=user_id, gen_id=gen_id, message=message, session_id=session_id)
-        return True
-    except:
-        traceback.print_exc()
-        return False
-
-def delete_dialogue_mess_by_id(mess_id):
-    try:
-        Dialogue_Mess.delete().where(Dialogue_Mess.mess_id == mess_id)
-        return True
-    except:
-        traceback.print_exc()
-        return False
-
-def update_dialogue_mess(mess_id: int, user_id: int, gen_id: int, message: dict, session_id: str):
-    try:
-        Dialogue_Mess.update(mess_id=mess_id, user_id=user_id, gen_id=gen_id, message=message, session_id=session_id)
-        return True
-    except:
-        traceback.print_exc()
-        return False
-
-def read_dialogue_mess():
-    try:
-        return Dialogue_Mess.select()
+        return Dialogue.create(username=username, generate_config_id=generate_config_id, bot_response=bot_response, user_query=user_query, turn_id=turn_id)
     except:
         traceback.print_exc()
         return None
+
+def update_user_query_in_dialogue(dialogue_id: int, bot_response: str):
+    try:
+        return True, Dialogue.update(bot_response=bot_response).where(Dialogue.dialogue_id==dialogue_id).execute()
+    except:
+        traceback.print_exc()
+        return False, None
+
+def read_dialogue_mess():
+    try:
+        return Dialogue.select()
+    except:
+        traceback.print_exc()
+        return None
+
+def query_dialogue_by_turnid_username(turn_id, username, generate_config_id):
+    try:
+        items = Dialogue.select().where((Dialogue.turn_id == turn_id) &
+                                                    (Dialogue.username == username) & (Dialogue.generate_config_id == generate_config_id)).order_by(Dialogue.created_time)
+        query_result = [model_to_dict(item) for item in items]
+        return query_result, True
+    except:
+        traceback.print_exc()
+        return None, False

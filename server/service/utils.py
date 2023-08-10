@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import torch
 from peewee import SqliteDatabase, MySQLDatabase
 
-from service.database.models import User, DebugMessage, Dialogue_Mess, Generate_Config, Vote 
+from service.database.models import User, DebugMessage, Dialogue, Generate_Config, Vote 
 
 
 class Singleton(type):
@@ -74,6 +74,7 @@ class ModelConfig:
     from_s3: bool = False
     # for lora-finetuned model such as baize
     base_model: str = None
+    prompts: dict = None
     
     def __post_init__(self):
         if self.tokenizer_path is None:
@@ -82,11 +83,14 @@ class ModelConfig:
             try:
                 self.type = MODEL_NAME_TO_MODEL_DICT[self.pretrained_path]
             except KeyError as e:
-                raise ValueError(
-                    f"Unknown pretrained model {self.pretrained_path}. Please "
-                    "check `pretrained_path` in your config or set `type` as "
-                    f"one of: {set(MODEL_NAME_TO_MODEL_DICT.values())}"
-                )
+                if self.prompts is None:
+                    raise ValueError(f"pretrained model {self.pretrained_path} is not a chatbot, "
+                                     "you must init prompts so that we could init a new chatbot.")
+                    raise ValueError(
+                        f"Unknown pretrained model {self.pretrained_path}. Please "
+                        "check `pretrained_path` in your config as "
+                        f"one of: {set(MODEL_NAME_TO_MODEL_DICT.values())}"
+                    )
         self.dtype = DTYPE_DICT[self.dtype]
         if torch.cuda.device_count() < 1:
             # no gpu
@@ -118,14 +122,16 @@ def parse_json(json_str):
         raise ValueError("Can not parse to json dict")
 
 
-def pack_model_info(model_config, nickname, model_name_or_path):
+def pack_model_info(generate_config_id, model_config, nickname, model_name_or_path, prompts, is_stream):
     from collections import OrderedDict
     gen_config = OrderedDict(sorted(model_config.items()))
     model_info = {
-        "gen_config": gen_config,
+        "generate_kwargs": gen_config,
         "nickname": nickname,
         "model_name_or_path": model_name_or_path,
-        "gen_id": None
+        "generate_config_id": generate_config_id,
+        "prompts": prompts,
+        "stream": is_stream
     }
     return model_info
 
@@ -140,10 +146,10 @@ def initial_database(database_path, db_type):
     
     User._meta.database = db
     DebugMessage._meta.database = db
-    Dialogue_Mess._meta.database = db
+    Dialogue._meta.database = db
     Generate_Config._meta.database = db
     Vote._meta.database = db
     db.connect()
-    db.create_tables([User, DebugMessage, Dialogue_Mess, Generate_Config, Vote])
+    db.create_tables([User, DebugMessage, Dialogue, Generate_Config, Vote])
     return db
 

@@ -1,15 +1,17 @@
 import traceback
 
+from playhouse.shortcuts import model_to_dict
+
 from ..models.vote import Vote
 
 
-def create_vote(user_id: int, model_candidate: dict, vote_result: str, is_session_mark: bool):
+def create_vote(username: str, vote_model: dict, vote_result: str, dialogue_id, turn_id):
     try:
-        Vote.create(user_id=user_id, model_candidate=model_candidate, vote_result=vote_result, is_session_mark=is_session_mark)
-        return True
+        item =  Vote.create(username=username, vote_model=vote_model, vote_result=vote_result, dialogue_id=dialogue_id, turn_id=turn_id)
+        return model_to_dict(item)
     except:
         traceback.print_exc()
-        return False
+        return None
 
 def delete_vote_by_vote_id(vote_id: int):
     try:
@@ -19,10 +21,10 @@ def delete_vote_by_vote_id(vote_id: int):
         traceback.print_exc()
         return False
 
-def update_vote(vote_id: int, user_id: int, model_candidate: dict, vote_result: str, is_session_mark: bool):
+def update_vote(vote_id: int, username: int, vote_model: dict, vote_result: str, dialogue_id: bool):
     try:
-        Vote.update(user_id=user_id, model_candidate=model_candidate, vote_result=vote_result,
-                    is_session_mark=is_session_mark).where(Vote.vote_id == vote_id)
+        Vote.update(username=username, vote_model=vote_model, vote_result=vote_result,
+                    dialogue_id=dialogue_id).where(Vote.vote_id == vote_id)
         return True
     except:
         traceback.print_exc()

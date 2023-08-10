@@ -1,19 +1,21 @@
 import traceback
 
+from peewee import chunked
+
 from ..models.user import User
 
 
-def create_user(user_name: str, session_mark_num: int=0, single_mark_num: int=0):
+def create_user(username: str, session_mark_num: int=0, single_mark_num: int=0, permission:str="root"):
     try:
-        User.create(user_name=user_name, session_mark_num=session_mark_num, single_mark_num=single_mark_num)
+        User.create(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, permission=permission)
         return True
     except:
         traceback.print_exc()
         return False
 
-def delete_user_by_username(user_name: str):
+def delete_user_by_username(username: str):
     try:
-        User.delete(User.user_name == user_name)
+        User.delete(User.username == username)
         return True
     except:
         traceback.print_exc()
@@ -27,17 +29,17 @@ def delete_user_by_userid(user_id: int):
         traceback.print_exc()
         return False
 
-def update_user(user_name: str, session_mark_num: int=0, single_mark_num: int=0):
+def update_user(username: str, session_mark_num: int=0, single_mark_num: int=0, permission: str = "root"):
     try:
-        User.update(user_name=user_name, session_mark_num=session_mark_num, single_mark_num=single_mark_num)
+        User.update(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, permission=permission)
         return True
     except:
         traceback.print_exc()
         return False
 
-def read_user_by_username(user_name: str):
+def read_user_by_username(username: str):
     try:
-        return User.select().where(User.user_name == user_name)
+        return User.select().where(User.username == username)
     except:
         traceback.print_exc()
         return None
@@ -50,8 +52,21 @@ def read_all_users():
         return None
 
 def adjust_username_in_user(username: str):
+    # 判断username是否存在
     try:
-        User.select().where(User.user_name == username).get()
+        query = User.select().where(User.username == username).get()
+        return True, query
+    except:
+        return False, None
+
+
+def insert_many_users(batch_data, chunk_num):
+    try:
+        for data_chunk in chunked(batch_data, chunk_num):
+            User.insert_many(data_chunk).execute()
         return True
     except:
-        return False 
+        traceback.print_exc()
+        return False
+    
+

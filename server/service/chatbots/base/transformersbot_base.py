@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoConfig
+from transformers import AutoTokenizer, AutoConfig, AutoModel, AutoModelForCausalLM
 from transformers.models.auto.modeling_auto import _BaseAutoModelClass
 from transformers.generation.streamers import TextIteratorStreamer
 from threading import Thread
@@ -17,20 +17,14 @@ class TransformersChatBotBase(ChatBotBase):
     
     @property
     def model_cls(self):
+        return AutoModelForCausalLM
         raise NotImplementedError(
             "Every model should set its own model class."
         )
     
     def get_generation_setting(self):
-        return {
-            "max_length": 2048, "num_beams": 1, "do_sample": True,
-            "top_p": 0.9, "top_k": 1, "temperature": 0.95,
-            "repetition_penalty": 1.02
-        }
-    
-    def extra_settings(self):
-        return {}
-    
+        return self.generation_setting
+
     def load_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.config.tokenizer_path, trust_remote_code=True)
@@ -114,6 +108,20 @@ class TransformersChatBotBase(ChatBotBase):
 
         return input_dict
     
+    def get_query_prompt(self, query):
+        meta_prompt = self.prompts['meta_prompt']
+        bot_prompt = self.prompts['bot_prompt']
+        user_prompt = self.prompts['user_prompt']
+        query_prompt = meta_prompt
+        for q in query:
+            if q['role'] == 'BOT':
+                query_prompt = query_prompt + bot_prompt.format(q['content'])
+            
+            if q['role'] == 'HUMAN':
+                query_prompt = query_prompt + user_prompt.format(q['content'])
+        query_prompt += bot_prompt.split("{}")[0]
+        return query_prompt
+    
     def generate(self, input_dict, gen_kwargs):
         return self.model.generate(**input_dict, **gen_kwargs)
     
@@ -145,6 +153,7 @@ class TransformersChatBotBase(ChatBotBase):
         print("Start generating...")
         try:
             is_stream = False
+            cur_length = 0
             if "prompt" in post:
                 self.set_input_prompt(post.pop("prompt"))
             if "is_stream" in post:
@@ -152,20 +161,29 @@ class TransformersChatBotBase(ChatBotBase):
             query = post["query"]
             gen_kwargs = self.get_generation_setting()
             gen_kwargs.update(post["params"])
-            gen_kwargs.update(self.extra_settings())
             prompt = self.get_query_prompt(query)
             input_dict = self.get_query_tensor(prompt)
+            cur_length = input_dict["input_ids"].shape[1]
             if is_stream:
                 response = ''
-                for output in self.stream_generate(input_dict, gen_kwargs):
+                streamer = self.stream_generate(input_dict, gen_kwargs)
+                for output in streamer:
                     response += output
+                    cur_length += 1
+                    print(cur_length)
                     response = self.process_response(response)
-                    yield response
+                    if cur_length >= self.get_generation_setting()["max_length"]:
+                        yield response, True
+                    else:
+                        yield response, False
             else:
                 output = self.generate(input_dict, gen_kwargs)
                 response = self.get_response(output, input_dict)
                 response = self.process_response(response)
-                yield response
+                if output.shape[1] >= self.get_generation_setting()["max_length"]:
+                    yield response, True
+                else:
+                    yield response, False
         except Exception as e:
             response = None
             import traceback
