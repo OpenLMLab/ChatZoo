@@ -1,48 +1,150 @@
-import { useRef } from 'react';
-
+import { useRef, useContext } from 'react';
 import styles from './chat.module.less';
-
 import PUYUC from '@puyu/components';
+import { FreezeContext } from '@/utils/freezecontext';
+import ModelConfig from "@/components/model/model";
+import { IdContext } from '@/utils/idcontexts';
 
-export default function Chat({ models }) {
-  const ref = useRef<any>();
-  const ref1 = useRef<any>();
+/**
+ * 除去Model原有的属性外需要SessionID
+ */
 
-  const sessionList = [
-    {
-      id: 140385,
-      status: 0,
-      message: '你好！我是chatzoo，很高兴能够帮助你。你有什么需要帮助的事情吗？',
-      question: 'ni hao ',
-    },
-    {
-      id: 140386,
-      status: 0,
-      message: '你好！我是chatzoo1，很高兴能够帮助你。你有什么需要帮助的事情吗？',
-      question: 'ni hao ',
-    },
-  ];
+interface ChatListProps {
+  models: ModelConfig[];
+  sessionId: string | null | undefined;
+  // question: string | null | undefined;
+}
+
+enum allStatus {
+  loading = 3, // 发起请求5s 内，无消息
+  pending = 4, // 发起请求5s 后，无消息 
+  active = 1, // 接收到event stream，流式输出中
+  error = -1, // 接收出错
+  finished = 0, //接收完成
+  toolong = -20003, // 会话超长
+  modelClose = -20008, // 模型关闭
+  backendTimeout = -20015, // 会话中，后端超时
+}
+
+interface sseMesage {
+  id: number; // 聊天id
+  status: allStatus; // 对话状态  0：对话停止状态 2:对话进行中
+  message: string; // 对话回复信息
+  question: string; // 对话问题A
+}
+
+const Chat: React.FC<ChatListProps> = ({models, sessionId}) => {
+  console.log('进入', sessionId)
+  const idContext = useContext(IdContext);
+  console.log("idcontext_chat", idContext?.id)
+  // const [messageApi, contextHolder] = message.useMessage();
+  // const freeze = useContext(FreezeContext);
+  const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
+  let sessionList = [[]];
+  if(cachedSessionList != null) {
+    sessionList = [JSON.parse(cachedSessionList)]
+    console.log('读取缓存1111111111111', sessionList)
+  }
+  // if(cachedSessionList != null) {
+  //   const cacheList = cachedSessionList;
+    // 如果当前是一个新的会话
+    // 则创建模型个数的数组 这里暂定为2次
+    // if(cacheList.length === 0) {
+    //   for(let i=0; i<2; i++) {
+    //     cacheList.push([]);
+    //   }
+    //   localStorage.setItem('sessionList'+sessionId, cacheList)
+    // }
+    // setSessionList(cacheList);
+  // } else {
+  //   for(let i=0; i<2; i++) {
+  //     sessionList.push([]);
+  //   }
+  //   localStorage.setItem('sessionList'+'1', JSON.stringify(sessionList))
+  //   console.log('会话', sessionList)
+  // }
+  // console.log(sessionList)
+  // if(cachedSessionList != null) {
+  //   const cureList =  JSON.parse(cachedSessionList);
+  //   if(cureList.length() == 0) {
+  //     const tmpList = new Array;
+  //     for(let i=0; i<2; i++) {
+  //       tmpList.push([]);
+  //     }
+  //     setSessionList(tmpList);
+  //   }
+  //   console.log('最终', sessionList)
+  //   // setSessionList(JSON.parse(cachedSessionList));
+  // } else {
+  //   for(let i=0; i<2; i++) {
+  //     sessionList.push([]);
+  //   }
+  // }
+  // for(let i=0; i<2; i++) {
+  //     sessionList.push([]);
+  //   }
+  // console.log("会话", sessionList)
+  /**
+   * 根据sessionId自行获取sessionList
+   * 如果sessionList为空，则可以自由切换，否则锁定选项。
+   */
+  // if(sessionList.length == 0) {
+  //   /**锁定单选框*/
+  //   freeze?.setFreeze('yes');
+  // } else {
+  //   freeze?.setFreeze('no');
+  // }
+  const refs = new Array;
+  for(let i=0; i<2; i++) {
+    refs.push(useRef<any>())
+  }
+
+  console.log('refs', refs)
+  // // const error = () => {
+  // //   messageApi.open({
+  // //     type: 'error',
+  // //     content: '不能发送空消息！',
+  // //   });
+  // // };
 
   const startSse = () => {
-    ref.current.startSse('你好');
-    ref1.current.startSse('你好1');
-
+    // refs.map((ref: any) => ref.current.startSse('hello'));
+    refs[0].current.startSse('hello')
+    console.log('当前的', refs)
   };
 
   const stopSse = () => {
-    ref.current.stopSse();
-    ref1.current.stopSse();
+    const item = refs[0].current.getSessionList()
+    const new_session_list = item.slice(0, -1)
+    const last_chat_json = item.slice(-1)[0]
+    console.log(last_chat_json)
+    new_session_list.push({
+      "id": last_chat_json["id"],
+      "status": last_chat_json["status"],
+      "message": last_chat_json["message"],
+      "question": last_chat_json["question"],
+    })
+    console.log("aaaa",new_session_list)
+    console.log("items_chat", item)
+    // refs.map((ref: any, index:number) => sessionList[index] = refs[0].current.getSessionList());
+    console.log(sessionList)
+    localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
+    console.log('更新缓存')
+    console.log('更新后', localStorage.getItem('sessionList' +  idContext?.id))
   }
 
-  const reGenerate = () => {
-    ref.current.reGenerate();
-    ref1.current.reGenerate();
-  };
+  // useEffect(() => {
+  //   // 从缓存中读取sessionList
+  //   const cachedSessionList = localStorage.getItem('sessionList'+sessionId);
+  //   if (cachedSessionList) {
+  //     setSessionList(JSON.parse(cachedSessionList));
+  //   }
+  // }, [sessionId]);
 
-  const getSseStatus = () => {
-    console.log(ref.current.getStatus());
-    console.log(ref1.current.getStatus());
-  };
+  // useEffect(() => {
+  //   localStorage.setItem('sessionList'+sessionId, JSON.stringify(sessionList));
+  // }, [sessionList]);
+
 
   return (
     <>
@@ -53,8 +155,6 @@ export default function Chat({ models }) {
               {model.nickname}
             </div>
             <div className={styles.func}>
-              {/* 图标应该怎么引入？应该不是直接复制 svg 吧？
-              有一些图标 antd icons 里没有，所以这里先写 svg */}
               <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M9.43701 7.95312C9.9893 7.95312 10.437 8.40084 10.437 8.95312V15.0786C10.437 15.6308 9.9893 16.0786 9.43701 16.0786C8.88473 16.0786 8.43701 15.6308 8.43701 15.0786V8.95312C8.43701 8.40084 8.88473 7.95312 9.43701 7.95312Z" fill="white" fill-opacity="0.85" />
@@ -71,17 +171,19 @@ export default function Chat({ models }) {
             </div>
           </div>
           <div className={styles.main}>
-            {/* 组件库内组件的内部样式如何修改？是否有文档？ */}
             <PUYUC.ChatBox
               // eventName=''
-              className={styles.chatBox}
-              propsSessionList={sessionList}
-              url={`/chat/generate?session_id=${index}&user_id=1`}
-              ref={ref}
+              // className={styles.chatBox}
+              propsSessionList={sessionList[index]}
+              url={"http://10.140.0.151:8081/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
+              ref={refs[0]}
             />
+            <div>{index}</div>
           </div>
         </div>
       ))}
+      <button onClick={startSse}>开始会话</button>
+      <button onClick={stopSse}>停止会话</button>
     </>
     //     <>
     //       <div className={styles.chatContainer}>
@@ -113,4 +215,4 @@ export default function Chat({ models }) {
   );
 };
 
-// export default Chat;
+export default Chat;

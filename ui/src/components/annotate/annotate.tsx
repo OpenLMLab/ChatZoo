@@ -2,7 +2,12 @@ import React, {useState} from "react";
 import {Button, Modal, Checkbox, message } from 'antd';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 
-const Annotate: React.FC = () => {
+/*参数与bottom一致*/
+interface BottomProps {
+    names: string[];
+    sessionId: string;
+}
+const Annotate: React.FC<BottomProps> = ({names, sessionId}) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [isModalOpen, setIsModalOpen] = useState(false);
     // 是否选中都不选
@@ -34,12 +39,11 @@ const Annotate: React.FC = () => {
             setIsNull(false);
         }
     }
-    const options = [
-        {label: '模型A', value: 'a'}
-    ]
-    const optionsWithDisabled = [
-        {label: '模型A', value: 'a'}
-    ]
+    const options = names.map((model:any, index:number) => ({
+        label: model,
+        value: index,
+    }));
+    const optionsWithDisabled = options;
     const allDis = () => {
         setIsDis(!isDis);
         console.log('都不选')
