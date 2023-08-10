@@ -1,8 +1,8 @@
-import React, {useContext, useState} from 'react';
+import { ModeContext } from '@/utils/contexts';
 import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
-import {ModeContext} from '@/utils/contexts'
-import style from './mode.module.less';  
+import { useContext, useState } from 'react';
+import style from './mode.module.less';
 import { FreezeContext } from '@/utils/freezecontext';
 
 const Mode = () => {

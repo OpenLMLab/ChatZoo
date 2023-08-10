@@ -1,11 +1,11 @@
-import React, {useContext, useEffect, useState} from 'react'
-import { Button, Input, ConfigProvider, Popover } from 'antd';
-import { SendOutlined, PlusOutlined, DownloadOutlined } from '@ant-design/icons';
-import style from './bottom.module.less';
-import NewForm from '@/components/newmodel/newmodel';
-import {ModeContext} from '@/utils/contexts';
 import Annotate from '@/components/annotate/annotate';
+import NewForm from '@/components/newmodel/newmodel';
+import { ModeContext } from '@/utils/contexts';
+import { DownloadOutlined, PlusOutlined, SendOutlined } from '@ant-design/icons';
+import { Button, ConfigProvider, Input, Popover } from 'antd';
+import React, { useContext, useState } from 'react';
 import { QuestionContext } from '@/utils/question';
+import style from './bottom.module.less';
 
 /**
  * 需要传入的参数为：所有模型的名称以及SessionId。

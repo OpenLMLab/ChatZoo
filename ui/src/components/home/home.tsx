@@ -1,17 +1,17 @@
-import Mode from "@/components/mode/mode"
-import Add from "@/components/add/add"
+import Add from "@/components/add/add";
 import Bottom from "@/components/bottom/bottom";
-import { Col, Row } from 'antd';
-import style from "./home.module.less";
-import './home.module.less';
-import { ModeContext, ModeContextProps } from "@/utils/contexts";
-import { IdContext, IdContextProps } from "@/utils/idcontexts";
-import { useState } from 'react';
 import Chat from "@/components/chat/chat";
-import ModelConfig from '@/components/model/model';
-import Manager from "@/components/manager/manager";
-import { QuestionContext,QuestionContextProps } from "@/utils/question";
+import Mode from "@/components/mode/mode";
+import { ModeContext, ModeContextProps } from "@/utils/contexts";
+import { QuestionContext, QuestionContextProps } from "@/utils/question";
+import { IdContext, IdContextProps } from "@/utils/idcontexts";
 import { FreezeContext, FreezeContextProps } from "@/utils/freezecontext";
+import Manager from "@/components/manager/manager";
+import { Col, Row } from 'antd';
+import { useState } from 'react';
+import './home.module.less';
+import style from "./home.module.less";
+import ModelConfig from "@/components/model/model";
 
 function Home () {
 
