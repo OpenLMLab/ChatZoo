@@ -1,11 +1,11 @@
-import PUYUC, {IChatItem} from '@puyu/components'
+import PUYUC, {IChatItem} from 'chat-webkit'
 import { useContext, useState, useEffect } from 'react';
 import { IdContext } from '@/utils/idcontexts';
 import style from "./manager.module.less";
 import { ModeContext } from '@/utils/contexts';
 import { ModelContext } from '@/utils/modelcontext';
 import ModelConfig from '../model/model';
-import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatInterface';
+import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 
 /**
  * 至少保持开启一个会话。

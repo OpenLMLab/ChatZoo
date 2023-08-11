@@ -1,10 +1,10 @@
 import { useRef, useContext } from 'react';
 import styles from './chat.module.less';
-import PUYUC from '@puyu/components';
+import PUYUC from 'chat-webkit';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { QuestionContext } from '@/utils/question';
-import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatInterface';
+import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 
 
 /**
@@ -13,6 +13,14 @@ import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatIn
  * 3. 进行对话
  * 4. 离开界面时存入缓存
  */
+
+function useRefsArray(length: number) {
+  const refs: any[] = [];
+  for(let i=0; i<length; i++) {
+    refs.push(useRef<any>())
+  }
+  return refs
+}
 
 const Chat: React.FC = () => {
   console.log('渲染')
@@ -26,13 +34,7 @@ const Chat: React.FC = () => {
     sessionList = JSON.parse(cachedSessionList)
   }
   /*创建ref*/
-  const refs: any[] = [];
-  models?.map((_,index) => {
-    console.log(index)
-    refs.push(useRef<any>())
-    console.log(refs)
-  })
-  console.log('新的refs', refs)
+  const refs = useRefsArray(models?.length!)
   const startSse = () => {
     refs.map(ref => ref.current.startSse(question))
   };
@@ -87,7 +89,7 @@ const Chat: React.FC = () => {
             <PUYUC.ChatBox
               propsSessionList={sessionList[0]}
               url={urls[0]+"/chat/generate?turn_id="+sessionId+0+"&username=gtl&role=annotate"}
-              ref={refs[0]}
+              ref={useRef<any>()}
             />
           </div>
         </div>
