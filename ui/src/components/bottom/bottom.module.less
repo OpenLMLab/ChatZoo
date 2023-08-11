@@ -56,3 +56,7 @@ overflow: hidden; //设置超出部分隐藏
 white-space: nowrap; // 设置不让它自动换行，默认是会自动换行的
 text-overflow: ellipsis; //超出部分用省略号显示
 }
+.popoverTitle:hover {
+    white-space: normal; /* 悬停时显示完整文本，允许换行 */
+    overflow: visible; /* 悬停时显示完整文本，不再隐藏溢出内容 */
+}

@@ -30,7 +30,7 @@ function Manager() {
       initSession.push(sseMessage);
     }
     /**TODO：防止溢出 */
-    localStorage.setItem('sessionListdefault', JSON.stringify(initSession))
+    localStorage.setItem('sessionList0', JSON.stringify(initSession))
 
     const addChat = () => {
         const newItem = {
