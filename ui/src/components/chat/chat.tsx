@@ -15,28 +15,25 @@ import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatIn
  */
 
 const Chat: React.FC = () => {
+  console.log('渲染')
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
-  console.log('渲染')
-  console.log('会话id', sessionId)
   const models = useContext(ModelContext)?.models;
-  const numofModels = models?.length;
   const question = useContext(QuestionContext)?.question;
-  console.log('chat组件模型数量', numofModels)
   const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
   let sessionList: sseMesage[][] = [];
   if(cachedSessionList != null && cachedSessionList != undefined) {
     sessionList = JSON.parse(cachedSessionList)
   }
-  console.log('当前的会话记录', sessionList)
   /*创建ref*/
-  const refs = new Array();
-  for(let i = 0; i < numofModels!; i++) {
-    refs.push(useRef());
-  }
-  console.log('当前会话的', refs)
+  const refs: any[] = [];
+  models?.map((_,index) => {
+    console.log(index)
+    refs.push(useRef<any>())
+    console.log(refs)
+  })
+  console.log('新的refs', refs)
   const startSse = () => {
-    console.log('开始发送', refs)
     refs.map(ref => ref.current.startSse(question))
   };
   const downloadSse = () => {
@@ -44,7 +41,6 @@ const Chat: React.FC = () => {
     refs.map(ref => new_session_list.push(ref.current.getSessionList()))
     new_session_list.map(sessionList=> {
       const last_dict = sessionList[sessionList.length - 1]
-      console.log('当前会话', last_dict)
       const new_dict: sseMesage = {
           "id": last_dict["id"],
           "status": last_dict["status"],
@@ -62,7 +58,7 @@ const Chat: React.FC = () => {
   const stopSse = () => {
     refs.map(ref => ref.current.stopSse())
   }
-  const urls = ["http://10.140.1.76:8081", "http://10.140.0.76:8081"]
+  const urls = ["http://10.140.1.76:8081", "http://10.140.1.76:8081"]
 
   return (
     <>
@@ -90,10 +86,9 @@ const Chat: React.FC = () => {
           </div>
           <div className={styles.main}>
             <PUYUC.ChatBox
-              eventName=''
-              propsSessionList={sessionList[index]}
-              url={urls[index]+"/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
-              ref={refs[index]}
+              propsSessionList={sessionList[0]}
+              url={urls[0]+"/chat/generate?turn_id="+sessionId+0+"&username=gtl&role=annotate"}
+              ref={refs[0]}
             />
           </div>
         </div>

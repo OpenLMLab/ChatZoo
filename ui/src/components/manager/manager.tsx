@@ -18,19 +18,20 @@ function Manager() {
         name: '请注意这是一个模拟会话，所做的处理均不会被记录入数据库~',
     }])
     const models = useContext(ModelContext)?.models;
-    // const numOfModel = models?.length
-    // const initSession = [];
-    // for (let i = 0; i < numOfModel!; i++) {
-    //   const sseMessage: sseMesage[] = [{
-    //     id:  1,
-    //     status: 0, // 假设 allStatus 是一个枚举类型
-    //     message: "初始da化",
-    //     question: "初da始化"
-    //   }];
-    //   initSession.push(sseMessage);
-    // }
+    const numOfModel = models?.length
+    console.log('模型个数', numOfModel)
+    const initSession = [];
+    for (let i = 0; i < numOfModel!; i++) {
+      const sseMessage: sseMesage[] = [{
+        id:  1,
+        status: 0, // 假设 allStatus 是一个枚举类型
+        message: "初始da化",
+        question: "初da始化"
+      }];
+      initSession.push(sseMessage);
+    }
     // /**TODO：防止溢出 */
-    // localStorage.setItem('sessionListdefault', JSON.stringify(initSession))
+    localStorage.setItem('sessionList0', JSON.stringify(initSession))
 
     const addChat = () => {
         const newItem = {

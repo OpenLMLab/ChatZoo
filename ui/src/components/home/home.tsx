@@ -47,28 +47,17 @@ function Home () {
         "moss_01",
         "fnlp/moss-moon-003-sft",
         { max_length: 2048 },
-        0,
-        8081,
+        '0',
         {
           meta_prompt: "",
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
-        }
-      ),
-      new ModelConfig(
-        "fnlp/moss-moon-003-sft",
-        "moss_01",
-        "fnlp/moss-moon-003-sft",
-        { max_length: 2048 },
-        0,
-        8080,
-        {
-          meta_prompt: "",
-          user_prompt: "Human: {}\n",
-          bot_prompt: "\nAssistant: {}\n",
-        }
+        },
+        "10.140.1.76:8081",
+        true
       )
     ]);
+
     const modelsValues: ModelContextProps = {
       models,
       setModels
@@ -108,7 +97,7 @@ function Home () {
                           </div>
                         </div>
                         <div className={style.footer}>
-                          <Bottom names={modelNames.names}/>
+                          <Bottom/>
                         </div>
                         </QuestionContext.Provider>
                     </Col>
