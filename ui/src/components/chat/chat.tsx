@@ -27,12 +27,21 @@ const Chat: React.FC = () => {
     sessionList = JSON.parse(cachedSessionList)
   }
   /*创建ref*/
-  const refs: any[] = [];
-  models?.map((_,index) => {
-    console.log(index)
-    refs.push(useRef<any>())
-    console.log(refs)
-  })
+  console.log("debug_chat_model", models)
+  // let refs: any[] = [];
+  const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()]
+  // models?.forEach((model) =>{
+  //   console.log(model, refs, "创建情况")
+  //   refs.push(useRef<any>())
+  //   console.log("create_model", refs)
+  // })
+  // models?.map((_,index) => {
+  //   console.log(index)
+  //   const ref = useRef<any>()
+  //   console.log(refs, ref)
+  //   refs.push(useRef<any>())
+  //   console.log(refs)
+  // })
   console.log('新的refs', refs)
   const startSse = () => {
     refs.map(ref => ref.current.startSse(question))
