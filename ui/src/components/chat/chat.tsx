@@ -1,7 +1,6 @@
-import { useRef, useContext, useState, useEffect } from 'react';
+import { useRef, useContext } from 'react';
 import styles from './chat.module.less';
 import PUYUC from '@puyu/components';
-import { FreezeContext } from '@/utils/freezecontext';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { QuestionContext } from '@/utils/question';
@@ -18,40 +17,57 @@ import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatIn
 const Chat: React.FC = () => {
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
+  console.log('渲染')
+  console.log('会话id', sessionId)
   const models = useContext(ModelContext)?.models;
   const numofModels = models?.length;
   const question = useContext(QuestionContext)?.question;
   console.log('chat组件模型数量', numofModels)
   const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
-  let sessionList = [[]];
-  if(cachedSessionList != null) {
+  let sessionList: sseMesage[][] = [];
+  if(cachedSessionList != null && cachedSessionList != undefined) {
     sessionList = JSON.parse(cachedSessionList)
-    console.log('最新的session', sessionList)
   }
+  console.log('当前的会话记录', sessionList)
   /*创建ref*/
-  const refs = new Array;
-  for(let i=0; i<numofModels!; i++) {
-    refs.push(useRef<any>())
+  const refs = new Array();
+  for(let i = 0; i < numofModels!; i++) {
+    refs.push(useRef());
   }
+  console.log('当前会话的', refs)
   const startSse = () => {
+    console.log('开始发送', refs)
     refs.map(ref => ref.current.startSse(question))
   };
-
-  const stopSse = () => {
-    const new_session_list: sseMesage[][] = []
+  const downloadSse = () => {
+    let new_session_list: sseMesage[][] = []
     refs.map(ref => new_session_list.push(ref.current.getSessionList()))
-    console.log(sessionList)
+    new_session_list.map(sessionList=> {
+      const last_dict = sessionList[sessionList.length - 1]
+      console.log('当前会话', last_dict)
+      const new_dict: sseMesage = {
+          "id": last_dict["id"],
+          "status": last_dict["status"],
+          "message": last_dict["message"],
+          "question": last_dict["question"]
+      }
+      console.log('新的字典', new_dict)
+      sessionList[sessionList.length - 1] = new_dict
+    })
+    console.log('修改后的字典', new_session_list)
     localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
     console.log('更新缓存')
-    console.log('更新后', localStorage.getItem('sessionList' +  idContext?.id))
+    console.log('更新后', 'sessionList' +  idContext?.id)
   }
-
-  const urls = ["http://10.140.1.76:8081", "http://10.140.0.151:8081"]
+  const stopSse = () => {
+    refs.map(ref => ref.current.stopSse())
+  }
+  const urls = ["http://10.140.1.76:8081", "http://10.140.0.76:8081"]
 
   return (
     <>
       {models?.map((model: any, index: number) => (
-        <div key={index} className={styles.chatContainer}>
+        <div className={styles.chatContainer}>
           <div className={styles.banner}>
             <div className={styles.typo}>
               {model.nickname}
@@ -74,6 +90,7 @@ const Chat: React.FC = () => {
           </div>
           <div className={styles.main}>
             <PUYUC.ChatBox
+              eventName=''
               propsSessionList={sessionList[index]}
               url={urls[index]+"/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
               ref={refs[index]}
@@ -82,6 +99,7 @@ const Chat: React.FC = () => {
         </div>
       ))}
       <button onClick={startSse}>开始会话</button>
+      <button onClick={downloadSse}>下载会话</button>
       <button onClick={stopSse}>停止会话</button>
     </>
   );

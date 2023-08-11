@@ -14,23 +14,23 @@ function Manager() {
     const idContext = useContext(IdContext);
     const [curChatId, setCurChatId] = useState<string>('')
     const [chatList, setChatList] = useState<IChatItem[]>([{
-        id: 'default',
+        id: '0',
         name: '请注意这是一个模拟会话，所做的处理均不会被记录入数据库~',
     }])
     const models = useContext(ModelContext)?.models;
-    const numOfModel = models?.length
-    const initSession = [];
-    for (let i = 0; i < numOfModel!; i++) {
-      const sseMessage: sseMesage[] = [{
-        id:  1,
-        status: 0, // 假设 allStatus 是一个枚举类型
-        message: "初始da化",
-        question: "初da始化"
-      }];
-      initSession.push(sseMessage);
-    }
-    /**TODO：防止溢出 */
-    localStorage.setItem('sessionListdefault', JSON.stringify(initSession))
+    // const numOfModel = models?.length
+    // const initSession = [];
+    // for (let i = 0; i < numOfModel!; i++) {
+    //   const sseMessage: sseMesage[] = [{
+    //     id:  1,
+    //     status: 0, // 假设 allStatus 是一个枚举类型
+    //     message: "初始da化",
+    //     question: "初da始化"
+    //   }];
+    //   initSession.push(sseMessage);
+    // }
+    // /**TODO：防止溢出 */
+    // localStorage.setItem('sessionListdefault', JSON.stringify(initSession))
 
     const addChat = () => {
         const newItem = {

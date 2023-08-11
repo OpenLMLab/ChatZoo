@@ -23,7 +23,7 @@ function Home () {
       setMode,
     };
     // sessionId
-    const [id, setId] = useState<string | null>('default');
+    const [id, setId] = useState<string | null>('0');
     const idContextValues: IdContextProps = {
       id,
       setId
@@ -81,7 +81,7 @@ function Home () {
 
     const modelNames: BottomProps = {
       names: models.map((model) => model.nickname),
-      sessionId: 'default'
+      sessionId: '0'
     }
 
     return (
