@@ -3,6 +3,7 @@ import {Button, Modal, Checkbox, message } from 'antd';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { IdContext } from "@/utils/idcontexts";
 import { ModelContext } from "@/utils/modelcontext";
+import { ModeContext } from "@/utils/contexts";
 
 /*参数与bottom一致*/
 
@@ -19,6 +20,10 @@ const Annotate: React.FC = () => {
     const showModal = () => {
         setIsModalOpen(true);
     }
+    // 当前模式
+    const mode = useContext(ModeContext)?.mode
+    // 设置标题
+    const title = (mode === 'single') ? '单回复标注':'会话标注'
     const error = () => {
         messageApi.open({
           type: 'error',
@@ -55,7 +60,7 @@ const Annotate: React.FC = () => {
         <>
             {contextHolder}
             <Button type='primary' onClick={showModal}>标注</Button>
-            <Modal title="会话标注"
+            <Modal title={title}
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={handleCancel}
