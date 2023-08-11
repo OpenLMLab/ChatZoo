@@ -8,11 +8,10 @@ import { IdContext, IdContextProps } from "@/utils/idcontexts";
 import { FreezeContext, FreezeContextProps } from "@/utils/freezecontext";
 import Manager from "@/components/manager/manager";
 import { Col, Row } from 'antd';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import './home.module.less';
 import style from "./home.module.less";
 import ModelConfig from "@/components/model/model";
-import { createContext } from "vm";
 import { ModelContext, ModelContextProps } from "@/utils/modelcontext";
 
 function Home () {
@@ -55,20 +54,6 @@ function Home () {
         },
         "10.140.1.76:8081",
         true
-      ),
-      new ModelConfig(
-        "fnlp/moss-moon-003-sft",
-        "moss_02",
-        "fnlp/moss-moon-003-sft",
-        { max_length: 2048 },
-        '0',
-        {
-          meta_prompt: "",
-          user_prompt: "Human: {}\n",
-          bot_prompt: "\nAssistant: {}\n",
-        },
-        "10.140.1.76:8081",
-        true
       )
     ]);
 
@@ -77,15 +62,6 @@ function Home () {
       setModels
     }
 
-    interface BottomProps {
-      names: string[];
-      sessionId: string;
-    }
-
-    const modelNames: BottomProps = {
-      names: models.map((model) => model.nickname),
-      sessionId: '0'
-    }
 
     return (
         <ModelContext.Provider value={modelsValues} >

@@ -1,11 +1,11 @@
-import PUYUC, {IChatItem} from '@puyu/components'
+import PUYUC, {IChatItem} from 'chat-webkit'
 import { useContext, useState, useEffect } from 'react';
 import { IdContext } from '@/utils/idcontexts';
 import style from "./manager.module.less";
 import { ModeContext } from '@/utils/contexts';
 import { ModelContext } from '@/utils/modelcontext';
 import ModelConfig from '../model/model';
-import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatInterface';
+import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 
 /**
  * 至少保持开启一个会话。
@@ -14,7 +14,7 @@ function Manager() {
     const idContext = useContext(IdContext);
     const [curChatId, setCurChatId] = useState<string>('')
     const [chatList, setChatList] = useState<IChatItem[]>([{
-        id: '0',
+        id: Date.now().toString(),
         name: '请注意这是一个模拟会话，所做的处理均不会被记录入数据库~',
     }])
     const models = useContext(ModelContext)?.models;
@@ -22,12 +22,7 @@ function Manager() {
     console.log('模型个数', numOfModel)
     const initSession = [];
     for (let i = 0; i < numOfModel!; i++) {
-      const sseMessage: sseMesage[] = [{
-        id:  1,
-        status: 0, // 假设 allStatus 是一个枚举类型
-        message: "初始data化",
-        question: "初data始化"
-      }];
+      const sseMessage: sseMesage[] = [];
       initSession.push(sseMessage);
     }
     /**TODO：防止溢出 */
@@ -48,12 +43,7 @@ function Manager() {
         const numOfModel = models?.length
         const initSession = [];
         for (let i = 0; i < numOfModel!; i++) {
-          const sseMessage: sseMesage[] = [{
-            id:  1,
-            status: 0, // 假设 allStatus 是一个枚举类型
-            message: newItem.id,
-            question: newItem.id
-          }];
+          const sseMessage: sseMesage[] = [];
           initSession.push(sseMessage);
         }
         console.log('初始化sessionList', initSession)
@@ -61,13 +51,19 @@ function Manager() {
     }
 
     const deleteChat = (id: string) => {
-        const newList = chatList.slice()
-        const index = chatList.findIndex(x => x.id === id)
-        if (index >= 1) {
-            newList.splice(index, 1)
-            setChatList(newList)
-        }
-    }
+      const newList = chatList.slice()
+      const index = chatList.findIndex(x => x.id === id)
+      if (chatList.length >= 1) {
+          newList.splice(index, 1)
+          setChatList(newList)
+          if(index != 0) {
+            selectChat(chatList[index - 1].id)
+          } else {
+            selectChat(chatList[chatList.length - 2].id)
+          }
+          
+      }
+  }
 
     const selectChat = (id:string) => {
         setCurChatId(id)

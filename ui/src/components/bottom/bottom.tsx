@@ -8,14 +8,9 @@ import { QuestionContext } from '@/utils/question';
 import style from './bottom.module.less';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
-
-/**
- * 需要传入的参数为：所有模型的名称以及SessionId。
- */
-
-interface BottomProps {
-    names: string[];
-}
+import { EventEmitter } from 'stream';
+import eventBus from '@/utils/eventBus'
+import { isContext } from 'vm';
 
 /**
  * 处理输入
@@ -29,14 +24,14 @@ const Bottom: React.FC = () => {
     const names: string[] = []
     models?.map(model => names.push(model.nickname))    
     const [inputValue, setInputValue] = useState('');
-    const qc = useContext(QuestionContext);
+    const sessionId = useContext(IdContext)?.id
     const handleChange = (event: any) => {
         const { value } = event.target;
         setInputValue(value);
       };
     const handleEnter = () => {
         handleInput(inputValue);
-        qc?.setQuestion(inputValue)
+        eventBus.emit('sendMessage', inputValue, models)
         setInputValue('');
     };
     const [open, setOpen] = useState(false);
