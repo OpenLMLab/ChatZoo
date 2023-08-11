@@ -2,150 +2,55 @@ import { useRef, useContext, useState, useEffect } from 'react';
 import styles from './chat.module.less';
 import PUYUC from '@puyu/components';
 import { FreezeContext } from '@/utils/freezecontext';
-import ModelConfig from "@/components/model/model";
 import { IdContext } from '@/utils/idcontexts';
+import { ModelContext } from '@/utils/modelcontext';
+import { QuestionContext } from '@/utils/question';
+import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatInterface';
+
 
 /**
- * 除去Model原有的属性外需要SessionID
+ * 1. 获取全局sessionId
+ * 2. 读取缓存
+ * 3. 进行对话
+ * 4. 离开界面时存入缓存
  */
 
-interface ChatListProps {
-  models: ModelConfig[];
-}
-
-enum allStatus {
-  loading = 3, // 发起请求5s 内，无消息
-  pending = 4, // 发起请求5s 后，无消息 
-  active = 1, // 接收到event stream，流式输出中
-  error = -1, // 接收出错
-  finished = 0, //接收完成
-  toolong = -20003, // 会话超长
-  modelClose = -20008, // 模型关闭
-  backendTimeout = -20015, // 会话中，后端超时
-}
-
-interface sseMesage {
-  id: number; // 聊天id
-  status: allStatus; // 对话状态  0：对话停止状态 2:对话进行中
-  message: string; // 对话回复信息
-  question: string; // 对话问题A
-}
-
-const Chat: React.FC<ChatListProps> = ({models}) => {
+const Chat: React.FC = () => {
   const idContext = useContext(IdContext);
-  console.log("idcontext_chat", idContext?.id)
-  // const [messageApi, contextHolder] = message.useMessage();
-  // const freeze = useContext(FreezeContext);
+  const sessionId = idContext?.id;
+  const models = useContext(ModelContext)?.models;
+  const numofModels = models?.length;
+  const question = useContext(QuestionContext)?.question;
+  console.log('chat组件模型数量', numofModels)
   const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
   let sessionList = [[]];
   if(cachedSessionList != null) {
-    
-    // console.log('读取缓存', 'sessionList' + sessionid)
-    // console.log('目前缓存', sessionList)
+    sessionList = JSON.parse(cachedSessionList)
+    console.log('最新的session', sessionList)
   }
-  // if(cachedSessionList != null) {
-  //   const cacheList = cachedSessionList;
-    // 如果当前是一个新的会话
-    // 则创建模型个数的数组 这里暂定为2次
-    // if(cacheList.length === 0) {
-    //   for(let i=0; i<2; i++) {
-    //     cacheList.push([]);
-    //   }
-    //   localStorage.setItem('sessionList'+sessionId, cacheList)
-    // }
-    // setSessionList(cacheList);
-  // } else {
-  //   for(let i=0; i<2; i++) {
-  //     sessionList.push([]);
-  //   }
-  //   localStorage.setItem('sessionList'+'1', JSON.stringify(sessionList))
-  //   console.log('会话', sessionList)
-  // }
-  // console.log(sessionList)
-  // if(cachedSessionList != null) {
-  //   const cureList =  JSON.parse(cachedSessionList);
-  //   if(cureList.length() == 0) {
-  //     const tmpList = new Array;
-  //     for(let i=0; i<2; i++) {
-  //       tmpList.push([]);
-  //     }
-  //     setSessionList(tmpList);
-  //   }
-  //   console.log('最终', sessionList)
-  //   // setSessionList(JSON.parse(cachedSessionList));
-  // } else {
-  //   for(let i=0; i<2; i++) {
-  //     sessionList.push([]);
-  //   }
-  // }
-  // for(let i=0; i<2; i++) {
-  //     sessionList.push([]);
-  //   }
-  // console.log("会话", sessionList)
-  /**
-   * 根据sessionId自行获取sessionList
-   * 如果sessionList为空，则可以自由切换，否则锁定选项。
-   */
-  // if(sessionList.length == 0) {
-  //   /**锁定单选框*/
-  //   freeze?.setFreeze('yes');
-  // } else {
-  //   freeze?.setFreeze('no');
-  // }
+  /*创建ref*/
   const refs = new Array;
-  for(let i=0; i<2; i++) {
+  for(let i=0; i<numofModels!; i++) {
     refs.push(useRef<any>())
   }
-
-  // // const error = () => {
-  // //   messageApi.open({
-  // //     type: 'error',
-  // //     content: '不能发送空消息！',
-  // //   });
-  // // };
-
   const startSse = () => {
-    // refs.map((ref: any) => ref.current.startSse('hello'));
-    refs[0].current.startSse('hello')
-    console.log('当前的', refs)
+    refs.map(ref => ref.current.startSse(question))
   };
 
   const stopSse = () => {
-    const item = refs[0].current.getSessionList()
-    const new_session_list = item.slice(0, -1)
-    const last_chat_json = item.slice(-1)[0]
-    console.log(last_chat_json)
-    new_session_list.push({
-      "id": last_chat_json["id"],
-      "status": last_chat_json["status"],
-      "message": last_chat_json["message"],
-      "question": last_chat_json["question"],
-    })
-    console.log("aaaa",new_session_list)
-    console.log("items_chat", item)
-    // refs.map((ref: any, index:number) => sessionList[index] = refs[0].current.getSessionList());
+    const new_session_list: sseMesage[][] = []
+    refs.map(ref => new_session_list.push(ref.current.getSessionList()))
     console.log(sessionList)
     localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
     console.log('更新缓存')
     console.log('更新后', localStorage.getItem('sessionList' +  idContext?.id))
   }
 
-  // useEffect(() => {
-  //   // 从缓存中读取sessionList
-  //   const cachedSessionList = localStorage.getItem('sessionList'+sessionId);
-  //   if (cachedSessionList) {
-  //     setSessionList(JSON.parse(cachedSessionList));
-  //   }
-  // }, [sessionId]);
-
-  // useEffect(() => {
-  //   localStorage.setItem('sessionList'+sessionId, JSON.stringify(sessionList));
-  // }, [sessionList]);
-
+  const urls = ["http://10.140.1.76:8081", "http://10.140.0.151:8081"]
 
   return (
     <>
-      {models.map((model: any, index: number) => (
+      {models?.map((model: any, index: number) => (
         <div key={index} className={styles.chatContainer}>
           <div className={styles.banner}>
             <div className={styles.typo}>
@@ -169,9 +74,9 @@ const Chat: React.FC<ChatListProps> = ({models}) => {
           </div>
           <div className={styles.main}>
             <PUYUC.ChatBox
-              propsSessionList={sessionList[0]}
-              url={"http://10.140.0.151:8081/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
-              ref={refs[0]}
+              propsSessionList={sessionList[index]}
+              url={urls[index]+"/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
+              ref={refs[index]}
             />
           </div>
         </div>
@@ -179,33 +84,6 @@ const Chat: React.FC<ChatListProps> = ({models}) => {
       <button onClick={startSse}>开始会话</button>
       <button onClick={stopSse}>停止会话</button>
     </>
-    //     <>
-    //       <div className={styles.chatContainer}>
-    //         {models.map(model, index) => (
-    //           <div className={styles.banner}>
-    //             模型A
-    //           </div>
-    //           <div className={styles.main}>
-    //             <PUYUC.ChatBox
-    //                 // eventName=''
-    //                 propsSessionList={sessionList}
-    //                 url={'/chat/generate?session_id=1234&user_id=1'}
-    //                 ref={ref}
-    //               />
-    //           </div>
-    //         )}
-    // {/* 
-    //         <PUYUC.ChatBox
-    //           propsSessionList={sessionList}
-    //           url={'/chat/generate?session_id=1234&user_id=2'}
-    //           ref={ref1}
-    //         />  */}
-    //       </div>
-    //       {/* <button onClick={startSse}>开始会话</button>
-    //       <button onClick={stopSse}>停止会话</button>
-    //       <button onClick={reGenerate}>重试</button>
-    //       <button onClick={getSseStatus}>获取状态</button> */}
-    //     </>
   );
 };
 

@@ -13,15 +13,15 @@ import './home.module.less';
 import style from "./home.module.less";
 import ModelConfig from "@/components/model/model";
 import { createContext } from "vm";
+import { ModelContext, ModelContextProps } from "@/utils/modelcontext";
 
 function Home () {
 
     const [mode, setMode] = useState<string | null>('dialogue');
-    const contextValues: ModeContextProps = {
+    const modeValues: ModeContextProps = {
       mode,
       setMode,
     };
-
     // sessionId
     const [id, setId] = useState<string | null>('default');
     const idContextValues: IdContextProps = {
@@ -41,7 +41,7 @@ function Home () {
       setFreeze
     }
 
-    const models: ModelConfig[] = [
+    const [models, setModels] = useState<ModelConfig[]>([
       new ModelConfig(
         "fnlp/moss-moon-003-sft",
         "moss_01",
@@ -54,21 +54,25 @@ function Home () {
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
         }
+      ),
+      new ModelConfig(
+        "fnlp/moss-moon-003-sft",
+        "moss_01",
+        "fnlp/moss-moon-003-sft",
+        { max_length: 2048 },
+        0,
+        8080,
+        {
+          meta_prompt: "",
+          user_prompt: "Human: {}\n",
+          bot_prompt: "\nAssistant: {}\n",
+        }
       )
-      // new ModelConfig(
-      //   "fnlp/moss-moon-003-sft",
-      //   "moss_01",
-      //   "fnlp/moss-moon-003-sft",
-      //   { max_length: 2048 },
-      //   0,
-      //   8081,
-      //   {
-      //     meta_prompt: "",
-      //     user_prompt: "Human: {}\n",
-      //     bot_prompt: "\nAssistant: {}\n",
-      //   }
-      // ),
-    ];
+    ]);
+    const modelsValues: ModelContextProps = {
+      models,
+      setModels
+    }
 
     interface BottomProps {
       names: string[];
@@ -80,46 +84,40 @@ function Home () {
       sessionId: 'default'
     }
 
-    // const sessionId = useContext(IdContext)?.id;
-    const idcontext = useContext(IdContext);
-    idcontext?.setId("12222")
-    console.log("idcontext", idcontext?.id)
-    const [sessionId, setSessionId] = useState<string>("default");
-    console.log("home_Session_id", sessionId)
-
     return (
-      // <FreezeContext.Provider value={freezeValues}>
-        // <ModeContext.Provider value={contextValues}>
-        <IdContext.Provider value={idContextValues}>
+        <ModelContext.Provider value={modelsValues} >
             <div className={style.wrapper}>
+                  <IdContext.Provider value={idContextValues}>
                 <Row  gutter={24} className={style.row}>
                   <Col span={4} className={style.sider}>
                       <h1 className={style.logo}>ChatZoo</h1>
                       <Manager />
                   </Col>
-                  <Col span={20} className={style.main}>
-                    <div className={style.header}>
-                      <div className={style.mode}>
-                        <Mode></Mode>
-                      </div> 
-                    </div>
-                    {/* <QuestionContext.Provider value={questionValues}> */}
-                      <div className={style.content}>
-                        <div className={style.add}>
-                          {models.length === 0 ? <Add></Add> : <Chat models={models}/>}
+                  <ModeContext.Provider value={modeValues}>
+                    <FreezeContext.Provider value={freezeValues}>
+                    <Col span={20} className={style.main}>
+                      <div className={style.header}>
+                        <div className={style.mode}>
+                            <Mode></Mode>
+                        </div> 
+                      </div>
+                      <QuestionContext.Provider value={questionValues}>
+                        <div className={style.content}>
+                          <div className={style.add}>
+                            {models.length === 0 ? <Add></Add> : <Chat/>}
+                          </div>
                         </div>
-                        {/* </IdContext.Provider> */}
-                      </div>
-                      <div className={style.footer}>
-                        <Bottom names={modelNames.names}/>
-                      </div>
-                    {/* </QuestionContext.Provider> */}
-                  </Col>
+                        <div className={style.footer}>
+                          <Bottom names={modelNames.names}/>
+                        </div>
+                        </QuestionContext.Provider>
+                    </Col>
+                    </FreezeContext.Provider>
+                  </ModeContext.Provider>
                 </Row>
+                </IdContext.Provider>
             </div>
-          {/* // </ModeContext.Provider> */}
-      {/* // </FreezeContext.Provider> */}
-      </IdContext.Provider>
+        </ModelContext.Provider>
       );
 }
 
