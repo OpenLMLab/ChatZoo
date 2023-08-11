@@ -33,20 +33,42 @@ const Chat: React.FC = () => {
   for(let i=0; i<numofModels!; i++) {
     refs.push(useRef<any>())
   }
+  console.log("切换会话管理， refs:", refs)
+
   const startSse = () => {
-    refs.map(ref => ref.current.startSse(question))
+    const quest = "你是谁啊"
+    refs.map(ref => {
+      ref.current.startSse(quest)
+    })
+    // refs.map(ref => ref.current.startSse(question))
+    console.log("start chat")
   };
 
   const stopSse = () => {
     const new_session_list: sseMesage[][] = []
-    refs.map(ref => new_session_list.push(ref.current.getSessionList()))
-    console.log(sessionList)
+    refs.map(ref => {
+      const item = ref.current.getSessionList()
+      const new_item = item.slice(0, -1)
+      console.log("status", ref.current.getStatus())
+      new_item.push({
+        "id": item[item.length-1]["id"],
+        "status": item[item.length-1]["status"],
+        "message": item[item.length-1]["message"],
+        "question": item[item.length-1]["question"]
+      })
+      new_session_list.push(new_item)
+    })
+    
+    console.log(new_session_list)
     localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
     console.log('更新缓存')
     console.log('更新后', localStorage.getItem('sessionList' +  idContext?.id))
+    refs.map(ref=> ref.current.stopSse())
   }
 
-  const urls = ["http://10.140.1.76:8081", "http://10.140.0.151:8081"]
+  // const urls = ["http://10.140.1.76:8081", "http://10.140.0.151:8081"]
+  const urls = ["http://10.140.1.76:8082", "http://10.140.1.76:8082"]
+
 
   return (
     <>

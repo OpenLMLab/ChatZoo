@@ -24,8 +24,8 @@ function Manager() {
       const sseMessage: sseMesage[] = [{
         id:  1,
         status: 0, // 假设 allStatus 是一个枚举类型
-        message: "初始da化",
-        question: "初da始化"
+        message: "初始data化",
+        question: "初data始化"
       }];
       initSession.push(sseMessage);
     }
@@ -40,9 +40,9 @@ function Manager() {
         const newList = chatList.slice()  // 复制数组
         newList.unshift(newItem)   // 向数组开头添加元素
         setChatList(newList)
-        /**新增后会立即选中当前的sessionid */
-        setCurChatId(newItem.id)
-        idContext?.setId(newItem.id)
+         /**新增后会立即选中当前的sessionid */
+         setCurChatId(newItem.id)
+         idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length
         const initSession = [];

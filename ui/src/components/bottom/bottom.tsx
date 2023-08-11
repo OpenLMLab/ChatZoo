@@ -44,6 +44,11 @@ const Bottom: React.FC<BottomProps> = ({names}) => {
     const handleOpenModal = (newOpen: any) => {
         setModal(newOpen)
     }
+    const downloadSessionListByName = (nickname: string) => {
+        // 下载会话数据， 通过传入的 nickname 来判断下载哪几个模型的数据
+        let data = 
+        localStorage.getItem(sessionId+"")
+    }
     const m = useContext(ModeContext)?.mode;
     return (
             <ConfigProvider
@@ -99,13 +104,16 @@ const Bottom: React.FC<BottomProps> = ({names}) => {
                 </div>
                 <div className={style.icon}>
                     <Popover
+                        overlayClassName={style.popoverStyle}
+                        overlayInnerStyle={{fontSize: 14, fontFamily: "PingFang SC", fontWeight: 400}}
                         content={
                             <div>
-                                <a>全部</a>
-                                {names.map((name: string) => (<a>{name}</a>))}
+                                <Button block className={style.popoverTitle}>全部</Button>
+                                {names.map((name: string) => (<Button block className={style.popoverTitle}>{name}</Button>))}
                             </div>
                         }
-                        title="请选择要下载的会话记录"
+                        // title={<span>"请选择要下载的会话记录"<span/>}
+                        title={<span className={style.popoverTitle}>请选择要下载的会话记录</span>}
                         trigger="click"
                         open={open}
                         onOpenChange={handleOpenChange}
