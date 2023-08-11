@@ -55,6 +55,20 @@ function Home () {
         },
         "10.140.1.76:8081",
         true
+      ),
+      new ModelConfig(
+        "fnlp/moss-moon-003-sft",
+        "moss_02",
+        "fnlp/moss-moon-003-sft",
+        { max_length: 2048 },
+        '0',
+        {
+          meta_prompt: "",
+          user_prompt: "Human: {}\n",
+          bot_prompt: "\nAssistant: {}\n",
+        },
+        "10.140.1.76:8081",
+        true
       )
     ]);
 

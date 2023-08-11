@@ -25,12 +25,12 @@ function Manager() {
       const sseMessage: sseMesage[] = [{
         id:  1,
         status: 0, // 假设 allStatus 是一个枚举类型
-        message: "初始da化",
-        question: "初da始化"
+        message: "初始data化",
+        question: "初data始化"
       }];
       initSession.push(sseMessage);
     }
-    // /**TODO：防止溢出 */
+    /**TODO：防止溢出 */
     localStorage.setItem('sessionList0', JSON.stringify(initSession))
 
     const addChat = () => {
