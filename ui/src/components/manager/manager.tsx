@@ -14,7 +14,7 @@ function Manager() {
     const idContext = useContext(IdContext);
     const [curChatId, setCurChatId] = useState<string>('')
     const [chatList, setChatList] = useState<IChatItem[]>([{
-        id: 'default',
+        id: '0',
         name: '请注意这是一个模拟会话，所做的处理均不会被记录入数据库~',
     }])
     const models = useContext(ModelContext)?.models;

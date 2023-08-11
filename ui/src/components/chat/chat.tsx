@@ -1,7 +1,6 @@
-import { useRef, useContext, useState, useEffect } from 'react';
+import { useRef, useContext } from 'react';
 import styles from './chat.module.less';
 import PUYUC from '@puyu/components';
-import { FreezeContext } from '@/utils/freezecontext';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { QuestionContext } from '@/utils/question';
@@ -18,20 +17,22 @@ import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatIn
 const Chat: React.FC = () => {
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
+  console.log('渲染')
+  console.log('会话id', sessionId)
   const models = useContext(ModelContext)?.models;
   const numofModels = models?.length;
   const question = useContext(QuestionContext)?.question;
   console.log('chat组件模型数量', numofModels)
   const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
-  let sessionList = [[]];
-  if(cachedSessionList != null) {
+  let sessionList: sseMesage[][] = [];
+  if(cachedSessionList != null && cachedSessionList != undefined) {
     sessionList = JSON.parse(cachedSessionList)
-    console.log('最新的session', sessionList)
   }
+  console.log('当前的会话记录', sessionList)
   /*创建ref*/
-  const refs = new Array;
-  for(let i=0; i<numofModels!; i++) {
-    refs.push(useRef<any>())
+  const refs = new Array();
+  for(let i = 0; i < numofModels!; i++) {
+    refs.push(useRef());
   }
   console.log("切换会话管理， refs:", refs)
 
@@ -73,7 +74,7 @@ const Chat: React.FC = () => {
   return (
     <>
       {models?.map((model: any, index: number) => (
-        <div key={index} className={styles.chatContainer}>
+        <div className={styles.chatContainer}>
           <div className={styles.banner}>
             <div className={styles.typo}>
               {model.nickname}
@@ -96,6 +97,7 @@ const Chat: React.FC = () => {
           </div>
           <div className={styles.main}>
             <PUYUC.ChatBox
+              eventName=''
               propsSessionList={sessionList[index]}
               url={urls[index]+"/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
               ref={refs[index]}
@@ -104,6 +106,7 @@ const Chat: React.FC = () => {
         </div>
       ))}
       <button onClick={startSse}>开始会话</button>
+      <button onClick={downloadSse}>下载会话</button>
       <button onClick={stopSse}>停止会话</button>
     </>
   );
