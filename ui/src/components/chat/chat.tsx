@@ -11,7 +11,6 @@ import { IdContext } from '@/utils/idcontexts';
 
 interface ChatListProps {
   models: ModelConfig[];
-  // question: string | null | undefined;
 }
 
 enum allStatus {
@@ -33,10 +32,12 @@ interface sseMesage {
 }
 
 const Chat: React.FC<ChatListProps> = ({models}) => {
-  const sessionId = useContext(IdContext)?.id
-  console.log('渲染', sessionId)
-  const cachedSessionList = localStorage.getItem('sessionList' + sessionId);
-  const sessionList = JSON.parse(cachedSessionList)
+  const idContext = useContext(IdContext);
+  console.log("idcontext_chat", idContext?.id)
+  // const [messageApi, contextHolder] = message.useMessage();
+  // const freeze = useContext(FreezeContext);
+  const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
+  let sessionList = [[]];
   if(cachedSessionList != null) {
     
     // console.log('读取缓存', 'sessionList' + sessionid)
@@ -110,11 +111,23 @@ const Chat: React.FC<ChatListProps> = ({models}) => {
   };
 
   const stopSse = () => {
-    // refs.map((ref: any, index:number) => sessionList[index] = ref.current.getSessionList());
-    sessionList[0] = refs[0].current.getSessionList()
+    const item = refs[0].current.getSessionList()
+    const new_session_list = item.slice(0, -1)
+    const last_chat_json = item.slice(-1)[0]
+    console.log(last_chat_json)
+    new_session_list.push({
+      "id": last_chat_json["id"],
+      "status": last_chat_json["status"],
+      "message": last_chat_json["message"],
+      "question": last_chat_json["question"],
+    })
+    console.log("aaaa",new_session_list)
+    console.log("items_chat", item)
+    // refs.map((ref: any, index:number) => sessionList[index] = refs[0].current.getSessionList());
     console.log(sessionList)
-    localStorage.setItem('sessionList' + sessionId, JSON.stringify(sessionList))
-    console.log('更新缓存到', 'sessionList' + sessionId)
+    localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
+    console.log('更新缓存')
+    console.log('更新后', localStorage.getItem('sessionList' +  idContext?.id))
   }
 
   // useEffect(() => {

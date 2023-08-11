@@ -6,7 +6,7 @@ export interface IdContextProps {
   setId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export const IdContext = createContext<IdContextProps | null>(null);
+export const IdContext = createContext<IdContextProps | null>(null)
 
 // Create a provider component
 export const IdContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

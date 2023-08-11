@@ -12,6 +12,7 @@ import { useContext, useState } from 'react';
 import './home.module.less';
 import style from "./home.module.less";
 import ModelConfig from "@/components/model/model";
+import { createContext } from "vm";
 
 function Home () {
 
@@ -78,6 +79,13 @@ function Home () {
       names: models.map((model) => model.nickname),
       sessionId: 'default'
     }
+
+    // const sessionId = useContext(IdContext)?.id;
+    const idcontext = useContext(IdContext);
+    idcontext?.setId("12222")
+    console.log("idcontext", idcontext?.id)
+    const [sessionId, setSessionId] = useState<string>("default");
+    console.log("home_Session_id", sessionId)
 
     return (
       // <FreezeContext.Provider value={freezeValues}>

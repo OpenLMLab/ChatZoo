@@ -49,16 +49,18 @@ function Manager() {
     const addChat = () => {
         const newItem = {
             id: Date.now().toString(),
-            name: '新会话'
+            name: '新会话'+Date.now().toString()
         }
-        const newList = chatList.slice()
-        newList.unshift(newItem)
+        const newList = chatList.slice()  // 复制数组
+        newList.unshift(newItem)   // 向数组开头添加元素
         setChatList(newList)
         /**新增后会立即选中当前的sessionid */
         setCurChatId(newItem.id)
         localStorage.setItem('sessionid', newItem.id)
         // idContext?.setId(newItem.id)
         // console.log('是否更新', idContext?.id)
+        idContext?.setId(newItem.id)
+        console.log("addchat",idContext, newItem.id)
         /**初始化缓存 */
         const initSession =     [[
             {
@@ -103,7 +105,7 @@ function Manager() {
     const selectChat = (id:string) => {
         setCurChatId(id)
         idContext?.setId(id)
-        console.log('选中', id)
+        console.log('选中', id, curChatId)
     }
 
     return (
