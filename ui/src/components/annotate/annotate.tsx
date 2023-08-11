@@ -2,15 +2,17 @@ import React, {useContext, useState} from "react";
 import {Button, Modal, Checkbox, message } from 'antd';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { IdContext } from "@/utils/idcontexts";
+import { ModelContext } from "@/utils/modelcontext";
 
 /*参数与bottom一致*/
-interface BottomProps {
-    names: string[];
-}
-const Annotate: React.FC<BottomProps> = ({names}) => {
+
+const Annotate: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
     const [messageApi, contextHolder] = message.useMessage();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const models = useContext(ModelContext)?.models;
+    const names: string[] = [] 
+    models?.map(model => names.push(model.nickname));
     // 是否选中都不选
     const [isDis, setIsDis] = useState(false);
     const [isNull, setIsNull] = useState(true);

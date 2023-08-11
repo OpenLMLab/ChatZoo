@@ -19,59 +19,46 @@ const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
-  console.log('渲染')
-  console.log('会话id', sessionId)
   const models = useContext(ModelContext)?.models;
-  const numofModels = models?.length;
   const question = useContext(QuestionContext)?.question;
-  console.log('chat组件模型数量', numofModels)
   const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
   let sessionList: sseMesage[][] = [];
   if(cachedSessionList != null && cachedSessionList != undefined) {
     sessionList = JSON.parse(cachedSessionList)
   }
-  console.log('当前的会话记录', sessionList)
   /*创建ref*/
-  const refs = new Array();
-  for(let i = 0; i < numofModels!; i++) {
-    refs.push(useRef());
-  }
-  console.log("切换会话管理， refs:", refs)
-
+  const refs: any[] = [];
+  models?.map((_,index) => {
+    console.log(index)
+    refs.push(useRef<any>())
+    console.log(refs)
+  })
+  console.log('新的refs', refs)
   const startSse = () => {
-    const quest = "你是谁啊"
-    refs.map(ref => {
-      ref.current.startSse(quest)
+    refs.map(ref => ref.current.startSse(question))
+  };
+  const downloadSse = () => {
+    let new_session_list: sseMesage[][] = []
+    refs.map(ref => new_session_list.push(ref.current.getSessionList()))
+    new_session_list.map(sessionList=> {
+      const last_dict = sessionList[sessionList.length - 1]
+      const new_dict: sseMesage = {
+          "id": last_dict["id"],
+          "status": last_dict["status"],
+          "message": last_dict["message"],
+          "question": last_dict["question"]
+      }
+      console.log('新的字典', new_dict)
+      sessionList[sessionList.length - 1] = new_dict
     })
     // refs.map(ref => ref.current.startSse(question))
     console.log("start chat")
   };
 
   const stopSse = () => {
-    const new_session_list: sseMesage[][] = []
-    refs.map(ref => {
-      const item = ref.current.getSessionList()
-      const new_item = item.slice(0, -1)
-      console.log("status", ref.current.getStatus())
-      new_item.push({
-        "id": item[item.length-1]["id"],
-        "status": item[item.length-1]["status"],
-        "message": item[item.length-1]["message"],
-        "question": item[item.length-1]["question"]
-      })
-      new_session_list.push(new_item)
-    })
-    
-    console.log(new_session_list)
-    localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
-    console.log('更新缓存')
-    console.log('更新后', localStorage.getItem('sessionList' +  idContext?.id))
-    refs.map(ref=> ref.current.stopSse())
+    refs.map(ref => ref.current.stopSse())
   }
-
-  // const urls = ["http://10.140.1.76:8081", "http://10.140.0.151:8081"]
-  const urls = ["http://10.140.1.76:8082", "http://10.140.1.76:8082"]
-
+  const urls = ["http://10.140.1.76:8081", "http://10.140.1.76:8081"]
 
   return (
     <>
@@ -123,10 +110,9 @@ const Chat: React.FC = () => {
           </div>
           <div className={styles.main}>
             <PUYUC.ChatBox
-              eventName=''
-              propsSessionList={sessionList[index]}
-              url={urls[index]+"/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
-              ref={refs[index]}
+              propsSessionList={sessionList[0]}
+              url={urls[0]+"/chat/generate?turn_id="+sessionId+0+"&username=gtl&role=annotate"}
+              ref={refs[0]}
             />
           </div>
         </div>

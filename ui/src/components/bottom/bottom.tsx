@@ -7,6 +7,7 @@ import React, { useContext, useState } from 'react';
 import { QuestionContext } from '@/utils/question';
 import style from './bottom.module.less';
 import { IdContext } from '@/utils/idcontexts';
+import { ModelContext } from '@/utils/modelcontext';
 
 /**
  * 需要传入的参数为：所有模型的名称以及SessionId。
@@ -23,8 +24,10 @@ function handleInput(value:string) {
     console.log('输入的值', value)
 } 
 
-const Bottom: React.FC<BottomProps> = ({names}) => {
-    const sessionId = useContext(IdContext)?.id;
+const Bottom: React.FC = () => {
+    const models = useContext(ModelContext)?.models;
+    const names: string[] = []
+    models?.map(model => names.push(model.nickname))    
     const [inputValue, setInputValue] = useState('');
     const qc = useContext(QuestionContext);
     const handleChange = (event: any) => {
@@ -32,9 +35,9 @@ const Bottom: React.FC<BottomProps> = ({names}) => {
         setInputValue(value);
       };
     const handleEnter = () => {
-    handleInput(inputValue);
-    qc?.setQuestion(inputValue)
-    setInputValue('');
+        handleInput(inputValue);
+        qc?.setQuestion(inputValue)
+        setInputValue('');
     };
     const [open, setOpen] = useState(false);
     const [modal, setModal] = useState(false);
@@ -94,12 +97,12 @@ const Bottom: React.FC<BottomProps> = ({names}) => {
                             open={modal}
                             onCreate={handleOpenModal}
                             onCancel={() => {
-                            setModal(false);
+                                setModal(false);
                             }}
                         />
                     </>
                 ) : (
-                    <Annotate names={names}></Annotate>
+                    <Annotate></Annotate>
                 )}
                 </div>
                 <div className={style.icon}>

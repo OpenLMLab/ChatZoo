@@ -19,17 +19,22 @@ function Manager() {
     }])
     const models = useContext(ModelContext)?.models;
     const numOfModel = models?.length
+    console.log('模型个数', numOfModel)
     const initSession = [];
     for (let i = 0; i < numOfModel!; i++) {
       const sseMessage: sseMesage[] = [{
         id:  1,
         status: 0, // 假设 allStatus 是一个枚举类型
-        message: "初始data化",
-        question: "初data始化"
+        message: "初始da化",
+        question: "初da始化"
       }];
       initSession.push(sseMessage);
     }
+<<<<<<< HEAD
     /**TODO：防止溢出 */
+=======
+    // /**TODO：防止溢出 */
+>>>>>>> f8239bcd35f7ca2ac17717f017768eb0e6a02d28
     localStorage.setItem('sessionList0', JSON.stringify(initSession))
 
     const addChat = () => {
