@@ -5,7 +5,8 @@ import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { QuestionContext } from '@/utils/question';
 import { sseMesage } from '@puyu/components/dist/types/components/chatBox/chatInterface';
-import { Tooltip, Modal } from 'antd';
+import { Tooltip, Modal, Select, Input } from 'antd';
+import ModelConfig from '@/components/model/model';
 
 
 /**
@@ -17,6 +18,21 @@ import { Tooltip, Modal } from 'antd';
 
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
+  const mcf = new ModelConfig(
+                "fnlp/moss-moon-003-sft",
+                "moss_01",
+                "fnlp/moss-moon-003-sft",
+                { max_length: 2048 },
+                '0',
+                {
+                  meta_prompt: "",
+                  user_prompt: "Human: {}\n",
+                  bot_prompt: "\nAssistant: {}\n",
+                },
+                "10.140.1.76:8081",
+                true
+            )
+  const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf); // 开启 model 的 title 名字开关
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
   const models = useContext(ModelContext)?.models;
@@ -28,21 +44,16 @@ const Chat: React.FC = () => {
   }
   /*创建ref*/
   console.log("debug_chat_model", models)
-  // let refs: any[] = [];
   const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()]
-  // models?.forEach((model) =>{
-  //   console.log(model, refs, "创建情况")
-  //   refs.push(useRef<any>())
-  //   console.log("create_model", refs)
-  // })
-  // models?.map((_,index) => {
-  //   console.log(index)
-  //   const ref = useRef<any>()
-  //   console.log(refs, ref)
-  //   refs.push(useRef<any>())
-  //   console.log(refs)
-  // })
   console.log('新的refs', refs)
+
+
+  // funtions
+  const handleOpenModal = (model_info: ModelConfig) => {
+    setOpenModelConfig(true)
+    setModalConfig(model_info)
+  }
+
   const startSse = () => {
     refs.map(ref => ref.current.startSse(question))
   };
@@ -68,20 +79,64 @@ const Chat: React.FC = () => {
     refs.map(ref => ref.current.stopSse())
   }
   const urls = ["http://10.140.1.76:8081", "http://10.140.1.76:8081"]
-
+  const modalStyle = {
+    width: 450,
+    height: 622,
+    top: 89,
+    borderRadius: 4,
+  };
+  const { TextArea } = Input;
   return (
     <>
     <Modal
-        title="Modal 1000px width"
+        title={<span className={styles.modelConfigTile}>{modalConfig.nickname}模型配置</span>}
         centered
+        cancelText="取消"
+        okText="保存"
         open={openModelConfig}
         onOk={() => setOpenModelConfig(false)}
         onCancel={() => setOpenModelConfig(false)}
-        width={1000}
+        // style={modalStyle}
+        className={styles.modelConfig}
       >
-        <p>some contents...</p>
-        <p>some contents...</p>
-        <p>some contents...</p>
+        <div className={styles.modelConfigItem }>
+          <div className={styles.modelConfigItemInput}>stream</div>
+          <Select defaultValue={modalConfig.stream}
+              style={{ width: 120 }}
+              options={[
+                { value: false, label: 'false' },
+                { value: true, label: 'true' },
+              ]} />
+        </div>
+             
+        <div className={styles.modelConfigItem }>
+              <div className={styles.modelConfigItemInput}>meta_prompt</div>
+              <TextArea rows={4} placeholder="meta_prompt is" maxLength={6} />
+        </div>
+
+        <div className={styles.modelConfigItem }>
+          <div className={styles.tooltipTitle}>user_prompt</div>
+                <TextArea rows={4} placeholder="user_prompt is" maxLength={6} />
+        </div>
+              
+        
+        <div className={styles.modelConfigItem }>
+            <div className={styles.tooltipTitle}>bot_prompt</div>
+            <TextArea rows={4} placeholder="bot_prompt is" maxLength={6} />
+        </div>
+              
+        
+        <div className={styles.modelConfigItem }>
+
+            {Object.entries(modalConfig.generate_kwargs).map(([key, value]) => (
+            <div key={key}>
+              <div className={styles.tooltipTitle}>{key}</div>
+              <Input value={value} />
+            </div>
+          ))}
+
+        </div>
+
       </Modal>
       {models?.map((model: any, index: number) => (
         <div className={styles.chatContainer}>
@@ -100,7 +155,7 @@ const Chat: React.FC = () => {
                   </div>
               </Tooltip>
               <Tooltip title={<span className={styles.tooltipTitle}>设置</span>}>
-                  <div onClick={() => setOpenModelConfig(true)}>
+                  <div onClick={() => handleOpenModal(model)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path d="M8.43489 3.09853C8.61523 2.4493 9.20636 2 9.88017 2H14.1201C14.7939 2 15.385 2.4493 15.5654 3.09853L16.0767 4.93928L17.9266 4.46169C18.579 4.29325 19.2637 4.58053 19.6006 5.16407L21.7206 8.83594C22.0575 9.41948 21.9639 10.1561 21.4918 10.6369L20.1534 12L21.4918 13.3632C21.9639 13.8439 22.0575 14.5805 21.7206 15.1641L19.6006 18.8359C19.2637 19.4195 18.579 19.7068 17.9266 19.5383L16.0767 19.0607L15.5654 20.9015C15.385 21.5507 14.7939 22 14.1201 22H9.88017C9.20635 22 8.61523 21.5507 8.43489 20.9015L7.9236 19.0608L6.07405 19.5383C5.42163 19.7068 4.73696 19.4195 4.40005 18.8359L2.2801 15.1641C1.94319 14.5805 2.03674 13.8439 2.50882 13.3632L3.84725 12L2.50882 10.6369C2.03674 10.1561 1.94319 9.41948 2.2801 8.83594L4.40005 5.16407C4.73696 4.58053 5.42163 4.29325 6.07405 4.46169L7.9236 4.93918L8.43489 3.09853ZM10.2602 4L9.71924 5.94749C9.50038 6.73539 8.69077 7.20282 7.899 6.99841L5.94208 6.49319L4.20217 9.50681L5.6183 10.9491C6.19121 11.5326 6.19121 12.4674 5.6183 13.0509L4.20217 14.4932L5.94208 17.5068L7.89901 17.0016C8.69078 16.7972 9.50038 17.2646 9.71924 18.0525L10.2602 20H13.74L14.281 18.0524C14.4999 17.2645 15.3095 16.7971 16.1013 17.0015L18.0586 17.5068L19.7985 14.4932L18.3824 13.0509C17.8095 12.4674 17.8095 11.5326 18.3824 10.9491L19.7985 9.50681L18.0586 6.49319L16.1013 6.99851C15.3095 7.20292 14.4999 6.73549 14.281 5.94759L13.74 4H10.2602ZM12.0001 10C10.8956 10 10.0001 10.8954 10.0001 12C10.0001 13.1046 10.8956 14 12.0001 14C13.1047 14 14.0001 13.1046 14.0001 12C14.0001 10.8954 13.1047 10 12.0001 10ZM8.00012 12C8.00012 9.79086 9.79099 8 12.0001 8C14.2093 8 16.0001 9.79086 16.0001 12C16.0001 14.2091 14.2093 16 12.0001 16C9.79099 16 8.00012 14.2091 8.00012 12Z" fill="white" fill-opacity="0.85" />
                     </svg>
