@@ -41,9 +41,9 @@ function Manager() {
         const newList = chatList.slice()  // 复制数组
         newList.unshift(newItem)   // 向数组开头添加元素
         setChatList(newList)
-        /**新增后会立即选中当前的sessionid */
-        setCurChatId(newItem.id)
-        idContext?.setId(newItem.id)
+         /**新增后会立即选中当前的sessionid */
+         setCurChatId(newItem.id)
+         idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length
         const initSession = [];

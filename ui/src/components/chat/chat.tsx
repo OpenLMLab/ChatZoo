@@ -50,11 +50,10 @@ const Chat: React.FC = () => {
       console.log('新的字典', new_dict)
       sessionList[sessionList.length - 1] = new_dict
     })
-    console.log('修改后的字典', new_session_list)
-    localStorage.setItem('sessionList' + idContext?.id, JSON.stringify(new_session_list))
-    console.log('更新缓存')
-    console.log('更新后', 'sessionList' +  idContext?.id)
-  }
+    // refs.map(ref => ref.current.startSse(question))
+    console.log("start chat")
+  };
+
   const stopSse = () => {
     refs.map(ref => ref.current.stopSse())
   }
