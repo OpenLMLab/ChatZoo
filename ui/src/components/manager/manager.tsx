@@ -15,7 +15,7 @@ function Manager() {
         id: 'default',
         name: '请注意这是一个模拟会话，所做的处理均不会被记录入数据库~',
     }])
-    localStorage.setItem('sessionList' + 'default', JSON.stringify(
+    localStorage.setItem('sessionList' + '0', JSON.stringify(
     [[
         {
           id: 140385,
@@ -56,7 +56,9 @@ function Manager() {
         setChatList(newList)
         /**新增后会立即选中当前的sessionid */
         setCurChatId(newItem.id)
-        idContext?.setId(newItem.id)
+        localStorage.setItem('sessionid', newItem.id)
+        // idContext?.setId(newItem.id)
+        // console.log('是否更新', idContext?.id)
         /**初始化缓存 */
         const initSession =     [[
             {

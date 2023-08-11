@@ -54,7 +54,6 @@ function Home () {
           bot_prompt: "\nAssistant: {}\n",
         }
       )
-      // ),
       // new ModelConfig(
       //   "fnlp/moss-moon-003-sft",
       //   "moss_01",
@@ -80,13 +79,11 @@ function Home () {
       sessionId: 'default'
     }
 
-    const sessionId = useContext(IdContext)?.id;
-
     return (
-      <FreezeContext.Provider value={freezeValues}>
-        <ModeContext.Provider value={contextValues}>
+      // <FreezeContext.Provider value={freezeValues}>
+        // <ModeContext.Provider value={contextValues}>
+        <IdContext.Provider value={idContextValues}>
             <div className={style.wrapper}>
-              <IdContext.Provider value={idContextValues}>
                 <Row  gutter={24} className={style.row}>
                   <Col span={4} className={style.sider}>
                       <h1 className={style.logo}>ChatZoo</h1>
@@ -98,22 +95,23 @@ function Home () {
                         <Mode></Mode>
                       </div> 
                     </div>
-                    <QuestionContext.Provider value={questionValues}>
+                    {/* <QuestionContext.Provider value={questionValues}> */}
                       <div className={style.content}>
                         <div className={style.add}>
-                        {models.length === 0 ? <Add></Add> : <Chat models={models} sessionId={sessionId} />}
+                          {models.length === 0 ? <Add></Add> : <Chat models={models}/>}
                         </div>
+                        {/* </IdContext.Provider> */}
                       </div>
                       <div className={style.footer}>
-                        <Bottom names={modelNames.names} sessionId={modelNames.sessionId}/>
+                        <Bottom names={modelNames.names}/>
                       </div>
-                    </QuestionContext.Provider>
+                    {/* </QuestionContext.Provider> */}
                   </Col>
                 </Row>
-              </IdContext.Provider>
             </div>
-          </ModeContext.Provider>
-      </FreezeContext.Provider>
+          {/* // </ModeContext.Provider> */}
+      {/* // </FreezeContext.Provider> */}
+      </IdContext.Provider>
       );
 }
 

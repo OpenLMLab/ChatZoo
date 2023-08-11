@@ -6,6 +6,7 @@ import { Button, ConfigProvider, Input, Popover } from 'antd';
 import React, { useContext, useState } from 'react';
 import { QuestionContext } from '@/utils/question';
 import style from './bottom.module.less';
+import { IdContext } from '@/utils/idcontexts';
 
 /**
  * 需要传入的参数为：所有模型的名称以及SessionId。
@@ -13,7 +14,6 @@ import style from './bottom.module.less';
 
 interface BottomProps {
     names: string[];
-    sessionId: string;
 }
 
 /**
@@ -23,7 +23,8 @@ function handleInput(value:string) {
     console.log('输入的值', value)
 } 
 
-const Bottom: React.FC<BottomProps> = ({names, sessionId}) => {
+const Bottom: React.FC<BottomProps> = ({names}) => {
+    const sessionId = useContext(IdContext)?.id;
     const [inputValue, setInputValue] = useState('');
     const qc = useContext(QuestionContext);
     const handleChange = (event: any) => {
@@ -93,7 +94,7 @@ const Bottom: React.FC<BottomProps> = ({names, sessionId}) => {
                         />
                     </>
                 ) : (
-                    <Annotate names={names} sessionId={sessionId}></Annotate>
+                    <Annotate names={names}></Annotate>
                 )}
                 </div>
                 <div className={style.icon}>

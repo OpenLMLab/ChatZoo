@@ -1,4 +1,4 @@
-import { useRef, useContext } from 'react';
+import { useRef, useContext, useState, useEffect } from 'react';
 import styles from './chat.module.less';
 import PUYUC from '@puyu/components';
 import { FreezeContext } from '@/utils/freezecontext';
@@ -11,7 +11,6 @@ import { IdContext } from '@/utils/idcontexts';
 
 interface ChatListProps {
   models: ModelConfig[];
-  sessionId: string | null | undefined;
   // question: string | null | undefined;
 }
 
@@ -33,15 +32,15 @@ interface sseMesage {
   question: string; // 对话问题A
 }
 
-const Chat: React.FC<ChatListProps> = ({models, sessionId}) => {
-  console.log('进入', sessionId)
-  // const [messageApi, contextHolder] = message.useMessage();
-  // const freeze = useContext(FreezeContext);
+const Chat: React.FC<ChatListProps> = ({models}) => {
+  const sessionId = useContext(IdContext)?.id
+  console.log('渲染', sessionId)
   const cachedSessionList = localStorage.getItem('sessionList' + sessionId);
-  let sessionList = [[]];
+  const sessionList = JSON.parse(cachedSessionList)
   if(cachedSessionList != null) {
-    sessionList = JSON.parse(cachedSessionList)
-    console.log('读取缓存', sessionList)
+    
+    // console.log('读取缓存', 'sessionList' + sessionid)
+    // console.log('目前缓存', sessionList)
   }
   // if(cachedSessionList != null) {
   //   const cacheList = cachedSessionList;
@@ -97,7 +96,6 @@ const Chat: React.FC<ChatListProps> = ({models, sessionId}) => {
     refs.push(useRef<any>())
   }
 
-  console.log('refs', refs)
   // // const error = () => {
   // //   messageApi.open({
   // //     type: 'error',
@@ -112,11 +110,11 @@ const Chat: React.FC<ChatListProps> = ({models, sessionId}) => {
   };
 
   const stopSse = () => {
-    refs.map((ref: any, index:number) => sessionList[index] = ref.current.getSessionList());
+    // refs.map((ref: any, index:number) => sessionList[index] = ref.current.getSessionList());
+    sessionList[0] = refs[0].current.getSessionList()
     console.log(sessionList)
     localStorage.setItem('sessionList' + sessionId, JSON.stringify(sessionList))
-    console.log('更新缓存')
-    console.log('更新后', localStorage.getItem('sessionList' + sessionId))
+    console.log('更新缓存到', 'sessionList' + sessionId)
   }
 
   // useEffect(() => {
@@ -158,13 +156,10 @@ const Chat: React.FC<ChatListProps> = ({models, sessionId}) => {
           </div>
           <div className={styles.main}>
             <PUYUC.ChatBox
-              // eventName=''
-              // className={styles.chatBox}
-              propsSessionList={sessionList[index]}
+              propsSessionList={sessionList[0]}
               url={"http://10.140.0.151:8081/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
               ref={refs[0]}
             />
-            <div>{index}</div>
           </div>
         </div>
       ))}
