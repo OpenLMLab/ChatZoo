@@ -57,7 +57,7 @@ function Home() {
         true,
         '0',
         true
-      )
+      ),
     ]);
 
   const modelsValues: ModelContextProps = {

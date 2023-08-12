@@ -33,6 +33,7 @@ function handleInput(value:string) {
 const Bottom: React.FC = () => {
     // 控制输入框禁用
     const [isInput, setisInput] = useState(true);
+
     const [inputValue, setInputValue] = useState('');
     const [status, setStatus] = useState(false);
     const mode = useContext(ModeContext)?.mode;
@@ -40,6 +41,19 @@ const Bottom: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
     const names: string[] = []
     models?.map(model => names.push(model.nickname))
+
+
+    // 禁用输入框的事件
+    useEffect(()=>{
+        const banInputEvent = (banButton: boolean) => {
+            setisInput(banButton)
+        }
+        eventBus.on("banInputEvent", banInputEvent)
+        return ()=>{
+            eventBus.off("banInputEvent", banInputEvent)
+        }
+    })
+
 
     useEffect(() => {
         const statusListener = (status: boolean) => {

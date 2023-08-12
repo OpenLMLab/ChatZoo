@@ -51,13 +51,14 @@ const Chat: React.FC = () => {
   const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sessionMesage = {}
   sessionList = JSON.parse(cachedSessionList!)
-  if(sessionList['0'].length === 0) {
-    freeze?.setFreeze('no')
-  } else {
-    freeze?.setFreeze('yes')
-    // 找到模式
-    eventBus.emit('findMode', sessionId)
-  }
+  console.log("chat session list", sessionList)
+  // if(sessionList['0'].length === 0) {
+  //   freeze?.setFreeze('no')
+  // } else {
+  //   freeze?.setFreeze('yes')
+  //   // 找到模式
+  //   // eventBus.emit('findMode', sessionId)
+  // }
 
   if(models != null)
       models.forEach((model) =>{
@@ -122,9 +123,9 @@ const Chat: React.FC = () => {
     sessionList = new_session_list
     localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
     console.log('已经保存到', sessionId)
-    if(sessionList['0'].length === 1) {
-      eventBus.emit('setMode', mode, sessionId)
-    }
+    // if(sessionList['0'].length === 1) {
+    //   eventBus.emit('setMode', mode, sessionId)
+    // }
   };
   // 关闭某个模型
   const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
@@ -157,6 +158,9 @@ const Chat: React.FC = () => {
                 sessionList[model.model_id] = []
             }
           })
+      // 对话开始前， 禁用会话列表, 禁用切换模式
+      eventBus.emit('banSessionList', true)
+      eventBus.emit('banModeEvent', true)
       // 开始对话
       startSse(question, models)
       // 异步保存缓存
@@ -166,6 +170,11 @@ const Chat: React.FC = () => {
         if(mode === 'single') {
           eventBus.emit('input', false) 
         }
+        // 会话结束后
+        // 对话开始前， 开启会话列表
+        console.log("开启会话列表")
+        eventBus.emit('banSessionList', false)
+        eventBus.emit('banModeEvent', false)
       }, 5000); // 延迟时间为 1000 毫秒（1秒）
     };
     eventBus.on('sendMessage', listener);

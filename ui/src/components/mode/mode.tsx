@@ -1,11 +1,15 @@
 import { ModeContext } from '@/utils/contexts';
 import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import style from './mode.module.less';
 import { FreezeContext } from '@/utils/freezecontext';
+import eventBus from '@/utils/eventBus';
 
 const Mode = () => {
+    // 禁用mode的开关
+    const [banMode, setBanMode] = useState(false)
+
     // 获取权限
     const permission = localStorage.getItem('permission');
     let freeze = useContext(FreezeContext);
@@ -35,13 +39,24 @@ const Mode = () => {
         currOption = disOptions
     }
 
+    // 开始/关闭会话后，接受到禁用/开启mode的命令
+    useEffect(()=>{
+        const banModeEvent = (banButton: boolean) => {
+            setBanMode(banButton)
+        }
+        eventBus.on('banModeEvent', banModeEvent)
+        return () => {
+            eventBus.off('banModeEvent', banModeEvent)
+        }
+    })
+
     return (
         <div className={style.radio}>
             <Radio.Group
                 options = {currOption}
                 onChange = {onChange}
                 value = {value}
-                disabled = {myfreeze}
+                disabled = {banMode}
                 optionType = 'button'
                 buttonStyle = 'outline'
             />
