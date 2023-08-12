@@ -1,3 +1,5 @@
+@import '@/styles/theme.less';
+
 .chatContainer {
     display: flex;
     flex-direction: column;
@@ -19,7 +21,7 @@
     justify-content: space-between;
     align-items: center;
     border-radius: 4px 4px 0px 0px;
-    background: var(--main, #4C8F70);
+    background: @primary;
 
     .typo {
         display: -webkit-box;
