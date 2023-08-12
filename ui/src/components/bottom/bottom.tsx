@@ -8,6 +8,8 @@ import style from './bottom.module.less';
 import { ModelContext } from '@/utils/modelcontext';
 import eventBus from '@/utils/eventBus'
 import { IdContext } from '@/utils/idcontexts';
+import ModelConfig from '../model/model';
+import { sessionMesage } from '@/utils/sessionInterface';
 
 /**
  * 底部栏（输入、标注、下载）
@@ -80,6 +82,39 @@ const Bottom: React.FC = () => {
     const handleOpenModal = (newOpen: any) => {
         setModal(newOpen)
     }
+    // 下载对话记录
+    const handleDownloadSingle = (model_info: ModelConfig, sessionid: string) => {
+        let history: sessionMesage = {}
+        const cache_data = localStorage.getItem(sessionid)
+        if(cache_data)
+            history = JSON.parse(cache_data)
+        const model_history = JSON.stringify(history[model_info.model_id])
+        const blob = new Blob([model_history], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = model_info.nickname +'.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+    const handleDownloadAll = (model_infos: ModelConfig[], sessionid: string) => {
+        let history: sessionMesage = {}
+        const cache_data = localStorage.getItem(sessionid)
+        if(cache_data)
+            history = JSON.parse(cache_data)
+        let new_history: sessionMesage = {}
+        model_infos.forEach(model_info => {
+            new_history[model_info.nickname] = history[model_info.model_id]
+        });
+        const model_history = JSON.stringify(new_history)
+        const blob = new Blob([model_history], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download =  '全部.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
 
     return (
             <ConfigProvider
@@ -140,8 +175,9 @@ const Bottom: React.FC = () => {
                         overlayInnerStyle={{fontSize: 14, fontFamily: "PingFang SC", fontWeight: 400}}
                         content={
                             <div>
-                                <Button block className={style.popoverTitle}>全部</Button>
-                                {names.map((name: string) => (<Button block className={style.popoverTitle}>{name}</Button>))}
+                                <Button block className={style.popoverTitle} onClick={()=>{handleDownloadAll(models!, sessionId!)}}>全部</Button>
+                                {models?.map((name: ModelConfig) => (<Button block className={style.popoverTitle} onClick={() => {handleDownloadSingle(name, sessionId!)}}>
+                                    {name.nickname}</Button>))}
                             </div>
                         }
                         title={<span className={style.popoverTitle}>请选择要下载的会话记录</span>}

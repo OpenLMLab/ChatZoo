@@ -57,6 +57,7 @@ function Manager() {
           if(models)
             initSession[models[i].model_id] = []
         }
+        console.log("addchat", newItem.id)
         localStorage.setItem(newItem.id, JSON.stringify(initSession))
     }
 
