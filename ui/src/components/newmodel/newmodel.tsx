@@ -63,7 +63,8 @@ const NewForm: React.FC<newFormProps> = ({
                 res.data.data['device'],
                 res.data.data['prompts'],
                 res.data.data['url'],
-                res.data.data['stream']
+                res.data.data['stream'],
+                res.data.data['model_id']
             )
             const updateModels = [...models, model]
             mct?.setModels(updateModels)

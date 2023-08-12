@@ -36,6 +36,7 @@ const Annotate: React.FC = () => {
         if(isNull) {
             error();
         } else {
+            vote();
             setIsModalOpen(false);
         }
     }
@@ -56,6 +57,26 @@ const Annotate: React.FC = () => {
         setIsDis(!isDis);
         console.log('都不选')
     }
+    // 投票功能
+    const vote = () => {
+        const username = localStorage.getItem('username')
+        const dialogue_id = null
+        const turn_id = sessionId
+        const vote_result = options
+        const vote_model: { [nickname: string]: string } = {};
+        models?.forEach((element) => {
+            vote_model[element.nickname] = element.model_id
+        });
+        const data = {
+            'username': username,
+            'vote_result': vote_result,
+            'vote_model': vote_model,
+            'dialogue_id': dialogue_id,
+            'turn_id': turn_id
+        }
+        console.log('打包数据', data)
+    }
+
     return (
         <>
             {contextHolder}
