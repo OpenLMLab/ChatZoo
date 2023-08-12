@@ -40,6 +40,7 @@ const Chat: React.FC = () => {
   const role = localStorage.getItem('permission')  
   console.log('当前会话', sessionId)
   const models = useContext(ModelContext)?.models;
+  const setModels = useContext(ModelContext)
   const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sseMesage[][] = [];
   if(cachedSessionList != null && cachedSessionList != undefined) {
@@ -106,7 +107,15 @@ const Chat: React.FC = () => {
     localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
     console.log('已经保存到', sessionId)
   };
-
+  // 关闭某个模型
+  const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
+    // 传入要关闭模型的index
+    console.log("关闭模型", close_Model, index)
+    let new_models: ModelConfig[] = []
+    new_models = models?.filter((_,item) => item != index)
+    setModels?.setModels(new_models);
+    console.log(models, new_models)
+  }
   const { TextArea } = Input;
 
   useEffect(() => {
@@ -213,7 +222,7 @@ const Chat: React.FC = () => {
               
               <Tooltip title={<span className={styles.tooltipTitle}>关闭</span>}>
                   {(role == "debug") ?(
-                    <div>
+                    <div onClick={() => closeModel(model, index)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path d="M19.4523 5.89065C19.8421 5.49943 19.841 4.86626 19.4497 4.47644C19.0585 4.08662 18.4253 4.08775 18.0355 4.47898L11.9851 10.5511L5.91311 4.50085C5.52189 4.11103 4.88872 4.11217 4.4989 4.50339C4.10908 4.89462 4.11021 5.52778 4.50144 5.9176L10.5735 11.9679L4.45398 18.1093C4.06416 18.5006 4.06529 19.1337 4.45652 19.5236C4.84774 19.9134 5.48091 19.9122 5.87073 19.521L11.9902 13.3795L18.1318 19.4991C18.523 19.889 19.1562 19.8878 19.546 19.4966C19.9358 19.1054 19.9347 18.4722 19.5435 18.0824L13.4019 11.9628L19.4523 5.89065Z" fill="white" fill-opacity="0.85" />
                     </svg>
