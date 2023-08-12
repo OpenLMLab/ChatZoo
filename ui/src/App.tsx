@@ -42,6 +42,7 @@ function App () {
         http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
           localStorage.setItem('permission', res.data.data.role);
           localStorage.setItem('username', res.data.data.username);
+          console.log("login success")
           navigate('/home');
         }).catch(() => {
           error("登录失败！")
