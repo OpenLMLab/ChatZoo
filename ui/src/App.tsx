@@ -40,6 +40,7 @@ function App () {
         };
         // 登录
         http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
+          console.log('登陆后', res.data.data.role)
           localStorage.setItem('permission', res.data.data.role);
           localStorage.setItem('username', res.data.data.username);
           console.log("login success")

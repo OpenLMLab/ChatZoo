@@ -2,10 +2,9 @@ import PUYUC, {IChatItem} from 'chat-webkit'
 import { useContext, useState, useEffect } from 'react';
 import { IdContext } from '@/utils/idcontexts';
 import style from "./manager.module.less";
-import { ModeContext } from '@/utils/contexts';
 import { ModelContext } from '@/utils/modelcontext';
-import ModelConfig from '../model/model';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
+import eventBus from '@/utils/eventBus';
 
 /**
  * 至少保持开启一个会话。
@@ -19,7 +18,6 @@ function Manager() {
     }])
     const models = useContext(ModelContext)?.models;
     const numOfModel = models?.length
-    console.log('模型个数', numOfModel)
     const initSession = [];
     for (let i = 0; i < numOfModel!; i++) {
       const sseMessage: sseMesage[] = [];
@@ -47,7 +45,7 @@ function Manager() {
           initSession.push(sseMessage);
         }
         console.log('初始化sessionList', initSession)
-        localStorage.setItem('sessionList' + newItem.id, JSON.stringify(initSession))
+        localStorage.setItem(newItem.id, JSON.stringify(initSession))
     }
 
     const deleteChat = (id: string) => {
@@ -68,7 +66,10 @@ function Manager() {
     const selectChat = (id:string) => {
         setCurChatId(id)
         idContext?.setId(id)
-        console.log('选中', id, curChatId)
+        // 如果选择的id与当前的id不一致，则默认保存
+        if(id != curChatId) {
+          eventBus.emit('downloadSession')
+        }
     }
 
     return (

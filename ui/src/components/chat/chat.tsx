@@ -3,7 +3,6 @@ import styles from './chat.module.less';
 import PUYUC from 'chat-webkit';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
-import { QuestionContext } from '@/utils/question';
 import { Tooltip, Modal, Select, Input } from 'antd';
 import ModelConfig from '@/components/model/model';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
@@ -18,6 +17,7 @@ import eventBus from '@/utils/eventBus';
  */
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
+
   const mcf = new ModelConfig(
                 "fnlp/moss-moon-003-sft",
                 "moss_01",
@@ -29,65 +29,84 @@ const Chat: React.FC = () => {
                   user_prompt: "Human: {}\n",
                   bot_prompt: "\nAssistant: {}\n",
                 },
-                "10.140.1.76:8081",
+                "http://10.140.1.76:8083",
                 true
             )
   const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf); // 开启 model 的 title 名字开关
+
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
    // 用户的角色， 用于决定是否渲染模型管理
   const role = localStorage.getItem('permission')  
-  // if(role == "debug"){
-  //   console.log("更改role!!!!!!!!!!!!!!")
-  //   setRoleControl(true)
-  // }
   console.log('当前会话', sessionId)
   const models = useContext(ModelContext)?.models;
-  const cachedSessionList = localStorage.getItem('sessionList' + idContext?.id);
+  const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sseMesage[][] = [];
   if(cachedSessionList != null && cachedSessionList != undefined) {
     sessionList = JSON.parse(cachedSessionList)
   }
-  console.log(models?.length, sessionList.length, sessionList, "models")
+
   if(models != null)
       for (let index = 0; index < (models?.length-sessionList.length); index++) {
         sessionList.push([])
       }
   const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()]
-  console.log("model_print", models, sessionList.length)
+  const modelStatus = ['0', '0', '0', '0']
+
   // funtions
   const handleOpenModal = (model_info: ModelConfig) => {
     setOpenModelConfig(true)
     setModalConfig(model_info)
   }
+
   const startSse = (question: string, models: ModelConfig[]) => {
-    console.log("model_lenght", models?.length)
+    // 开始会话前先保存
+    downloadSse()
     refs.map((ref, index) => {
       if(index < models?.length!) {
-        console.log(index, question, sessionList)
         ref.current.startSse(question)
       }
     })
   };
-  // const downloadSse = () => {
-  //   let new_session_list: sseMesage[][] = []
-  //   refs.map(ref => new_session_list.push(ref.current.getSessionList()))
-  //   new_session_list.map(sessionList=> {
-  //     const last_dict = sessionList[sessionList.length - 1]
-  //     const new_dict: sseMesage = {
-  //         "id": last_dict["id"],
-  //         "status": last_dict["status"],
-  //         "message": last_dict["message"],
-  //         "question": last_dict["question"]
-  //     }
-  //     console.log('新的字典', new_dict)
-  //     sessionList[sessionList.length - 1] = new_dict
-  //   })
-  //   // refs.map(ref => ref.current.startSse(question))
-  //   console.log("start chat")
-  // };
+  // 获取状态
+  const getSseStatus = () => {
+    let needDownload = true;
+    refs.map((ref, index) => {
+      if(index < models?.length!) {
+        console.log('模型', index, '的状态是', ref.current.getStatus())
+        if(ref.current.getStatus() != '0') {
+          needDownload = false;
+        }
+      }
+    })
+    return needDownload;
+  }
 
-  const urls = ["http://10.140.1.76:8083", "http://10.140.1.76:8082"]
+  const downloadSse = () => {
+    let new_session_list: sseMesage[][] = []
+    refs.map((ref, index) => {
+      if(index < models?.length!) {
+        new_session_list.push(ref.current.getSessionList())
+        console.log('收到对话', ref.current.getSessionList())
+      }
+    })
+    new_session_list.map(session=> {
+      if(session.length - 1 >= 0) {
+        const last_dict = session[session.length - 1]
+        const new_dict: sseMesage = {
+            "id": last_dict["id"],
+            "status": last_dict["status"],
+            "message": last_dict["message"],
+            "question": last_dict["question"]
+        }
+        session[session.length - 1] = new_dict
+      }
+    })
+    console.log('最新的session', new_session_list)
+    localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
+    console.log('已经保存到', sessionId)
+  };
+
   const { TextArea } = Input;
 
   useEffect(() => {
@@ -98,15 +117,14 @@ const Chat: React.FC = () => {
       for (let index = 0; index < (models?.length-sessionList.length); index++) {
         sessionList.push([])
       }
-      console.log("useeffect", models, sessionList)
-      startSse(question, models)
-      console.log('接收到', question)
-      // 执行一些操作
+      startSse(question, models)   
     };
     eventBus.on('sendMessage', listener);
+    // eventBus.on('downloadSession', downloadListener);
     return () => {
       // 在组件卸载时取消订阅
       eventBus.removeListener('sendMessage', listener);
+      // eventBus.removeListener('downloadSession', downloadListener);
     };
   }, []);
   
@@ -217,7 +235,7 @@ const Chat: React.FC = () => {
           <div className={styles.main}>
             <PUYUC.ChatBox
               propsSessionList={sessionList[index]}
-              url={urls[index]+"/chat/generate?turn_id="+sessionId+"&username=gtl&role=annotate"}
+              url={model.url+"/chat/generate?turn_id="+sessionId+"&username=gtl&role="+localStorage.getItem('permission')}
               ref={refs[index]}
             />
           </div>

@@ -52,7 +52,7 @@ function Home () {
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
         },
-        "10.140.1.76:8081",
+        "http://10.140.1.76:8083",
         true
       )
     ]);
