@@ -7,8 +7,9 @@ import { Tooltip, Modal, Select, Input } from 'antd';
 import ModelConfig from '@/components/model/model';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 import eventBus from '@/utils/eventBus';
-import { url } from 'inspector';
 import {sessionMesage} from '@/utils/sessionInterface'
+import { ModeContext } from '@/utils/contexts';
+
 
 /**
  * 1. 获取全局sessionId
@@ -18,7 +19,7 @@ import {sessionMesage} from '@/utils/sessionInterface'
  */
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
-
+  const mode = useContext(ModeContext)?.mode
   const mcf = new ModelConfig(
                 "fnlp/moss-moon-003-sft",
                 "moss_01",
@@ -36,7 +37,6 @@ const Chat: React.FC = () => {
                 true
             )
   const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf); // 开启 model 的 title 名字开关
-
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
    // 用户的角色， 用于决定是否渲染模型管理
@@ -61,7 +61,7 @@ const Chat: React.FC = () => {
         }
       })
   const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()]
-  const modelStatus = ['0', '0', '0', '0']
+  const modelStatus = ['-1', '-1', '-1', '-1']
 
   // funtions
   const handleOpenModal = (model_info: ModelConfig) => {
@@ -71,7 +71,6 @@ const Chat: React.FC = () => {
 
   const startSse = (question: string, new_models: ModelConfig[]) => {
     // 开始会话前先保存
-    downloadSse(new_models)
     console.log("startSse", new_models, sessionList)
     refs.map((ref, index) => {
       if(index < new_models?.length && new_models[index].start) {
@@ -82,16 +81,13 @@ const Chat: React.FC = () => {
   };
   // 获取状态
   const getSseStatus = () => {
-    let needDownload = true;
     refs.map((ref, index) => {
       if(index < models?.length!) {
         console.log('模型', index, '的状态是', ref.current.getStatus())
-        if(ref.current.getStatus() != '0') {
-          needDownload = false;
-        }
+        modelStatus[index] =  ref.current.getStatus()
       }
     })
-    return needDownload;
+    console.log('打印当前状态', modelStatus)
   }
 
   const downloadSse = (new_models: ModelConfig[]) => {
@@ -155,9 +151,8 @@ const Chat: React.FC = () => {
   const {Option} = Select
 
   useEffect(() => {
-    // 订阅事件
-    const listener = (question: string, models: ModelConfig[]) => {
-      // 处理事件
+    const listener = (question: string, models: ModelConfig[], mode:string) => {
+      // 插入会话
       if(models != null)
           models.forEach((model) =>{
             if(!(model.model_id in sessionList)){
@@ -165,14 +160,22 @@ const Chat: React.FC = () => {
                 sessionList[model.model_id] = []
             }
           })
-      startSse(question, models)   
+      // 开始对话
+      startSse(question, models)
+      // 异步保存缓存
+      setTimeout(() => {
+        getSseStatus();
+        downloadSse(models);
+        if(mode === 'single') {
+          eventBus.emit('input') 
+        }
+        // 通知标注
+      }, 5000); // 延迟时间为 1000 毫秒（1秒）
     };
     eventBus.on('sendMessage', listener);
-    // eventBus.on('downloadSession', downloadListener);
     return () => {
       // 在组件卸载时取消订阅
       eventBus.removeListener('sendMessage', listener);
-      // eventBus.removeListener('downloadSession', downloadListener);
     };
   }, []);
   
@@ -186,7 +189,6 @@ const Chat: React.FC = () => {
         open={openModelConfig}
         onOk={() => setOpenModelConfig(false)}
         onCancel={() => setOpenModelConfig(false)}
-        // style={modalStyle}
         className={styles.modelConfig}
       >
         <div className={styles.modelConfigItem }>
@@ -289,7 +291,7 @@ const Chat: React.FC = () => {
           <div className={styles.main} key={index+""}>
             <PUYUC.ChatBox
               propsSessionList={sessionList[model.model_id]}
-              url={model.url+"/chat/generate?turn_id="+sessionId+"&username=gtl&role="+localStorage.getItem('permission')}
+              url={model.url+"/chat/generate?turn_id="+sessionId+"&username="+localStorage.getItem('username')+"&role="+localStorage.getItem('permission')}
               ref={refs[index]}
               token={JSON.stringify(model.generate_kwargs)}
             />

@@ -1,9 +1,11 @@
+@import '@/styles/theme.less';
+
 .wrapper {
     height: 100%;
   }
   
   .sider {
-    background: #4C8F70;
+    background: @primary;
     height: 100%;
     min-height: 800px;
   }
@@ -23,7 +25,7 @@
   }
   
   .main {
-    background: linear-gradient(117.2deg, #518673 10.6%, #41464A 90.8%);
+    background: @background-gradient;
     height: 100%;
     min-height: 800px;
     display: flex;
