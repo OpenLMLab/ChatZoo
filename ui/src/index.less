@@ -1,3 +1,5 @@
+@import '@/styles/theme.less';
+
 body,
 html,
 #root {
@@ -24,7 +26,7 @@ html,
 }
 
 .ant-btn-primary {
-  background-color: rgba(76, 143, 112, 1);
+  background-color: @primary;
 }
 .ant-btn-default {
   background-color: rgba(244, 245, 249, 1);
@@ -36,13 +38,13 @@ html,
   gap: 10px;
 }
 .ant-btn-primary:not(:disabled):not(.ant-btn-disabled):hover {
-  background-color: rgba(76, 143, 112, 1);
+  background-color: @primary;
 }
 :where(.css-dev-only-do-not-override-txh9fw).ant-btn-default:not(:disabled):not(.ant-btn-disabled):active {
-  color: rgba(76, 143, 112, 1);
-  border-color: rgba(76, 143, 112, 1);
+  color: @primary;
+  border-color: @primary;
 }
 .ant-btn-default:not(:disabled):not(.ant-btn-disabled):hover {
-  color: rgba(76, 143, 112, 1);
-  border-color: rgba(76, 143, 112, 1);
+  color: @primary;
+  border-color: @primary;
 }
