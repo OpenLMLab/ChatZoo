@@ -53,7 +53,8 @@ function Home () {
           bot_prompt: "\nAssistant: {}\n",
         },
         "http://10.140.1.76:8083",
-        true
+        true,
+        '0'
       )
     ]);
 

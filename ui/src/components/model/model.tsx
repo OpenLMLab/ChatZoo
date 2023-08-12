@@ -17,6 +17,7 @@ class ModelConfig {
     prompts: Prompts;
     url: string;
     stream: boolean;
+    model_id: string;
 
     constructor(
         model_name_or_path: string,
@@ -26,7 +27,8 @@ class ModelConfig {
         device: string,
         prompts: Prompts,
         url: string,
-        stream: boolean
+        stream: boolean,
+        model_id: string
     ) {
         this.model_name_or_path = model_name_or_path;
         this.nickname = nickname;
@@ -35,7 +37,8 @@ class ModelConfig {
         this.device = device;
         this.url = url;
         this.prompts = prompts;
-        this.stream = stream
+        this.stream = stream;
+        this.model_id = model_id;
     }
 }
 

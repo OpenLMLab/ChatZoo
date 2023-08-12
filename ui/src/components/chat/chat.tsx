@@ -30,7 +30,8 @@ const Chat: React.FC = () => {
                   bot_prompt: "\nAssistant: {}\n",
                 },
                 "http://10.140.1.76:8083",
-                true
+                true,
+                '0'
             )
   const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf); // 开启 model 的 title 名字开关
 
