@@ -18,6 +18,7 @@ class ModelConfig {
     url: string;
     stream: boolean;
     model_id: string;
+    start: boolean;
 
     constructor(
         model_name_or_path: string,
@@ -28,7 +29,8 @@ class ModelConfig {
         prompts: Prompts,
         url: string,
         stream: boolean,
-        model_id: string
+        model_id: string,
+        start: boolean
     ) {
         this.model_name_or_path = model_name_or_path;
         this.nickname = nickname;
@@ -39,6 +41,7 @@ class ModelConfig {
         this.prompts = prompts;
         this.stream = stream;
         this.model_id = model_id;
+        this.start = start
     }
 }
 

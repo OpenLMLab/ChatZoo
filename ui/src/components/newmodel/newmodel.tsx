@@ -53,7 +53,19 @@ const NewForm: React.FC<newFormProps> = ({
         if(models?.length === 4) {
             error('最多只能存在4个模型！')
         }
-        http.get<string, any>(values['path']+'/chat/model_info').then((res) => {
+        // 检查URL是否以'http://'开头，如果不是则添加
+        let url = values['path'].trim()
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'http://' + url;
+        }
+
+        // 检查URL最后是否有'/'，如果有则删除
+        if (url.endsWith('/')) {
+            url = url.slice(0, -1);
+        }
+
+        console.log(values)
+        http.get<string, any>(url+'/chat/model_info').then((res) => {
             console.log('返回结果', res.data.data)
             const model = new ModelConfig(
                 res.data.data['model_name_or_path'],
@@ -62,9 +74,10 @@ const NewForm: React.FC<newFormProps> = ({
                 res.data.data['generate_kwargs'],
                 res.data.data['device'],
                 res.data.data['prompts'],
-                res.data.data['url'],
+                url,
                 res.data.data['stream'],
-                res.data.data['model_id']
+                res.data.data['model_id'],
+                true
             )
             const updateModels = [...models, model]
             mct?.setModels(updateModels)

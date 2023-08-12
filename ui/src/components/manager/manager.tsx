@@ -5,6 +5,7 @@ import style from "./manager.module.less";
 import { ModelContext } from '@/utils/modelcontext';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 import eventBus from '@/utils/eventBus';
+import {sessionMesage} from '@/utils/sessionInterface'
 
 /**
  * 至少保持开启一个会话。
@@ -18,10 +19,12 @@ function Manager() {
     }])
     const models = useContext(ModelContext)?.models;
     const numOfModel = models?.length
-    const initSession = [];
+    const initSession: sessionMesage = {};
     for (let i = 0; i < numOfModel!; i++) {
-      const sseMessage: sseMesage[] = [];
-      initSession.push(sseMessage);
+      // const sseMessage: sseMesage[] = [];
+      // initSession.push(sseMessage);
+      if(models)
+          initSession[models[i].model_id] = []
     }
     /**TODO：防止溢出 */
     localStorage.setItem('sessionList0', JSON.stringify(initSession))
@@ -39,10 +42,10 @@ function Manager() {
          idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length
-        const initSession = [];
+        const initSession: sessionMesage = {};
         for (let i = 0; i < numOfModel!; i++) {
-          const sseMessage: sseMesage[] = [];
-          initSession.push(sseMessage);
+          if(models)
+            initSession[models[i].model_id] = []
         }
         console.log('初始化sessionList', initSession)
         localStorage.setItem(newItem.id, JSON.stringify(initSession))
