@@ -17,7 +17,7 @@ const Annotate: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
     const mode = useContext(ModeContext)?.mode;
     const [messageApi, contextHolder] = message.useMessage();
-    const [isBtn, setisBtn] = useState(false);
+    const [isBtn, setisBtn] = useState(true);
     let ids = {}
     useEffect(() => {
         const statusListener = (status: boolean) => {
