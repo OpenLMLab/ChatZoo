@@ -3,14 +3,25 @@ import NewForm from '@/components/newmodel/newmodel';
 import { ModeContext } from '@/utils/contexts';
 import { DownloadOutlined, PlusOutlined, SendOutlined } from '@ant-design/icons';
 import { Button, ConfigProvider, Input, Popover } from 'antd';
-import React, { useContext, useState } from 'react';
-import { QuestionContext } from '@/utils/question';
+import React, { useContext, useEffect, useState } from 'react';
 import style from './bottom.module.less';
-import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
-import { EventEmitter } from 'stream';
 import eventBus from '@/utils/eventBus'
-import { isContext } from 'vm';
+import { IdContext } from '@/utils/idcontexts';
+import ModelConfig from '../model/model';
+import { sessionMesage } from '@/utils/sessionInterface';
+
+/**
+ * 底部栏（输入、标注、下载）
+ * 1. Enter，发送消息给chat组件。
+ * 2. 如果当前是单回复标注：chat组件完成消息的收发，通知底部栏禁用输入框；完成标注后，解禁输入框。
+ * 3. 如果当前是会话标注，不受影响。
+ * 4. 点击会话标注，开始投票，同时禁用标注按钮。（但是切换会话的时候，需要启用标注按钮）
+ */
+
+/**
+ * inputListener：输入框禁用 input
+ */
 
 /**
  * 处理输入
@@ -20,20 +31,49 @@ function handleInput(value:string) {
 } 
 
 const Bottom: React.FC = () => {
-    const models = useContext(ModelContext)?.models;
-    const names: string[] = []
-    models?.map(model => names.push(model.nickname))    
+    // 控制输入框禁用
+    const [isInput, setisInput] = useState(true);
     const [inputValue, setInputValue] = useState('');
-    const sessionId = useContext(IdContext)?.id
+    const [status, setStatus] = useState(false);
+    const mode = useContext(ModeContext)?.mode;
+    const models = useContext(ModelContext)?.models;
+    const sessionId = useContext(IdContext)?.id;
+    const names: string[] = []
+    models?.map(model => names.push(model.nickname))
+
+    useEffect(() => {
+        const statusListener = (status: boolean) => {
+            setStatus(status)
+            console.log('设置是否已经标注', status)
+        }
+        const inputListener = (status: boolean) => {
+            setisInput(status)
+        }
+        const annotateListener = () => {
+            setisInput(true)
+        }
+        eventBus.on('finishAnnotate', annotateListener)
+        eventBus.on('input', inputListener)
+        eventBus.on('sendStatus', statusListener)
+        return () => {
+            eventBus.removeListener('input', inputListener)
+            eventBus.removeListener('sendStatus', statusListener)
+            eventBus.removeListener('finishAnnotate', annotateListener)
+        }
+    }, []);
+    
+    // 输入框
     const handleChange = (event: any) => {
         const { value } = event.target;
         setInputValue(value);
       };
     const handleEnter = () => {
         handleInput(inputValue);
-        eventBus.emit('sendMessage', inputValue, models)
+        eventBus.emit('sendMessage', inputValue, models, mode, sessionId)
         setInputValue('');
     };
+
+    // 对话框
     const [open, setOpen] = useState(false);
     const [modal, setModal] = useState(false);
     const handleOpenChange = (newOpen: boolean) => {
@@ -42,12 +82,40 @@ const Bottom: React.FC = () => {
     const handleOpenModal = (newOpen: any) => {
         setModal(newOpen)
     }
-    const downloadSessionListByName = (nickname: string) => {
-        // 下载会话数据， 通过传入的 nickname 来判断下载哪几个模型的数据
-        let data = 
-        localStorage.getItem(sessionId+"")
+    // 下载对话记录
+    const handleDownloadSingle = (model_info: ModelConfig, sessionid: string) => {
+        let history: sessionMesage = {}
+        const cache_data = localStorage.getItem(sessionid)
+        if(cache_data)
+            history = JSON.parse(cache_data)
+        const model_history = JSON.stringify(history[model_info.model_id])
+        const blob = new Blob([model_history], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = model_info.nickname +'.json';
+        link.click();
+        URL.revokeObjectURL(url);
     }
-    const m = useContext(ModeContext)?.mode;
+    const handleDownloadAll = (model_infos: ModelConfig[], sessionid: string) => {
+        let history: sessionMesage = {}
+        const cache_data = localStorage.getItem(sessionid)
+        if(cache_data)
+            history = JSON.parse(cache_data)
+        let new_history: sessionMesage = {}
+        model_infos.forEach(model_info => {
+            new_history[model_info.nickname] = history[model_info.model_id]
+        });
+        const model_history = JSON.stringify(new_history)
+        const blob = new Blob([model_history], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download =  '全部.json';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
     return (
             <ConfigProvider
             theme={{
@@ -71,13 +139,14 @@ const Bottom: React.FC = () => {
                         value={inputValue}
                         onChange={handleChange}
                         onPressEnter={handleEnter}
+                        disabled={!isInput}
                     />
                     <div className={style.icon}>
                         <Button type="text" icon={<SendOutlined />} style={{color: 'rgba(255, 255, 255, 0.85)'}} ghost ></Button>
                     </div>
                 </div>
                 <div className={style.icon}>
-                {m === 'model' ? (
+                {mode === 'model' ? (
                     <>
                         <Button
                             type="text"
@@ -106,8 +175,9 @@ const Bottom: React.FC = () => {
                         overlayInnerStyle={{fontSize: 14, fontFamily: "PingFang SC", fontWeight: 400}}
                         content={
                             <div>
-                                <Button block className={style.popoverTitle}>全部</Button>
-                                {names.map((name: string) => (<Button block className={style.popoverTitle}>{name}</Button>))}
+                                <Button block className={style.popoverTitle} onClick={()=>{handleDownloadAll(models!, sessionId!)}}>全部</Button>
+                                {models?.map((name: ModelConfig) => (<Button block className={style.popoverTitle} onClick={() => {handleDownloadSingle(name, sessionId!)}}>
+                                    {name.nickname}</Button>))}
                             </div>
                         }
                         title={<span className={style.popoverTitle}>请选择要下载的会话记录</span>}

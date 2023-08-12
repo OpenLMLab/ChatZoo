@@ -1,15 +1,33 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useState, useEffect} from "react";
 import {Button, Modal, Checkbox, message } from 'antd';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { IdContext } from "@/utils/idcontexts";
 import { ModelContext } from "@/utils/modelcontext";
 import { ModeContext } from "@/utils/contexts";
+import http from "@/utils/axios";
+import eventBus from '@/utils/eventBus'
 
-/*参数与bottom一致*/
+/**
+ * 标注按钮：是否禁用
+ * sendStatus：按钮是否要禁用
+ * dialogueFinish：会话是否设置为已经禁用
+ */
 
 const Annotate: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
+    const mode = useContext(ModeContext)?.mode;
     const [messageApi, contextHolder] = message.useMessage();
+    const [isBtn, setisBtn] = useState(false);
+    let ids = {}
+    useEffect(() => {
+        const statusListener = (status: boolean) => {
+            setisBtn(status)
+        }
+        eventBus.on('sendStatus', statusListener)
+        return () => {
+            eventBus.removeListener('sendStatus', statusListener)
+        }
+    }, []);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const models = useContext(ModelContext)?.models;
     const names: string[] = [] 
@@ -20,8 +38,6 @@ const Annotate: React.FC = () => {
     const showModal = () => {
         setIsModalOpen(true);
     }
-    // 当前模式
-    const mode = useContext(ModeContext)?.mode
     // 设置标题
     const title = (mode === 'single') ? '单回复标注':'会话标注'
     const error = () => {
@@ -36,7 +52,14 @@ const Annotate: React.FC = () => {
         if(isNull) {
             error();
         } else {
-            vote();
+            if(mode === 'single') {
+                voteDialogue();
+                eventBus.emit('finishAnnotate')
+            } else {
+                vote();
+                eventBus.emit('dialogueFinish', sessionId);
+                setisBtn(false);
+            }
             setIsModalOpen(false);
         }
     }
@@ -62,8 +85,8 @@ const Annotate: React.FC = () => {
         const username = localStorage.getItem('username')
         const dialogue_id = null
         const turn_id = sessionId
-        const vote_result = options
-        const vote_model: { [nickname: string]: string } = {};
+        const vote_result = "moss_01"
+        const vote_model = {};
         models?.forEach((element) => {
             vote_model[element.nickname] = element.model_id
         });
@@ -75,12 +98,39 @@ const Annotate: React.FC = () => {
             'turn_id': turn_id
         }
         console.log('打包数据', data)
+        http.post<any,any>('/vote?', {data: data}).then((res) => {
+            console.log('会话标注成功', res);
+          }).catch(() => {
+            console.log('会话标注失败')
+          });
+    }
+    const voteDialogue = () => {
+        const username = localStorage.getItem('username')
+        const dialogue_id = ids
+        const turn_id = null
+        const vote_result = "moss_01"
+        const vote_model = {};
+        models?.forEach((element) => {
+            vote_model[element.nickname] = element.model_id
+        });
+        const data = {
+            'username': username,
+            'vote_result': vote_result,
+            'vote_model': vote_model,
+            'dialogue_id': dialogue_id,
+            'turn_id': turn_id
+        }
+        http.post<any,any>('/vote?', {data: data}).then((res) => {
+            console.log('会话标注成功', res);
+          }).catch(() => {
+            console.log('会话标注失败')
+          });
     }
 
     return (
         <>
             {contextHolder}
-            <Button type='primary' onClick={showModal}>标注</Button>
+            <Button type='primary' onClick={showModal} disabled={ !isBtn }>标注</Button>
             <Modal title={title}
                 open={isModalOpen}
                 onOk={handleOk}

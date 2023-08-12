@@ -17,47 +17,48 @@ import style from "./home.module.less";
 
 function Home() {
 
-  const [mode, setMode] = useState<string | null>('dialogue');
-  const modeValues: ModeContextProps = {
-    mode,
-    setMode,
-  };
-  // sessionId
-  const [id, setId] = useState<string | null>('0');
-  const idContextValues: IdContextProps = {
-    id,
-    setId
-  }
-  // question
-  const [question, setQuestion] = useState<string | null>(null);
-  const questionValues: QuestionContextProps = {
-    question,
-    setQuestion
-  }
-  // freeze
-  const [freeze, setFreeze] = useState<string | null>(null);
-  const freezeValues: FreezeContextProps = {
-    freeze,
-    setFreeze
-  }
+    const [mode, setMode] = useState<string | null>('dialogue');
+    const modeValues: ModeContextProps = {
+      mode,
+      setMode,
+    };
+    // sessionId
+    const [id, setId] = useState<string | null>(Date.now().toString());
+    const idContextValues: IdContextProps = {
+      id,
+      setId
+    }
+    // question
+    const [question, setQuestion] = useState<string | null>(null);
+    const questionValues: QuestionContextProps = {
+      question,
+      setQuestion
+    }
+    // freeze
+    const [freeze, setFreeze] = useState<string | null>(null);
+    const freezeValues: FreezeContextProps = {
+      freeze,
+      setFreeze
+    }
 
-  const [models, setModels] = useState<ModelConfig[]>([
-    new ModelConfig(
-      "fnlp/moss-moon-003-sft",
-      "moss_01",
-      "fnlp/moss-moon-003-sft",
-      { max_length: 2048 },
-      '0',
-      {
-        meta_prompt: "",
-        user_prompt: "Human: {}\n",
-        bot_prompt: "\nAssistant: {}\n",
-      },
-      "http://10.140.1.76:8083",
-      true,
-      '0'
-    )
-  ]);
+    const [models, setModels] = useState<ModelConfig[]>([
+      new ModelConfig(
+        "fnlp/moss-moon-003-sft",
+        "moss_01",
+        "fnlp/moss-moon-003-sft",
+        { max_length: 2048 },
+        '0',
+        {
+          meta_prompt: "",
+          user_prompt: "Human: {}\n",
+          bot_prompt: "\nAssistant: {}\n",
+        },
+        "http://10.140.1.76:8083",
+        true,
+        '0',
+        true
+      )
+    ]);
 
   const modelsValues: ModelContextProps = {
     models,
