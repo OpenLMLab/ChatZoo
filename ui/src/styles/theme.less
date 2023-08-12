@@ -7,6 +7,9 @@
 @blue-background-gradient: linear-gradient(117.2deg, #516e86 10.6%, #41464A 90.8%);
 @blue-primary: #598aa0;
 
+@red-background-gradient: linear-gradient(117.2deg, #865151 10.6%, #41464A 90.8%);
+@red-primary: #a05959;
+
 [theme='green'] {
     --primary: @green-primary;
     --background-gradient: @green-background-gradient;
@@ -20,6 +23,11 @@
 [theme='orange'] {
     --primary: @orange-primary;
     --background-gradient: @orange-background-gradient;
+}
+
+[theme='red'] {
+    --primary: @red-primary;
+    --background-gradient: @red-background-gradient;
 }
 
 @background-gradient: var(--background-gradient, @green-background-gradient);
