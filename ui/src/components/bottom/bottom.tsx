@@ -110,7 +110,6 @@ const Bottom: React.FC = () => {
                                 {names.map((name: string) => (<Button block className={style.popoverTitle}>{name}</Button>))}
                             </div>
                         }
-                        // title={<span>"请选择要下载的会话记录"<span/>}
                         title={<span className={style.popoverTitle}>请选择要下载的会话记录</span>}
                         trigger="click"
                         open={open}
