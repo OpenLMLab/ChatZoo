@@ -280,6 +280,7 @@ const Chat: React.FC = () => {
               url={model.url+"/chat/generate?turn_id="+sessionId+"&username="+localStorage.getItem('username')+"&role="+localStorage.getItem('permission')}
               ref={refs[index]}
               token={JSON.stringify(model.generate_kwargs)}
+              requestMessageContainerStyle={{backgroundColor: 'rgba(39, 45, 230, 0.1)'}}
             />
           </div>
         </div>
