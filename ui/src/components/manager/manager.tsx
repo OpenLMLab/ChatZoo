@@ -3,12 +3,13 @@ import { useContext, useState, useEffect } from 'react';
 import { IdContext } from '@/utils/idcontexts';
 import style from "./manager.module.less";
 import { ModelContext } from '@/utils/modelcontext';
-import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 import eventBus from '@/utils/eventBus';
 import {sessionMesage} from '@/utils/sessionInterface'
+import { ModeContext } from '@/utils/contexts';
 
 interface ChatItem extends IChatItem {
-  isAnnotated: boolean
+  notAnnotated: boolean
+  mode: string
 }
 /**
  * 至少保持开启一个会话。
@@ -22,7 +23,8 @@ function Manager() {
     const [chatList, setChatList] = useState<ChatItem[]>([{
         id: idContext?.id!,
         name: '初始化会话',
-        isAnnotated: false
+        notAnnotated: true,
+        mode: "default"
     }])
     for (let i = 0; i < numOfModel!; i++) {
       if(models)
@@ -37,7 +39,8 @@ function Manager() {
         const newItem = {
             id: Date.now().toString(),
             name: '新会话'+ Date.now().toString(),
-            isAnnotated: false
+            notAnnotated: true,
+            mode: "default"
         }
         const newList = chatList.slice()  // 复制数组
         newList.unshift(newItem)   // 向数组开头添加元素
@@ -75,15 +78,20 @@ function Manager() {
     const annotateChat = (id: string) => {
       const index = chatList.findIndex(x => x.id === id)
       console.log('正在标注', index)
-      chatList[index]['isAnnotated'] = true
-      eventBus.emit('sendStatus', chatList[index]['isAnnotated'])
+      chatList[index]['notAnnotated'] = false
+      eventBus.emit('sendStatus', chatList[index]['notAnnotated'])
     }
 
     const selectChat = (id:string) => {
         setCurChatId(id)
         idContext?.setId(id)
         const index = chatList.findIndex(x => x.id === id)
-        eventBus.emit('sendStatus', chatList[index]['isAnnotated'])
+        eventBus.emit('sendStatus', chatList[index]['notAnnotated'])
+    }
+
+    const setMode = (mode: string, sessionId: string) => {
+      const index = chatList.findIndex(x => x.id === sessionId)
+      chatList[index]['mode'] = mode
     }
 
     useEffect(() => {
@@ -91,9 +99,21 @@ function Manager() {
         console.log('想要标注的session', sessionId)
         annotateChat(sessionId)
       }
+      const modeListener = (mode: string, sessionId: string) => {
+        console.log('模式', mode, 'sessionId', sessionId)
+        setMode(mode, sessionId)
+      }
+      const findMode = (sessionId: string) => {
+        const index = chatList.findIndex(x => x.id === sessionId)
+        useContext(ModeContext)?.setMode(chatList[index]['mode'])
+      }
       eventBus.on('dialogueFinish', annotateListener)
+      eventBus.on('setMode', modeListener)
+      eventBus.on('findMode', findMode)
       return () => {
         eventBus.removeListener('dialogueFinish', annotateListener)
+        eventBus.removeListener('setMode', modeListener)
+        eventBus.removeListener('findMode', findMode)
       }
   }, []);
 
