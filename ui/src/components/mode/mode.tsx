@@ -9,9 +9,9 @@ const Mode = () => {
     // 获取权限
     const permission = localStorage.getItem('permission');
     let freeze = useContext(FreezeContext);
-    let myfreeze = true;
-    if(freeze?.freeze != 'yes') {
-        myfreeze = false;
+    let myfreeze = false;
+    if(freeze?.freeze === 'yes') {
+        myfreeze = true;
     }
     const modeContext = useContext(ModeContext);
     const [ value, setValue] = useState('dialogue');

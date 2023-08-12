@@ -9,6 +9,7 @@ import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterf
 import eventBus from '@/utils/eventBus';
 import {sessionMesage} from '@/utils/sessionInterface'
 import { ModeContext } from '@/utils/contexts';
+import { FreezeContext } from '@/utils/freezecontext';
 
 
 /**
@@ -19,6 +20,8 @@ import { ModeContext } from '@/utils/contexts';
  */
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
+  const modeContext = useContext(ModeContext)
+  const freeze = useContext(FreezeContext);
   const mcf = new ModelConfig(
                 "fnlp/moss-moon-003-sft",
                 "moss_01",
@@ -46,10 +49,14 @@ const Chat: React.FC = () => {
   //  是否暂停模型
   
   const cachedSessionList = localStorage.getItem(sessionId!);
-  // let sessionList: sseMesage[][] = [];
   let sessionList: sessionMesage = {}
-  if(cachedSessionList != null && cachedSessionList != undefined) {
-    sessionList = JSON.parse(cachedSessionList)
+  sessionList = JSON.parse(cachedSessionList!)
+  if(sessionList['0'].length === 0) {
+    freeze?.setFreeze('no')
+  } else {
+    freeze?.setFreeze('yes')
+    // 找到模式
+    eventBus.emit('findMode', sessionId)
   }
 
   if(models != null)
@@ -89,7 +96,7 @@ const Chat: React.FC = () => {
     console.log('打印当前状态', modelStatus)
   }
 
-  const downloadSse = (new_models: ModelConfig[], sessionId:string) => {
+  const downloadSse = (new_models: ModelConfig[], mode:string, sessionId:string) => {
     let new_session_list: sessionMesage = {}
     refs.map((ref, index) => {
       if(index < new_models?.length!) {
@@ -112,9 +119,12 @@ const Chat: React.FC = () => {
         }
         new_session_list[key] = session
     });
-    console.log('最新的session', new_session_list)
+    sessionList = new_session_list
     localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
     console.log('已经保存到', sessionId)
+    if(sessionList['0'].length === 1) {
+      eventBus.emit('setMode', mode, sessionId)
+    }
   };
   // 关闭某个模型
   const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
@@ -152,7 +162,7 @@ const Chat: React.FC = () => {
       // 异步保存缓存
       setTimeout(() => {
         getSseStatus();
-        downloadSse(models, sessionId);
+        downloadSse(models,mode,sessionId);
         if(mode === 'single') {
           eventBus.emit('input', false) 
         }
