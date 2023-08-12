@@ -18,21 +18,20 @@ function Manager() {
     const models = useContext(ModelContext)?.models;
     const numOfModel = models?.length
     const initSession: sessionMesage = {};
-    const initId = Date.now().toString()
     const [curChatId, setCurChatId] = useState<string>('')
     const [chatList, setChatList] = useState<ChatItem[]>([{
-        id: initId,
+        id: idContext?.id!,
         name: '初始化会话',
         isAnnotated: false
     }])
     for (let i = 0; i < numOfModel!; i++) {
-      // const sseMessage: sseMesage[] = [];
-      // initSession.push(sseMessage);
       if(models)
           initSession[models[i].model_id] = []
     }
     /**TODO：防止溢出 */
-    localStorage.setItem(initId, JSON.stringify(initSession))
+    if(localStorage.getItem(idContext?.id!) == undefined || null) {
+      localStorage.setItem(idContext?.id!, JSON.stringify(initSession))
+    }
 
     const addChat = () => {
         const newItem = {
@@ -46,6 +45,7 @@ function Manager() {
          /**新增后会立即选中当前的sessionid */
          setCurChatId(newItem.id)
          eventBus.emit('sendStatus', true)
+         eventBus.emit('input', true)
          idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length
