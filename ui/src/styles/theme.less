@@ -7,5 +7,20 @@
 @blue-background-gradient: linear-gradient(117.2deg, #516e86 10.6%, #41464A 90.8%);
 @blue-primary: #598aa0;
 
-@background-gradient: @green-background-gradient;
-@primary: @green-primary;
+[theme='green'] {
+    --primary: @green-primary;
+    --background-gradient: @green-background-gradient;
+}
+
+[theme='blue'] {
+    --primary: @blue-primary;
+    --background-gradient: @blue-background-gradient;
+}
+
+[theme='orange'] {
+    --primary: @orange-primary;
+    --background-gradient: @orange-background-gradient;
+}
+
+@background-gradient: var(--background-gradient, @green-background-gradient);
+@primary: var(--primary, @green-primary);
