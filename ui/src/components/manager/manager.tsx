@@ -15,6 +15,9 @@ interface ChatItem extends IChatItem {
  * 至少保持开启一个会话。
  */
 function Manager() {
+  // 模式控制的
+    const modeContext = useContext(ModeContext)
+    console.log(modeContext?.mode, "manager mode")
     const idContext = useContext(IdContext);
     const models = useContext(ModelContext)?.models;
     const numOfModel = models?.length
@@ -24,7 +27,7 @@ function Manager() {
         id: idContext?.id!,
         name: '初始化会话',
         notAnnotated: true,
-        mode: "default"
+        mode: modeContext?.mode!
     }])
     for (let i = 0; i < numOfModel!; i++) {
       if(models)
@@ -40,7 +43,7 @@ function Manager() {
             id: Date.now().toString(),
             name: '新会话'+ Date.now().toString(),
             notAnnotated: true,
-            mode: "default"
+            mode: modeContext?.mode!
         }
         const newList = chatList.slice()  // 复制数组
         newList.unshift(newItem)   // 向数组开头添加元素
@@ -58,6 +61,7 @@ function Manager() {
             initSession[models[i].model_id] = []
         }
         console.log("addchat", newItem.id)
+        console.log(chatList)
         localStorage.setItem(newItem.id, JSON.stringify(initSession))
     }
 

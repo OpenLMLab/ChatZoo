@@ -70,6 +70,7 @@ function Home() {
     <ModelContext.Provider value={modelsValues} >
       <div className={style.wrapper}>
         <IdContext.Provider value={idContextValues}>
+          <ModeContext.Provider value={modeValues}>
           <Row gutter={24} className={style.row}>
             <Col span={4} className={style.sider}>
               <h1 className={style.logo}>ChatZoo</h1>
@@ -78,7 +79,6 @@ function Home() {
               </div>
               <Manager />
             </Col>
-            <ModeContext.Provider value={modeValues}>
               <FreezeContext.Provider value={freezeValues}>
                 <Col span={20} className={style.main}>
                   <div className={style.header}>
@@ -98,8 +98,8 @@ function Home() {
                   </QuestionContext.Provider>
                 </Col>
               </FreezeContext.Provider>
-            </ModeContext.Provider>
           </Row>
+          </ModeContext.Provider>
         </IdContext.Provider>
       </div>
     </ModelContext.Provider>
