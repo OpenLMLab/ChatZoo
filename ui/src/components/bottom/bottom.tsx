@@ -3,14 +3,23 @@ import NewForm from '@/components/newmodel/newmodel';
 import { ModeContext } from '@/utils/contexts';
 import { DownloadOutlined, PlusOutlined, SendOutlined } from '@ant-design/icons';
 import { Button, ConfigProvider, Input, Popover } from 'antd';
-import React, { useContext, useState } from 'react';
-import { QuestionContext } from '@/utils/question';
+import React, { useContext, useEffect, useState } from 'react';
 import style from './bottom.module.less';
-import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
-import { EventEmitter } from 'stream';
 import eventBus from '@/utils/eventBus'
-import { isContext } from 'vm';
+import { IdContext } from '@/utils/idcontexts';
+
+/**
+ * 底部栏（输入、标注、下载）
+ * 1. Enter，发送消息给chat组件。
+ * 2. 如果当前是单回复标注：chat组件完成消息的收发，通知底部栏禁用输入框；完成标注后，解禁输入框。
+ * 3. 如果当前是会话标注，不受影响。
+ * 4. 点击会话标注，开始投票，同时禁用标注按钮。（但是切换会话的时候，需要启用标注按钮）
+ */
+
+/**
+ * inputListener：输入框禁用 input
+ */
 
 /**
  * 处理输入
@@ -20,20 +29,48 @@ function handleInput(value:string) {
 } 
 
 const Bottom: React.FC = () => {
+    // 控制输入框禁用
+    const [isInput, setisInput] = useState(true);
+    const [inputValue, setInputValue] = useState('');
+    const [status, setStatus] = useState(false);
+    const mode = useContext(ModeContext)?.mode;
     const models = useContext(ModelContext)?.models;
     const names: string[] = []
-    models?.map(model => names.push(model.nickname))    
-    const [inputValue, setInputValue] = useState('');
-    const sessionId = useContext(IdContext)?.id
+    models?.map(model => names.push(model.nickname))
+
+    useEffect(() => {
+        const statusListener = (status: boolean) => {
+            setStatus(status)
+            console.log('设置是否已经标注', status)
+        }
+        const inputListener = () => {
+            setisInput(false)
+        }
+        const annotateListener = () => {
+            setisInput(true)
+        }
+        eventBus.on('finishAnnotate', annotateListener)
+        eventBus.on('input', inputListener)
+        eventBus.on('sendStatus', statusListener)
+        return () => {
+            eventBus.removeListener('input', inputListener)
+            eventBus.removeListener('sendStatus', statusListener)
+            eventBus.removeListener('finishAnnotate', annotateListener)
+        }
+    }, []);
+    
+    // 输入框
     const handleChange = (event: any) => {
         const { value } = event.target;
         setInputValue(value);
       };
     const handleEnter = () => {
         handleInput(inputValue);
-        eventBus.emit('sendMessage', inputValue, models)
+        eventBus.emit('sendMessage', inputValue, models, mode)
         setInputValue('');
     };
+
+    // 对话框
     const [open, setOpen] = useState(false);
     const [modal, setModal] = useState(false);
     const handleOpenChange = (newOpen: boolean) => {
@@ -42,12 +79,7 @@ const Bottom: React.FC = () => {
     const handleOpenModal = (newOpen: any) => {
         setModal(newOpen)
     }
-    const downloadSessionListByName = (nickname: string) => {
-        // 下载会话数据， 通过传入的 nickname 来判断下载哪几个模型的数据
-        let data = 
-        localStorage.getItem(sessionId+"")
-    }
-    const m = useContext(ModeContext)?.mode;
+
     return (
             <ConfigProvider
             theme={{
@@ -71,13 +103,14 @@ const Bottom: React.FC = () => {
                         value={inputValue}
                         onChange={handleChange}
                         onPressEnter={handleEnter}
+                        disabled={!isInput}
                     />
                     <div className={style.icon}>
                         <Button type="text" icon={<SendOutlined />} style={{color: 'rgba(255, 255, 255, 0.85)'}} ghost ></Button>
                     </div>
                 </div>
                 <div className={style.icon}>
-                {m === 'model' ? (
+                {mode === 'model' ? (
                     <>
                         <Button
                             type="text"
