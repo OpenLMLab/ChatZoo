@@ -35,6 +35,7 @@ const Bottom: React.FC = () => {
     const [status, setStatus] = useState(false);
     const mode = useContext(ModeContext)?.mode;
     const models = useContext(ModelContext)?.models;
+    const sessionId = useContext(IdContext)?.id;
     const names: string[] = []
     models?.map(model => names.push(model.nickname))
 
@@ -43,8 +44,8 @@ const Bottom: React.FC = () => {
             setStatus(status)
             console.log('设置是否已经标注', status)
         }
-        const inputListener = () => {
-            setisInput(false)
+        const inputListener = (status: boolean) => {
+            setisInput(status)
         }
         const annotateListener = () => {
             setisInput(true)
@@ -66,7 +67,7 @@ const Bottom: React.FC = () => {
       };
     const handleEnter = () => {
         handleInput(inputValue);
-        eventBus.emit('sendMessage', inputValue, models, mode)
+        eventBus.emit('sendMessage', inputValue, models, mode, sessionId)
         setInputValue('');
     };
 

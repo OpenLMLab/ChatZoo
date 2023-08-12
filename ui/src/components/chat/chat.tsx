@@ -19,7 +19,6 @@ import { ModeContext } from '@/utils/contexts';
  */
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
-  const mode = useContext(ModeContext)?.mode
   const mcf = new ModelConfig(
                 "fnlp/moss-moon-003-sft",
                 "moss_01",
@@ -90,7 +89,7 @@ const Chat: React.FC = () => {
     console.log('打印当前状态', modelStatus)
   }
 
-  const downloadSse = (new_models: ModelConfig[]) => {
+  const downloadSse = (new_models: ModelConfig[], sessionId:string) => {
     let new_session_list: sessionMesage = {}
     refs.map((ref, index) => {
       if(index < new_models?.length!) {
@@ -113,18 +112,6 @@ const Chat: React.FC = () => {
         }
         new_session_list[key] = session
     });
-    // new_session_list.map(session=> {
-    //   if(session.length - 1 >= 0) {
-    //     const last_dict = session[session.length - 1]
-    //     const new_dict: sseMesage = {
-    //         "id": last_dict["id"],
-    //         "status": last_dict["status"],
-    //         "message": last_dict["message"],
-    //         "question": last_dict["question"]
-    //     }
-    //     session[session.length - 1] = new_dict
-    //   }
-    // })
     console.log('最新的session', new_session_list)
     localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
     console.log('已经保存到', sessionId)
@@ -151,7 +138,7 @@ const Chat: React.FC = () => {
   const {Option} = Select
 
   useEffect(() => {
-    const listener = (question: string, models: ModelConfig[], mode:string) => {
+    const listener = (question: string, models: ModelConfig[], mode:string, sessionId: string) => {
       // 插入会话
       if(models != null)
           models.forEach((model) =>{
@@ -165,11 +152,10 @@ const Chat: React.FC = () => {
       // 异步保存缓存
       setTimeout(() => {
         getSseStatus();
-        downloadSse(models);
+        downloadSse(models, sessionId);
         if(mode === 'single') {
-          eventBus.emit('input') 
+          eventBus.emit('input', false) 
         }
-        // 通知标注
       }, 5000); // 延迟时间为 1000 毫秒（1秒）
     };
     eventBus.on('sendMessage', listener);

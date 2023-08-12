@@ -22,7 +22,7 @@ function Home () {
       setMode,
     };
     // sessionId
-    const [id, setId] = useState<string | null>('0');
+    const [id, setId] = useState<string | null>(Date.now().toString());
     const idContextValues: IdContextProps = {
       id,
       setId
