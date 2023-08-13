@@ -1,11 +1,11 @@
-import React, {useContext, useState, useEffect} from "react";
-import {Button, Modal, Checkbox, message } from 'antd';
+import React, { useContext, useState, useEffect } from 'react';
+import { Button, Modal, Checkbox, message } from 'antd';
 import type { CheckboxValueType } from 'antd/es/checkbox/Group';
-import { IdContext } from "@/utils/idcontexts";
-import { ModelContext } from "@/utils/modelcontext";
-import { ModeContext } from "@/utils/contexts";
-import http from "@/utils/axios";
-import eventBus from '@/utils/eventBus'
+import { IdContext } from '@/utils/idcontexts';
+import { ModelContext } from '@/utils/modelcontext';
+import { ModeContext } from '@/utils/contexts';
+import http from '@/utils/axios';
+import eventBus from '@/utils/eventBus';
 
 /**
  * 标注按钮：是否禁用
@@ -39,26 +39,26 @@ const Annotate: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const models = useContext(ModelContext)?.models;
-    const names: string[] = [] 
-    models?.map(model => names.push(model.nickname));
+    const names: string[] = [];
+    models?.map((model) => names.push(model.nickname));
     // 是否选中都不选
     const [isDis, setIsDis] = useState(false);
     const [isNull, setIsNull] = useState(true);
     const showModal = () => {
         setIsModalOpen(true);
-    }
+    };
     // 设置标题
-    const title = (mode === 'single') ? '单回复标注':'会话标注'
+    const title = mode === 'single' ? '单回复标注' : '会话标注';
     const error = () => {
         messageApi.open({
-          type: 'error',
-          content: '请选择选项',
+            type: 'error',
+            content: '请选择选项',
         });
       };
     //完成标注，打开输入框的限制
     const handleOk = () => {
         // 发送
-        if(isNull) {
+        if (isNull) {
             error();
         } else {
             // 单标注完成，打开输入框
@@ -76,70 +76,74 @@ const Annotate: React.FC = () => {
             }
             setIsModalOpen(false);
         }
-    }
+    };
     const handleCancel = () => {
         setIsModalOpen(false);
-    }
+    };
     const onChange = (checkValues: CheckboxValueType[]) => {
-        if(checkValues.length != 0) {
+        if (checkValues.length != 0) {
             setIsNull(false);
         }
-    }
-    const options = names.map((model:any, index:number) => ({
+    };
+    const options = names.map((model: any, index: number) => ({
         label: model,
         value: index,
     }));
     const optionsWithDisabled = options;
     const allDis = () => {
         setIsDis(!isDis);
-        console.log('都不选')
-    }
+        console.log('都不选');
+    };
     // 投票功能
     const vote = () => {
-        const username = localStorage.getItem('username')
-        const dialogue_id = null
-        const turn_id = sessionId
-        const vote_result = "moss_01"
+        const username = localStorage.getItem('username');
+        const dialogue_id = null;
+        const turn_id = sessionId;
+        const vote_result = 'moss_01';
         const vote_model = {};
         models?.forEach((element) => {
-            vote_model[element.nickname] = element.model_id
+            vote_model[element.nickname] = element.model_id;
         });
         const data = {
-            'username': username,
-            'vote_result': vote_result,
-            'vote_model': vote_model,
-            'dialogue_id': dialogue_id,
-            'turn_id': turn_id
-        }
-        console.log('打包数据', data)
-        http.post<any,any>('/vote?', {data: data}).then((res) => {
-            console.log('会话标注成功', res);
-          }).catch(() => {
-            console.log('会话标注失败')
-          });
-    }
+            username: username,
+            vote_result: vote_result,
+            vote_model: vote_model,
+            dialogue_id: dialogue_id,
+            turn_id: turn_id,
+        };
+        console.log('打包数据', data);
+        http.post<any, any>('/vote?', { data: data })
+            .then((res) => {
+                console.log('会话标注成功', res);
+            })
+            .catch(() => {
+                console.log('会话标注失败');
+            });
+    };
     const voteDialogue = () => {
-        const username = localStorage.getItem('username')
-        const dialogue_id = ids
-        const turn_id = null
-        const vote_result = "moss_01"
+        const username = localStorage.getItem('username');
+        const dialogue_id = ids;
+        const turn_id = null;
+        const vote_result = 'moss_01';
         const vote_model = {};
         models?.forEach((element) => {
-            vote_model[element.nickname] = element.model_id
+            vote_model[element.nickname] = element.model_id;
         });
         const data = {
-            'username': username,
-            'vote_result': vote_result,
-            'vote_model': vote_model,
-            'dialogue_id': dialogue_id,
-            'turn_id': turn_id
-        }
-        http.post<any,any>('/vote?', {data: data}).then((res) => {
-            console.log('会话标注成功', res);
-          }).catch(() => {
-            console.log('会话标注失败')
-          });
-    }
+            username: username,
+            vote_result: vote_result,
+            vote_model: vote_model,
+            dialogue_id: dialogue_id,
+            turn_id: turn_id,
+        };
+        http.post<any, any>('/vote?', { data: data })
+            .then((res) => {
+                console.log('会话标注成功', res);
+            })
+            .catch(() => {
+                console.log('会话标注失败');
+            });
+    };
 
     return (
         <>
@@ -154,20 +158,18 @@ const Annotate: React.FC = () => {
                 cancelText="取消"
             >
                 请选择任意符合预期的模型
-                <br/>
+                <br />
                 {isDis ? (
-                    <Checkbox.Group
-                    options={optionsWithDisabled}
-                    disabled
-                    />
-                ):(
+                    <Checkbox.Group options={optionsWithDisabled} disabled />
+                ) : (
                     <Checkbox.Group options={options} onChange={onChange} />
                 )}
-                <br/>或者
+                <br />
+                或者
                 <Button onClick={allDis}>{isDis ? <>选择模型</> : <>都不选</>}</Button>
             </Modal>
         </>
-    )
-}
+    );
+};
 
 export default Annotate;

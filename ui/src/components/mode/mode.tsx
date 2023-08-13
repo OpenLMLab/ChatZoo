@@ -18,25 +18,25 @@ const Mode = () => {
     //     myfreeze = true;
     // }
     const modeContext = useContext(ModeContext);
-    const [ value, setValue] = useState('dialogue');
+    const [value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
         modeContext?.setMode(e.target.value);
-        setValue(e.target.value)
-      };
+        setValue(e.target.value);
+    };
     const fullOptions = [
-        {label: '模型管理', value: 'model'},
-        {label: '会话标注', value: 'dialogue'},
-        {label: '单回复标注', value: 'single'}
-    ]
+        { label: '模型管理', value: 'model' },
+        { label: '会话标注', value: 'dialogue' },
+        { label: '单回复标注', value: 'single' },
+    ];
     const disOptions = [
-        {label: '会话标注', value: 'dialogue'},
-        {label: '单回复标注', value: 'single'}
-    ]
-    let currOption = null
+        { label: '会话标注', value: 'dialogue' },
+        { label: '单回复标注', value: 'single' },
+    ];
+    let currOption = null;
     if (permission === 'debug') {
-        currOption = fullOptions
+        currOption = fullOptions;
     } else {
-        currOption = disOptions
+        currOption = disOptions;
     }
 
     // 开始/关闭会话后，接受到禁用/开启mode的命令
@@ -61,7 +61,7 @@ const Mode = () => {
                 buttonStyle = 'outline'
             />
         </div>
-    )
+    );
 };
 
 export default Mode;

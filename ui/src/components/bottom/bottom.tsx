@@ -6,7 +6,7 @@ import { Button, ConfigProvider, Input, Popover } from 'antd';
 import React, { useContext, useEffect, useState } from 'react';
 import style from './bottom.module.less';
 import { ModelContext } from '@/utils/modelcontext';
-import eventBus from '@/utils/eventBus'
+import eventBus from '@/utils/eventBus';
 import { IdContext } from '@/utils/idcontexts';
 import ModelConfig from '../model/model';
 import { sessionMesage } from '@/utils/sessionInterface';
@@ -26,9 +26,9 @@ import { sessionMesage } from '@/utils/sessionInterface';
 /**
  * 处理输入
  */
-function handleInput(value:string) {
-    console.log('输入的值', value)
-} 
+function handleInput(value: string) {
+    console.log('输入的值', value);
+}
 
 const Bottom: React.FC = () => {
     // 控制输入框禁用
@@ -79,10 +79,10 @@ const Bottom: React.FC = () => {
     const handleChange = (event: any) => {
         const { value } = event.target;
         setInputValue(value);
-      };
+    };
     const handleEnter = () => {
         handleInput(inputValue);
-        eventBus.emit('sendMessage', inputValue, models, mode, sessionId)
+        eventBus.emit('sendMessage', inputValue, models, mode, sessionId);
         setInputValue('');
     };
 
@@ -93,61 +93,59 @@ const Bottom: React.FC = () => {
         setOpen(newOpen);
     };
     const handleOpenModal = (newOpen: any) => {
-        setModal(newOpen)
-    }
+        setModal(newOpen);
+    };
     // 下载对话记录
     const handleDownloadSingle = (model_info: ModelConfig, sessionid: string) => {
-        let history: sessionMesage = {}
-        const cache_data = localStorage.getItem(sessionid)
-        if(cache_data)
-            history = JSON.parse(cache_data)
-        const model_history = JSON.stringify(history[model_info.model_id])
+        let history: sessionMesage = {};
+        const cache_data = localStorage.getItem(sessionid);
+        if (cache_data) history = JSON.parse(cache_data);
+        const model_history = JSON.stringify(history[model_info.model_id]);
         const blob = new Blob([model_history], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = model_info.nickname +'.json';
+        link.download = model_info.nickname + '.json';
         link.click();
         URL.revokeObjectURL(url);
-    }
+    };
     const handleDownloadAll = (model_infos: ModelConfig[], sessionid: string) => {
-        let history: sessionMesage = {}
-        const cache_data = localStorage.getItem(sessionid)
-        if(cache_data)
-            history = JSON.parse(cache_data)
-        let new_history: sessionMesage = {}
-        model_infos.forEach(model_info => {
-            new_history[model_info.nickname] = history[model_info.model_id]
+        let history: sessionMesage = {};
+        const cache_data = localStorage.getItem(sessionid);
+        if (cache_data) history = JSON.parse(cache_data);
+        let new_history: sessionMesage = {};
+        model_infos.forEach((model_info) => {
+            new_history[model_info.nickname] = history[model_info.model_id];
         });
-        const model_history = JSON.stringify(new_history)
+        const model_history = JSON.stringify(new_history);
         const blob = new Blob([model_history], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download =  '全部.json';
+        link.download = '全部.json';
         link.click();
         URL.revokeObjectURL(url);
-    }
+    };
 
     return (
-            <ConfigProvider
+        <ConfigProvider
             theme={{
                 components: {
                     Input: {
                         colorBgContainer: 'rgba(255, 255, 255, 0.06)',
                         colorTextPlaceholder: 'rgba(255, 255, 255, 0.95)',
-                        fontFamily: 'PingFang SC'
+                        fontFamily: 'PingFang SC',
                     },
                     Button: {
-                        colorBorder: 'rgba(255, 255, 255, 0.85)'
-                    }
-                }
+                        colorBorder: 'rgba(255, 255, 255, 0.85)',
+                    },
+                },
             }}
         >
             <div className={style.wrapper}>
                 <div className={style.input}>
-                    <Input 
-                        placeholder="介绍一下你自己吧" 
+                    <Input
+                        placeholder="介绍一下你自己吧"
                         bordered={false}
                         value={inputValue}
                         onChange={handleChange}
@@ -155,42 +153,64 @@ const Bottom: React.FC = () => {
                         disabled={isInput}
                     />
                     <div className={style.icon}>
-                        <Button type="text" icon={<SendOutlined />} style={{color: 'rgba(255, 255, 255, 0.85)'}} ghost ></Button>
+                        <Button
+                            type="text"
+                            icon={<SendOutlined />}
+                            style={{ color: 'rgba(255, 255, 255, 0.85)' }}
+                            ghost
+                        ></Button>
                     </div>
                 </div>
                 <div className={style.icon}>
-                {mode === 'model' ? (
-                    <>
-                        <Button
-                            type="text"
-                            icon={<PlusOutlined />}
-                            style={{ color: 'rgba(255, 255, 255, 0.85)' }}
-                            ghost
-                            onClick={() => {
-                            setModal(true);
-                            }}
-                        />
-                        <NewForm
-                            open={modal}
-                            onCreate={handleOpenModal}
-                            onCancel={() => {
-                                setModal(false);
-                            }}
-                        />
-                    </>
-                ) : (
-                    <Annotate></Annotate>
-                )}
+                    {mode === 'model' ? (
+                        <>
+                            <Button
+                                type="text"
+                                icon={<PlusOutlined />}
+                                style={{ color: 'rgba(255, 255, 255, 0.85)' }}
+                                ghost
+                                onClick={() => {
+                                    setModal(true);
+                                }}
+                            />
+                            <NewForm
+                                open={modal}
+                                onCreate={handleOpenModal}
+                                onCancel={() => {
+                                    setModal(false);
+                                }}
+                            />
+                        </>
+                    ) : (
+                        <Annotate></Annotate>
+                    )}
                 </div>
                 <div className={style.icon}>
                     <Popover
                         overlayClassName={style.popoverStyle}
-                        overlayInnerStyle={{fontSize: 14, fontFamily: "PingFang SC", fontWeight: 400}}
+                        overlayInnerStyle={{ fontSize: 14, fontFamily: 'PingFang SC', fontWeight: 400 }}
                         content={
                             <div>
-                                <Button block className={style.popoverTitle} onClick={()=>{handleDownloadAll(models!, sessionId!)}}>全部</Button>
-                                {models?.map((name: ModelConfig) => (<Button block className={style.popoverTitle} onClick={() => {handleDownloadSingle(name, sessionId!)}}>
-                                    {name.nickname}</Button>))}
+                                <Button
+                                    block
+                                    className={style.popoverTitle}
+                                    onClick={() => {
+                                        handleDownloadAll(models!, sessionId!);
+                                    }}
+                                >
+                                    全部
+                                </Button>
+                                {models?.map((name: ModelConfig) => (
+                                    <Button
+                                        block
+                                        className={style.popoverTitle}
+                                        onClick={() => {
+                                            handleDownloadSingle(name, sessionId!);
+                                        }}
+                                    >
+                                        {name.nickname}
+                                    </Button>
+                                ))}
                             </div>
                         }
                         title={<span className={style.popoverTitle}>请选择要下载的会话记录</span>}
@@ -198,13 +218,17 @@ const Bottom: React.FC = () => {
                         open={open}
                         onOpenChange={handleOpenChange}
                     >
-                        <Button type="text" icon={<DownloadOutlined />} style={{color: 'rgba(255, 255, 255, 0.85)'}} ghost ></Button>
+                        <Button
+                            type="text"
+                            icon={<DownloadOutlined />}
+                            style={{ color: 'rgba(255, 255, 255, 0.85)' }}
+                            ghost
+                        ></Button>
                     </Popover>
                 </div>
             </div>
         </ConfigProvider>
     );
 };
-
 
 export default Bottom;

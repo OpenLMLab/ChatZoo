@@ -1,15 +1,15 @@
 import PUYUC, {IChatItem} from 'chat-webkit'
 import { useContext, useState, useEffect, useRef } from 'react';
 import { IdContext } from '@/utils/idcontexts';
-import style from "./manager.module.less";
+import style from './manager.module.less';
 import { ModelContext } from '@/utils/modelcontext';
 import eventBus from '@/utils/eventBus';
 import {sessionMesage} from '@/utils/sessionInterface'
 import { ModeContext, ModeContextProps } from '@/utils/contexts';
 
 interface ChatItem extends IChatItem {
-  notAnnotated: boolean
-  mode: string
+    notAnnotated: boolean;
+    mode: string;
 }
 /**
  * 至少保持开启一个会话。
@@ -24,7 +24,7 @@ function Manager() {
 
     const idContext = useContext(IdContext);
     const models = useContext(ModelContext)?.models;
-    const numOfModel = models?.length
+    const numOfModel = models?.length;
     const initSession: sessionMesage = {};
     const [curChatId, setCurChatId] = useState<string>(idContext?.id!)
     const [chatList, setChatList] = useState<ChatItem[]>([{
@@ -43,19 +43,18 @@ function Manager() {
     //     setChatList(new_chatList)
     // }
     for (let i = 0; i < numOfModel!; i++) {
-      if(models)
-          initSession[models[i].model_id] = []
+        if (models) initSession[models[i].model_id] = [];
     }
     /**TODO：防止溢出 */
-    if(localStorage.getItem(idContext?.id!) == undefined || null) {
-      localStorage.setItem(idContext?.id!, JSON.stringify(initSession))
+    if (localStorage.getItem(idContext?.id!) == undefined || null) {
+        localStorage.setItem(idContext?.id!, JSON.stringify(initSession));
     }
 
     const addChat = (modecontext: string, chatList: ChatItem[]) => {
         console.log(modecontext, "add chat111111111")
         const newItem = {
             id: Date.now().toString(),
-            name: '新会话'+ Date.now().toString(),
+            name: '新会话' + Date.now().toString(),
             notAnnotated: true,
             mode: modecontext
         }
@@ -70,11 +69,10 @@ function Manager() {
         //  eventBus.emit('input', true)
          idContext?.setId(newItem.id)
         /**初始化缓存 */
-        const numOfModel = models?.length
+        const numOfModel = models?.length;
         const initSession: sessionMesage = {};
         for (let i = 0; i < numOfModel!; i++) {
-          if(models)
-            initSession[models[i].model_id] = []
+            if (models) initSession[models[i].model_id] = [];
         }
         console.log("addchat", newItem.id)
         console.log(chatList)
@@ -82,25 +80,25 @@ function Manager() {
     }
 
     const deleteChat = (id: string) => {
-      const newList = chatList.slice()
-      const index = chatList.findIndex(x => x.id === id)
-      if (chatList.length >= 1) {
-          newList.splice(index, 1)
-          setChatList(newList)
-          if(index != 0) {
-            selectChat(chatList[index - 1].id)
-          } else {
-            selectChat(chatList[chatList.length - 2].id)
-          } 
-      }
-  }
+        const newList = chatList.slice();
+        const index = chatList.findIndex((x) => x.id === id);
+        if (chatList.length >= 1) {
+            newList.splice(index, 1);
+            setChatList(newList);
+            if (index != 0) {
+                selectChat(chatList[index - 1].id);
+            } else {
+                selectChat(chatList[chatList.length - 2].id);
+            }
+        }
+    };
 
     const annotateChat = (id: string) => {
-      const index = chatList.findIndex(x => x.id === id)
-      console.log('正在标注', index)
-      chatList[index]['notAnnotated'] = false
-      eventBus.emit('sendStatus', chatList[index]['notAnnotated'])
-    }
+        const index = chatList.findIndex((x) => x.id === id);
+        console.log('正在标注', index);
+        chatList[index]['notAnnotated'] = false;
+        eventBus.emit('sendStatus', chatList[index]['notAnnotated']);
+    };
 
     const selectChat = (id:string) => {
         setCurChatId(id)
