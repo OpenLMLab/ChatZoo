@@ -4,4 +4,4 @@ interface sessionMesage {
     [key: string]: sseMesage[];
 }
 
-export type {sessionMesage};
+export type { sessionMesage };

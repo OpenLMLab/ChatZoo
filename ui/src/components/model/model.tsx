@@ -6,8 +6,8 @@ interface Prompts {
     meta_prompt: string;
     user_prompt: string;
     bot_prompt: string;
-  }
-  
+}
+
 class ModelConfig {
     model_name_or_path: string;
     nickname: string;
@@ -30,7 +30,7 @@ class ModelConfig {
         url: string,
         stream: boolean,
         model_id: string,
-        start: boolean
+        start: boolean,
     ) {
         this.model_name_or_path = model_name_or_path;
         this.nickname = nickname;
@@ -41,7 +41,7 @@ class ModelConfig {
         this.prompts = prompts;
         this.stream = stream;
         this.model_id = model_id;
-        this.start = start
+        this.start = start;
     }
 }
 

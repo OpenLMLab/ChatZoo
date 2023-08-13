@@ -10,43 +10,43 @@ const Mode = () => {
     const permission = localStorage.getItem('permission');
     let freeze = useContext(FreezeContext);
     let myfreeze = false;
-    if(freeze?.freeze === 'yes') {
+    if (freeze?.freeze === 'yes') {
         myfreeze = true;
     }
     const modeContext = useContext(ModeContext);
-    const [ value, setValue] = useState('dialogue');
+    const [value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
         modeContext?.setMode(e.target.value);
-        setValue(e.target.value)
-      };
+        setValue(e.target.value);
+    };
     const fullOptions = [
-        {label: '模型管理', value: 'model'},
-        {label: '会话标注', value: 'dialogue'},
-        {label: '单回复标注', value: 'single'}
-    ]
+        { label: '模型管理', value: 'model' },
+        { label: '会话标注', value: 'dialogue' },
+        { label: '单回复标注', value: 'single' },
+    ];
     const disOptions = [
-        {label: '会话标注', value: 'dialogue'},
-        {label: '单回复标注', value: 'single'}
-    ]
-    let currOption = null
+        { label: '会话标注', value: 'dialogue' },
+        { label: '单回复标注', value: 'single' },
+    ];
+    let currOption = null;
     if (permission === 'debug') {
-        currOption = fullOptions
+        currOption = fullOptions;
     } else {
-        currOption = disOptions
+        currOption = disOptions;
     }
 
     return (
         <div className={style.radio}>
             <Radio.Group
-                options = {currOption}
-                onChange = {onChange}
-                value = {value}
-                disabled = {myfreeze}
-                optionType = 'button'
-                buttonStyle = 'outline'
+                options={currOption}
+                onChange={onChange}
+                value={value}
+                disabled={myfreeze}
+                optionType="button"
+                buttonStyle="outline"
             />
         </div>
-    )
+    );
 };
 
 export default Mode;
