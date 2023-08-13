@@ -157,11 +157,16 @@ function Manager() {
         // 读取切换的模式的会话列表
         if(localStorage.getItem(modeContext!) != undefined && localStorage.getItem(modeContext!)!== null){
             const chatlist_state = JSON.parse(localStorage.getItem(modeContext!)!);
-            const new_chatList = chatlist_state["chatlist"]
+            const new_chatList: ChatItem[] = chatlist_state["chatlist"]
             const session_id = chatlist_state["session_id"]
+             // 切换模式时候判断是否开启对话框
+             const index = new_chatList.findIndex(x => x.id === session_id)
             idContext?.setId(session_id)
             setChatList(new_chatList)
             setCurChatId(session_id)
+            // selectChat(session_id)
+            eventBus.emit("banInputEvent", true)
+            console.log("[Debug] manager.tsx session_id:", session_id, index, new_chatList, !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
         }

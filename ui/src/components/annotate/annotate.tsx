@@ -21,7 +21,7 @@ const Annotate: React.FC = () => {
 
     // 获取角色， 决定是否开始标注
     const role = localStorage.getItem("permission")
-    console.log("[Debug] bottom.tsx role is " + role)
+    console.log("[Debug] annotate.tsx role is " + role)
 
     // 关闭标注的开关
     const [banVote, setBanVote] = useState(false);

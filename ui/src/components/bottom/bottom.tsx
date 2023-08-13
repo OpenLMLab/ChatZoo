@@ -44,6 +44,7 @@ const Bottom: React.FC = () => {
     // 禁用输入框的事件
     useEffect(()=>{
         const banInputEvent = (banButton: boolean) => {
+            console.log("[Debug] bottom.tsx 修改输入框事件：" + banButton)
             setisInput(banButton)
         }
         eventBus.on("banInputEvent", banInputEvent)
