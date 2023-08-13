@@ -5,6 +5,7 @@ import './App.module.less';
 import qs from 'qs';
 import http from "@/utils/axios";
 import { useState } from 'react';
+import eventBus from './utils/eventBus';
 
 function App () {
     const [messageApi, contextHolder] = message.useMessage();
@@ -44,7 +45,11 @@ function App () {
           localStorage.setItem('permission', res.data.data.role);
           localStorage.setItem('username', res.data.data.username);
           console.log("login success")
-          navigate('/home');
+          if(res.data.data.role == 'debug'){
+            console.log(res.data.data.role, "111111")
+            eventBus.emit("banVote", true)
+          }
+          navigate('/home');          
         }).catch(() => {
           error("登录失败！")
         });

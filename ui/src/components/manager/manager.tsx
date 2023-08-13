@@ -64,8 +64,10 @@ function Manager() {
         setChatList(newList)
          /**新增后会立即选中当前的sessionid */
          setCurChatId(newItem.id)
-         eventBus.emit('sendStatus', true)
-         eventBus.emit('input', true)
+         eventBus.emit('banInputEvent', false)
+
+        //  eventBus.emit('sendStatus', true)
+        //  eventBus.emit('input', true)
          idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length
@@ -104,13 +106,30 @@ function Manager() {
         setCurChatId(id)
         idContext?.setId(id)
         const index = chatList.findIndex(x => x.id === id)
-        eventBus.emit('sendStatus', chatList[index]['notAnnotated'])
+        // 判断是否禁用输入框
+        eventBus.emit('banInputEvent', !chatList[index]['notAnnotated'])
+        // eventBus.emit('sendStatus', chatList[index]['notAnnotated'])
     }
 
     const setMode = (mode: string, sessionId: string) => {
       const index = chatList.findIndex(x => x.id === sessionId)
       chatList[index]['mode'] = mode
     }
+    // 监听单会话标注是否完成， 完成将sessionList的标注置为可对话
+    useEffect(()=>{
+        const CurSessionAnnatote = (finishBtn: boolean, id: string) => {
+            const index = chatList.findIndex(x => x.id === id)
+            // const newChatList = chatList.slice()
+            chatList[index].notAnnotated = finishBtn
+            console.log("[Debug] manager.tsx" + "cursessionAnnatote :" + chatList + "session_id: " + id)
+            setChatList(chatList)
+        }
+        eventBus.on("annotateSession", CurSessionAnnatote)
+        return () => {
+          eventBus.off("annotateSession", CurSessionAnnatote)
+        }
+    })
+
     // 监听对话框是否发送消息， 如果发送就要禁用掉会话栏
     useEffect(()=>{
       const banSessionList = (banButton: boolean)=>{
@@ -164,7 +183,7 @@ function Manager() {
         const index = chatList.findIndex(x => x.id === sessionId)
         useContext(ModeContext)?.setMode(chatList[index]['mode'])
       }
-      eventBus.on('dialogueFinish', annotateListener)
+      // eventBus.on('dialogueFinish', annotateListener)
       // eventBus.on('setMode', modeListener)
       // eventBus.on('findMode', findMode)
       return () => {

@@ -3,7 +3,7 @@ import type { RadioChangeEvent } from 'antd';
 import { Radio } from 'antd';
 import { useContext, useState, useEffect } from 'react';
 import style from './mode.module.less';
-import { FreezeContext } from '@/utils/freezecontext';
+// import { FreezeContext } from '@/utils/freezecontext';
 import eventBus from '@/utils/eventBus';
 
 const Mode = () => {
@@ -12,11 +12,11 @@ const Mode = () => {
 
     // 获取权限
     const permission = localStorage.getItem('permission');
-    let freeze = useContext(FreezeContext);
-    let myfreeze = false;
-    if(freeze?.freeze === 'yes') {
-        myfreeze = true;
-    }
+    // let freeze = useContext(FreezeContext);
+    // let myfreeze = false;
+    // if(freeze?.freeze === 'yes') {
+    //     myfreeze = true;
+    // }
     const modeContext = useContext(ModeContext);
     const [ value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {

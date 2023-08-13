@@ -32,7 +32,7 @@ function handleInput(value:string) {
 
 const Bottom: React.FC = () => {
     // 控制输入框禁用
-    const [isInput, setisInput] = useState(true);
+    const [isInput, setisInput] = useState(false);
 
     const [inputValue, setInputValue] = useState('');
     const [status, setStatus] = useState(false);
@@ -41,8 +41,6 @@ const Bottom: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
     const names: string[] = []
     models?.map(model => names.push(model.nickname))
-
-
     // 禁用输入框的事件
     useEffect(()=>{
         const banInputEvent = (banButton: boolean) => {
@@ -55,26 +53,26 @@ const Bottom: React.FC = () => {
     })
 
 
-    useEffect(() => {
-        const statusListener = (status: boolean) => {
-            setStatus(status)
-            console.log('设置是否已经标注', status)
-        }
-        const inputListener = (status: boolean) => {
-            setisInput(status)
-        }
-        const annotateListener = () => {
-            setisInput(true)
-        }
-        eventBus.on('finishAnnotate', annotateListener)
-        eventBus.on('input', inputListener)
-        eventBus.on('sendStatus', statusListener)
-        return () => {
-            eventBus.removeListener('input', inputListener)
-            eventBus.removeListener('sendStatus', statusListener)
-            eventBus.removeListener('finishAnnotate', annotateListener)
-        }
-    }, []);
+    // useEffect(() => {
+    //     const statusListener = (status: boolean) => {
+    //         setStatus(status)
+    //         console.log('设置是否已经标注', status)
+    //     }
+    //     const inputListener = (status: boolean) => {
+    //         setisInput(status)
+    //     }
+    //     const annotateListener = () => {
+    //         setisInput(false)
+    //     }
+    //     eventBus.on('finishAnnotate', annotateListener)
+    //     eventBus.on('input', inputListener)
+    //     eventBus.on('sendStatus', statusListener)
+    //     return () => {
+    //         eventBus.removeListener('input', inputListener)
+    //         eventBus.removeListener('sendStatus', statusListener)
+    //         eventBus.removeListener('finishAnnotate', annotateListener)
+    //     }
+    // }, []);
     
     // 输入框
     const handleChange = (event: any) => {
@@ -153,7 +151,7 @@ const Bottom: React.FC = () => {
                         value={inputValue}
                         onChange={handleChange}
                         onPressEnter={handleEnter}
-                        disabled={!isInput}
+                        disabled={isInput}
                     />
                     <div className={style.icon}>
                         <Button type="text" icon={<SendOutlined />} style={{color: 'rgba(255, 255, 255, 0.85)'}} ghost ></Button>

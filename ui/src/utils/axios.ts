@@ -21,7 +21,7 @@ interface MyRequest<U> extends AxiosRequestConfig {
 
 class Http {
   timeout: number = 7000;
-  baseURL: string = "http://10.140.1.76:8081";
+  baseURL: string = "http://localhost:8081";
   forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
 
   mergeOptions(options: AxiosRequestConfig) {

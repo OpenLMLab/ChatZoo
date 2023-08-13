@@ -148,6 +148,7 @@ const Chat: React.FC = () => {
   const { TextArea } = Input;
   const {Option} = Select
 
+  // 监控对话事件，在 bottom 组件调用该事件来向对话组件发送消息
   useEffect(() => {
     const listener = (question: string, models: ModelConfig[], mode:string, sessionId: string) => {
       // 插入会话
@@ -158,23 +159,34 @@ const Chat: React.FC = () => {
                 sessionList[model.model_id] = []
             }
           })
-      // 对话开始前， 禁用会话列表, 禁用切换模式
-      eventBus.emit('banSessionList', true)
-      eventBus.emit('banModeEvent', true)
+      // 对话开始前， 禁用会话列表, 禁用切换模式, 禁用输入框输入
+      eventBus.emit('banSessionList', true)  // 禁用会话切换
+      eventBus.emit('banModeEvent', true)  // 禁用模式
+      eventBus.emit('banInputEvent', true)  // 禁用输入
       // 开始对话
       startSse(question, models)
       // 异步保存缓存
       setTimeout(() => {
         getSseStatus();
         downloadSse(models,mode,sessionId);
-        if(mode === 'single') {
-          eventBus.emit('input', false) 
+        // 如果是单回复标注那么要禁用输入框
+        if(role != 'debug')
+          if(mode === 'dialogue') {
+            eventBus.emit('banInputEvent', false) 
+          }else{
+            // 开启标注模式
+            eventBus.emit("annotateSession", false, sessionId)
+          }
+        else {
+          console.log("[Debug] 当前为debug模式, 用户对话不会禁止")
+          eventBus.emit('banInputEvent', false) 
         }
         // 会话结束后
         // 对话开始前， 开启会话列表
         console.log("开启会话列表")
-        eventBus.emit('banSessionList', false)
-        eventBus.emit('banModeEvent', false)
+        eventBus.emit('banSessionList', false) // 禁用会话切换
+        eventBus.emit('banModeEvent', false) // 开启模式
+        // eventBus.emit('banInputEvent', false)
       }, 5000); // 延迟时间为 1000 毫秒（1秒）
     };
     eventBus.on('sendMessage', listener);
