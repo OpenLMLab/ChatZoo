@@ -57,7 +57,52 @@ function Home() {
         true,
         '0',
         true
-      )
+      ),new ModelConfig(
+        "fnlp/moss-moon-003-sft",
+        "moss_01",
+        "fnlp/moss-moon-003-sft",
+        { max_length: 2048 },
+        '0',
+        {
+          meta_prompt: "",
+          user_prompt: "Human: {}\n",
+          bot_prompt: "\nAssistant: {}\n",
+        },
+        "http://10.140.1.76:8083",
+        true,
+        '0',
+        true
+      ),new ModelConfig(
+        "fnlp/moss-moon-003-sft",
+        "moss_01",
+        "fnlp/moss-moon-003-sft",
+        { max_length: 2048 },
+        '0',
+        {
+          meta_prompt: "",
+          user_prompt: "Human: {}\n",
+          bot_prompt: "\nAssistant: {}\n",
+        },
+        "http://10.140.1.76:8083",
+        true,
+        '0',
+        true
+      ),new ModelConfig(
+        "fnlp/moss-moon-003-sft",
+        "moss_01",
+        "fnlp/moss-moon-003-sft",
+        { max_length: 2048 },
+        '0',
+        {
+          meta_prompt: "",
+          user_prompt: "Human: {}\n",
+          bot_prompt: "\nAssistant: {}\n",
+        },
+        "http://10.140.1.76:8083",
+        true,
+        '0',
+        true
+      ),
     ]);
 
   const modelsValues: ModelContextProps = {

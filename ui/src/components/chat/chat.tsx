@@ -1,15 +1,15 @@
-import { useRef, useContext, useState, useEffect } from 'react';
-import styles from './chat.module.less';
-import PUYUC from 'chat-webkit';
+import ModelConfig from '@/components/model/model';
+import { ModeContext } from '@/utils/contexts';
+import eventBus from '@/utils/eventBus';
+import { FreezeContext } from '@/utils/freezecontext';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
-import { Tooltip, Modal, Select, Input } from 'antd';
-import ModelConfig from '@/components/model/model';
+import { sessionMesage } from '@/utils/sessionInterface';
+import { Input, Modal, Select, Tooltip } from 'antd';
+import PUYUC from 'chat-webkit';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
-import eventBus from '@/utils/eventBus';
-import {sessionMesage} from '@/utils/sessionInterface'
-import { ModeContext } from '@/utils/contexts';
-import { FreezeContext } from '@/utils/freezecontext';
+import { useContext, useEffect, useRef, useState } from 'react';
+import styles from './chat.module.less';
 
 
 /**
@@ -174,7 +174,10 @@ const Chat: React.FC = () => {
       eventBus.removeListener('sendMessage', listener);
     };
   }, []);
-  
+
+  // const doWrap = styles.wrap;
+  const doWrap = styles.noWrap; 
+
   return (
     <>
       <Modal
@@ -226,6 +229,7 @@ const Chat: React.FC = () => {
         </div>
 
       </Modal>
+      <div className={`${styles.chatwrap} ${doWrap}`}>
       {models?.map((model: any, index: number) => (
         <div className={styles.chatContainer}>
           <div className={styles.banner}>
@@ -295,6 +299,9 @@ const Chat: React.FC = () => {
           </div>
         </div>
       ))}
+      </div>
+
+      
     </>
   );
 };
