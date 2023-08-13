@@ -5,6 +5,7 @@ import './App.module.less';
 import qs from 'qs';
 import http from '@/utils/axios';
 import { useState } from 'react';
+import eventBus from './utils/eventBus';
 
 function App() {
     const [messageApi, contextHolder] = message.useMessage();
@@ -39,17 +40,19 @@ function App() {
             username: name,
         };
         // 登录
-        http.post<string, any>('/login/?' + qs.stringify(data))
-            .then((res) => {
-                console.log('登陆后', res.data.data.role);
-                localStorage.setItem('permission', res.data.data.role);
-                localStorage.setItem('username', res.data.data.username);
-                console.log('login success');
-                navigate('/home');
-            })
-            .catch(() => {
-                error('登录失败！');
-            });
+        http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
+          console.log('登陆后', res.data.data.role)
+          localStorage.setItem('permission', res.data.data.role);
+          localStorage.setItem('username', res.data.data.username);
+          console.log("login success")
+          if(res.data.data.role == 'debug'){
+            console.log(res.data.data.role, "111111")
+            eventBus.emit("banVote", true)
+          }
+          navigate('/home');          
+        }).catch(() => {
+          error("登录失败！")
+        });
     };
 
     const onFinishFailed = (errorInfo: any) => {

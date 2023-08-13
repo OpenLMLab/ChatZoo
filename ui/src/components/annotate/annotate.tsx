@@ -18,16 +18,25 @@ const Annotate: React.FC = () => {
     const mode = useContext(ModeContext)?.mode;
     const [messageApi, contextHolder] = message.useMessage();
     const [isBtn, setisBtn] = useState(true);
-    let ids = {};
+
+    // 获取角色， 决定是否开始标注
+    const role = localStorage.getItem("permission")
+    console.log("[Debug] annotate.tsx role is " + role)
+
+    // 关闭标注的开关
+    const [banVote, setBanVote] = useState(false);
+    let ids = {}
+    // 监听是否禁用标注，主要用于debug成员
     useEffect(() => {
         const statusListener = (status: boolean) => {
-            setisBtn(status);
-        };
-        eventBus.on('sendStatus', statusListener);
+            setBanVote(status)
+        }
+        eventBus.on('banVote', statusListener)
         return () => {
-            eventBus.removeListener('sendStatus', statusListener);
-        };
+            eventBus.removeListener('banVote', statusListener)
+        }
     }, []);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const models = useContext(ModelContext)?.models;
     const names: string[] = [];
@@ -45,16 +54,21 @@ const Annotate: React.FC = () => {
             type: 'error',
             content: '请选择选项',
         });
-    };
-    //完成标注
+      };
+    //完成标注，打开输入框的限制
     const handleOk = () => {
         // 发送
         if (isNull) {
             error();
         } else {
-            if (mode === 'single') {
+            // 单标注完成，打开输入框
+            if(mode === 'single') {
                 voteDialogue();
-                eventBus.emit('finishAnnotate');
+                eventBus.emit('banInputEvent', false)
+                console.log("[Debug] annotate.tsx :" + "单轮会话标注完成， 打开输入框, 并且可以标注")
+                // 开启标注
+                // 开启标注模式
+                eventBus.emit("annotateSession", true, sessionId)
             } else {
                 vote();
                 eventBus.emit('dialogueFinish', sessionId);
@@ -134,11 +148,9 @@ const Annotate: React.FC = () => {
     return (
         <>
             {contextHolder}
-            <Button type="primary" onClick={showModal} disabled={!isBtn}>
-                标注
-            </Button>
-            <Modal
-                title={title}
+            { role != 'debug' && <Button type='primary' onClick={showModal} disabled={ banVote}>标注</Button>}
+            {/* <Button type='primary' onClick={showModal} disabled={ banVote}>标注</Button> */}
+            <Modal title={title}
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={handleCancel}
