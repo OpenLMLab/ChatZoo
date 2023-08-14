@@ -52,7 +52,7 @@ function Home() {
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
         },
-        "http://localhost:8083",
+        "http://10.140.1.76:8083",
         true,
         '0',
         true
@@ -77,14 +77,12 @@ function Home() {
               </div>
               <Manager />
             </Col>
-              <FreezeContext.Provider value={freezeValues}>
                 <Col span={20} className={style.main}>
                   <div className={style.header}>
                     <div className={style.mode}>
                       <Mode></Mode>
                     </div>
                   </div>
-                  <QuestionContext.Provider value={questionValues}>
                     <div className={style.content}>
                       <div className={style.add}>
                         {models.length === 0 ? <Add></Add> : <Chat />}
@@ -93,9 +91,7 @@ function Home() {
                     <div className={style.footer}>
                       <Bottom />
                     </div>
-                  </QuestionContext.Provider>
                 </Col>
-              </FreezeContext.Provider>
           </Row>
           </ModeContext.Provider>
         </IdContext.Provider>

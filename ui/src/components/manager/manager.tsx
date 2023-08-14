@@ -5,7 +5,7 @@ import style from './manager.module.less';
 import { ModelContext } from '@/utils/modelcontext';
 import eventBus from '@/utils/eventBus';
 import {sessionMesage} from '@/utils/sessionInterface'
-import { ModeContext, ModeContextProps } from '@/utils/contexts';
+import { ModeContext } from '@/utils/contexts';
 
 interface ChatItem extends IChatItem {
     notAnnotated: boolean;
@@ -17,7 +17,6 @@ interface ChatItem extends IChatItem {
 function Manager() {
   // 模式控制的
     const modeContext = useContext(ModeContext)?.mode
-    const setModeContext = useContext(ModeContext)?.setMode
     console.log(modeContext, "manager mode")
     // 会话是否禁用的开关
     const [banSession, setBanSession] = useState(false);
@@ -34,14 +33,6 @@ function Manager() {
         mode: modeContext!
     }])
     const prevMyStateRef = useRef(modeContext);
-    // if(localStorage.getItem(modeContext!) != undefined && localStorage.getItem(modeContext!)!== null){
-    //     // 加载保存的会话列表
-    //     const chatlist_state = JSON.parse(localStorage.getItem(modeContext!)!);
-    //     const new_chatList = chatlist_state["chatlist"]
-    //     const session_id = chatlist_state["session_id"]
-    //     idContext?.setId(session_id)
-    //     setChatList(new_chatList)
-    // }
     for (let i = 0; i < numOfModel!; i++) {
         if (models) initSession[models[i].model_id] = [];
     }
@@ -51,7 +42,6 @@ function Manager() {
     }
 
     const addChat = (modecontext: string, chatList: ChatItem[]) => {
-        console.log(modecontext, "add chat111111111")
         const newItem = {
             id: Date.now().toString(),
             name: '新会话' + Date.now().toString(),
@@ -64,9 +54,6 @@ function Manager() {
          /**新增后会立即选中当前的sessionid */
          setCurChatId(newItem.id)
          eventBus.emit('banInputEvent', false)
-
-        //  eventBus.emit('sendStatus', true)
-        //  eventBus.emit('input', true)
          idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length;
@@ -74,8 +61,6 @@ function Manager() {
         for (let i = 0; i < numOfModel!; i++) {
             if (models) initSession[models[i].model_id] = [];
         }
-        console.log("addchat", newItem.id)
-        console.log(chatList)
         localStorage.setItem(newItem.id, JSON.stringify(initSession))
     }
 
@@ -93,33 +78,23 @@ function Manager() {
         }
     };
 
-    const annotateChat = (id: string) => {
-        const index = chatList.findIndex((x) => x.id === id);
-        console.log('正在标注', index);
-        chatList[index]['notAnnotated'] = false;
-        eventBus.emit('sendStatus', chatList[index]['notAnnotated']);
-    };
-
     const selectChat = (id:string) => {
         setCurChatId(id)
         idContext?.setId(id)
         const index = chatList.findIndex(x => x.id === id)
         // 判断是否禁用输入框
         eventBus.emit('banInputEvent', !chatList[index]['notAnnotated'])
-        // eventBus.emit('sendStatus', chatList[index]['notAnnotated'])
+        // 会话标注 && 已经标注
+        if(modeContext === 'dialogue') {
+          eventBus.emit('banVote', !chatList[index]['notAnnotated'])
+        }
     }
 
-    const setMode = (mode: string, sessionId: string) => {
-      const index = chatList.findIndex(x => x.id === sessionId)
-      chatList[index]['mode'] = mode
-    }
     // 监听单会话标注是否完成， 完成将sessionList的标注置为可对话
     useEffect(()=>{
         const CurSessionAnnatote = (finishBtn: boolean, id: string) => {
             const index = chatList.findIndex(x => x.id === id)
-            // const newChatList = chatList.slice()
             chatList[index].notAnnotated = finishBtn
-            console.log("[Debug] manager.tsx" + "cursessionAnnatote :" + chatList + "session_id: " + id)
             setChatList(chatList)
         }
         eventBus.on("annotateSession", CurSessionAnnatote)
@@ -143,9 +118,7 @@ function Manager() {
 
     // 监听模式的变化, 一旦变化就切换展示的会话信息
     useEffect(()=>{
-      console.log(chatList, idContext?.id, "manger mode_change effect", prevMyStateRef.current)
       if(prevMyStateRef.current != modeContext){
-        console.log('myState 变化了:', prevMyStateRef.current, '=>', modeContext);
         const sessionSate = {
           "chatlist": chatList,
           "session_id": idContext?.id
@@ -157,14 +130,14 @@ function Manager() {
             const chatlist_state = JSON.parse(localStorage.getItem(modeContext!)!);
             const new_chatList: ChatItem[] = chatlist_state["chatlist"]
             const session_id = chatlist_state["session_id"]
-             // 切换模式时候判断是否开启对话框
-             const index = new_chatList.findIndex(x => x.id === session_id)
+            // 切换模式时候判断是否开启对话框
+            const index = new_chatList.findIndex(x => x.id === session_id)
             idContext?.setId(session_id)
             setChatList(new_chatList)
             setCurChatId(session_id)
-            // selectChat(session_id)
-            eventBus.emit("banInputEvent", true)
-            console.log("[Debug] manager.tsx session_id:", session_id, index, new_chatList, !new_chatList[index]['notAnnotated'])
+            eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
+            console.log('现在的模式是', modeContext)
+            eventBus.emit('banVote', !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
         }
@@ -172,29 +145,6 @@ function Manager() {
       }
       
     }, [modeContext])
-
-    useEffect(() => {
-      const annotateListener = (sessionId: string) => {
-        console.log('想要标注的session', sessionId)
-        annotateChat(sessionId)
-      }
-      const modeListener = (mode: string, sessionId: string) => {
-        console.log('模式', mode, 'sessionId', sessionId)
-        setMode(mode, sessionId)
-      }
-      const findMode = (sessionId: string) => {
-        const index = chatList.findIndex(x => x.id === sessionId)
-        useContext(ModeContext)?.setMode(chatList[index]['mode'])
-      }
-      // eventBus.on('dialogueFinish', annotateListener)
-      // eventBus.on('setMode', modeListener)
-      // eventBus.on('findMode', findMode)
-      return () => {
-        eventBus.removeListener('dialogueFinish', annotateListener)
-        eventBus.removeListener('setMode', modeListener)
-        eventBus.removeListener('findMode', findMode)
-      }
-  }, []);
 
     return (
         <div className={style.chatmanagement} style={banSession ? {pointerEvents: 'none', opacity: 0.5} : {}}>

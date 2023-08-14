@@ -15,7 +15,8 @@ interface MyRequest<U> extends AxiosRequestConfig {
 
 class Http {
   timeout: number = 7000;
-  baseURL: string = "http://localhost:8081";
+  baseURL: string = `http://${import.meta.env.VITE_REACT_APP_HOST}:${import.meta.env.VITE_REACT_APP_PORT}`;
+  
   forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
 
     mergeOptions(options: AxiosRequestConfig) {

@@ -40,6 +40,7 @@ function App() {
             username: name,
         };
         // 登录
+        console.log('路径', http.baseURL)
         http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
           console.log('登陆后', res.data.data.role)
           localStorage.setItem('permission', res.data.data.role);
