@@ -35,7 +35,6 @@ const Bottom: React.FC = () => {
     const [isInput, setisInput] = useState(false);
 
     const [inputValue, setInputValue] = useState('');
-    const [status, setStatus] = useState(false);
     const mode = useContext(ModeContext)?.mode;
     const models = useContext(ModelContext)?.models;
     const sessionId = useContext(IdContext)?.id;
@@ -45,35 +44,13 @@ const Bottom: React.FC = () => {
     // 禁用输入框的事件
     useEffect(()=>{
         const banInputEvent = (banButton: boolean) => {
-            console.log("[Debug] bottom.tsx 修改输入框事件：" + banButton)
             setisInput(banButton)
         }
         eventBus.on("banInputEvent", banInputEvent)
         return ()=>{
             eventBus.off("banInputEvent", banInputEvent)
         }
-    })
-
-    // useEffect(() => {
-    //     const statusListener = (status: boolean) => {
-    //         setStatus(status)
-    //         console.log('设置是否已经标注', status)
-    //     }
-    //     const inputListener = (status: boolean) => {
-    //         setisInput(status)
-    //     }
-    //     const annotateListener = () => {
-    //         setisInput(false)
-    //     }
-    //     eventBus.on('finishAnnotate', annotateListener)
-    //     eventBus.on('input', inputListener)
-    //     eventBus.on('sendStatus', statusListener)
-    //     return () => {
-    //         eventBus.removeListener('input', inputListener)
-    //         eventBus.removeListener('sendStatus', statusListener)
-    //         eventBus.removeListener('finishAnnotate', annotateListener)
-    //     }
-    // }, []);
+    }, [])
     
     // 输入框
     const handleChange = (event: any) => {
