@@ -1,4 +1,4 @@
-from peewee import TextField
+from peewee import TextField, Model
 import json
 
 class JSONField(TextField):
@@ -8,3 +8,8 @@ class JSONField(TextField):
     def python_value(self, value):
         if value is not None:
             return json.loads(value)
+
+class BaseModel(Model):
+    
+    class Meta:
+        database = None # 不指定具体的数据库连接

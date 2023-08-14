@@ -10,7 +10,12 @@ class ChatGLMBOT(TransformersChatBotBase):
         assert config.dtype != torch.float32, \
             "`float32` is invalid for ChatGLM due to its structure."
         super(ChatGLMBOT, self).__init__(config)
-
+        self.prompts = {
+            "meta_prompt": "",
+            "user_prompt": "[Round {}]\n答：{}\n",
+            "bot_prompt": "问：{}\n"
+        }
+        
     @property
     def model_cls(self):
         return ChatGLMForConditionalGeneration

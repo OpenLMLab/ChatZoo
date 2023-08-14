@@ -8,8 +8,12 @@ class ChatBotBase:
     """
     def __init__(self, config):
         self.config = config
-        self.generation_setting = {}
-        self.input_prompt = None
+        self.generation_setting = {
+            "max_length": 2048, "num_beams": 1, "do_sample": True,
+            "top_p": 0.9, "top_k": 1, "temperature": 0.95,
+            "repetition_penalty": 1.02
+        }
+        self.prompts = {"meta_prompt": None, "user_prompt": None, "bot_prompt": None}
     
     def load_tokenizer(self):
         raise NotImplementedError(
@@ -25,7 +29,7 @@ class ChatBotBase:
         """
         获取用于生成的配置参数
         """
-        return {}
+        return self.generation_setting
 
     def set_generation_setting(self, new_setting: Dict):
         """
@@ -53,14 +57,13 @@ class ChatBotBase:
         """
         更改模型的 input_sprompt
         """
-        self.input_prompt = new_prompt
+        self.prompts = new_prompt
     
     def get_input_prompt(self):
-        return self.input_prompt
+        return self.prompts
     
     def get_query_tensor(self, prompt):
-        raise NotImplementedError(
-            
+        raise NotImplementedError(  
         )
     
     def stream_generate(self, input_dict, gen_kwargs):
