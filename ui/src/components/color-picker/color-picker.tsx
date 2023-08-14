@@ -9,7 +9,7 @@ const ColorPicker: React.FC = () => {
         return () => {
             console.log('to{$color}');
             const root = document.querySelector(':root');
-            if (root) {
+            if (root instanceof HTMLElement) {
                 root.style.removeProperty('--primary')
                 root.style.removeProperty('--background-gradient')
                 root.setAttribute('theme', color);
@@ -21,7 +21,7 @@ const ColorPicker: React.FC = () => {
         const root = document.querySelector(':root');
         const hsb = color.toHsb();
         const bGradStart = new ColorFactory({ h: hsb.h, s: hsb.s, b: hsb.b - 0.1 });
-        if (root) {
+        if (root instanceof HTMLElement) {
             root.style.setProperty('--primary', color.toHexString())
             root.style.setProperty('--background-gradient', `linear-gradient(117.2deg, ${bGradStart.toHexString()} 10.6%, #41464a 90.8%)`)
         }
