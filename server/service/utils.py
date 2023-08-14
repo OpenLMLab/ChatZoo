@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import torch
 from peewee import SqliteDatabase, MySQLDatabase
 
-from service.database.models import User, DebugMessage, Dialogue, Generate_Config, Vote 
+from .database.models import User, DebugMessage, Dialogue, Generate_Config, Vote 
 
 
 class Singleton(type):

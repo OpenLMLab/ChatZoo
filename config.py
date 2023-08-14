@@ -7,7 +7,7 @@ model_list = [
         "devices": "0,1",
         "dtype": "float16",
         "base_model": None,
-        # "port": 8082, # 若不指定则采用默认的配置参数
+        "port": 8082, # 若不指定则采用默认的配置参数
         "prompts": { # 若不指定，则默认找已经定义好的chatbots，若找不到则报错
              "meta_prompt": "",
              "user_prompt": "Human: {}\n",
@@ -26,7 +26,7 @@ model_list = [
         "devices": "2",
         "dtype": "float16",
         "base_model": None,
-        # "port": 8083, # 若不指定则采用默认的配置参数
+        "port": 8083, # 若不指定则采用默认的配置参数
     }
 ]
 user_list = [

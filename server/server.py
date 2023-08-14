@@ -2,6 +2,7 @@ import os
 import argparse
 import json
 
+from prettytable import PrettyTable
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -88,9 +89,9 @@ def init_params():
         tokenizer_path=args.tokenizer_path, dtype=args.dtype,
         from_s3=args.from_s3, base_model=args.base_model,
     )
-    print(f"Initializing model...")
-    print("Using devices:", args.devices)
-    print("Config:", model_config)
+    # print(f"Initializing model...")
+    # print("Using devices:", args.devices)
+    # print("Config:", model_config)
     if model_config.type is not None:
         bot = choose_bot(config=model_config)
     else:
@@ -116,6 +117,28 @@ def init_params():
 
         
     config = AppConfig(db, bot=bot, model_info=model_info, mode=args.mode)
+    
+    print("*"*20 + f"启动{args.nickname}后端服务" + "*"*20)
+    table = PrettyTable()
+    data = [
+        ["URL", f"{args.host}:{args.port}"],
+        ["devices", args.devices],
+        ["nickname", args.nickname],
+        ["model_name_or_path", args.model_name_or_path],
+        ["tokenizer_path", args.tokenizer_path],
+        ["stream", args.stream],
+        ["mode", args.mode],
+        ["db_path", args.db_path],
+        ["db_type", args.db_type]
+    ]
+    table.add_column("Field Name", [row[0] for row in data])
+    table.add_column("Value", [row[1] for row in data])
+
+    print(table)
+    # print(f"Initializing model...")
+    # print("Using devices:", args.devices)
+    # print("Config:", model_config)
+    # print(f"URL: {args.host}:{args.port}")
 
 app.include_router(login_router, prefix="/login")
 app.include_router(chat_router, prefix="/chat")
