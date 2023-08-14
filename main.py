@@ -157,13 +157,15 @@ def get_model_list():
     global model_list, main_host
     # 移除URL中可能存在的结尾斜杠
     use_host = main_host
-    if main_host.endswith('/'):
+    if use_host.endswith('/'):
         use_host = use_host[:-1]
+    if not use_host.startswith("http://") and not use_host.startswith("https://"):
+        use_host = "http://" + use_host
+    print(use_host, "use_host")
     # 拼接URL和端口号
     urls = [f"{use_host}:{model['port']}" for model in model_list]
-    return {"code": 200, "data": {
-        "urls": urls
-    }}
+    
+    return {"code": 200, "data": urls}
 
 @app.post("/login/")
 async def login_by_username(username):
