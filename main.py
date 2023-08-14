@@ -4,6 +4,7 @@ import importlib
 import subprocess
 import uvicorn
 import json
+import sys
 
 from fastapi import FastAPI
 
@@ -39,13 +40,22 @@ def run_subprocess_server(model_info: dict, database_path: str, database_dtype: 
 
 def run_suprocess_ui(host_name, port):
     base_path = "ui"
-    command = ["npm", "start"]
+    if sys.platform.startswith('linux'):
+        print("当前环境为 Linux")
+        command = ["npm", "start"]
+    elif sys.platform.startswith('win'):
+        print("当前环境为 Windows")
+        command = ["cmd", "/c","npm", "start"]
+    # command = ["npm", "start"]
     # 设置环境变量，指定端口号和主机
-    env = {
-        "PORT": host_name,  # 设置端口号
-        "HOST": str(port)  # 设置主机
-    }
-    process = subprocess.Popen(command, cwd=base_path, env=env)
+    # env = {
+    #     "VITE_REACT_APP_PORT": host_name,  # 设置端口号
+    #     "VITE_REACT_APP_HOST": str(port)  # 设置主机
+    # }
+    # print(env)
+    os.environ["VITE_REACT_APP_PORT"] = str(port)
+    os.environ["VITE_REACT_APP_HOST"] = host_name
+    process = subprocess.Popen(command, cwd=base_path)
     return process
 
 app = FastAPI()
@@ -93,9 +103,11 @@ async def startup_event():
         raise ValueError(f"user_list length is `{len(user_list)}`, you should init it")
 
     # 搜寻空闲的端口
+    used_port = [model['port'] for model in model_list if 'port' in model]
     for model in model_list:
-        if 'port' not in model:
-            model['port'] = find_free_port()
+        if 'port' not  in model:
+            model['port'] = find_free_port(used_port)
+            
     
     for idx, model_info in enumerate(model_list):
         print("**" * 10 + f"启动后端服务{idx}" +"**" * 10)
@@ -109,6 +121,10 @@ async def startup_event():
         subprocesses.append(process)
     main_host = host_name
     subprocesses.append(run_suprocess_ui(host_name=host_name, port=port))
+
+@app.get("/get_model_list")
+def get_model_list():
+    ...
 
 # 关闭进程
 @app.on_event("shutdown")
