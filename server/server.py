@@ -1,6 +1,7 @@
 import os
 import argparse
 import json
+import time
 
 from prettytable import PrettyTable
 import uvicorn
@@ -106,7 +107,7 @@ def init_params():
         raise ValueError("generate_kwargs couldnot be None, you should initial generate_kwargs!")
     
     # 如果为 arena 模式， 则将配置文件的模型配置参数写入数据库中
-    generate_config_id = None
+    generate_config_id = str(int(time.time()))
     if args.mode == "arena":
         generate_config_instance = create_generate_config(nickname=args.nickname, generate_kwargs=gen_config, model_name_or_path=args.model_name_or_path,
                             prompts=args.prompts)

@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from tools.utils import find_free_port
 
 from server.service.database.crud.user_crud import adjust_username_in_user
+from server.service.database.crud.user_crud import insert_many_users
 from server.service.utils import initial_database
 
 
@@ -112,6 +113,7 @@ async def startup_event():
     database_path = config_module.database_path
     database_dtype = config_module.database_dtype
     initial_database(database_path=database_path,db_type=database_dtype)
+    insert_many_users(user_list, 100)
 
     # check 变量是否出现问题
     if len(model_list) == 0:
