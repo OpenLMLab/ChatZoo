@@ -6,9 +6,15 @@ import uvicorn
 import json
 import sys
 
+from prettytable import PrettyTable
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from tools.utils import find_free_port
+
+from server.service.database.crud.user_crud import adjust_username_in_user
+from server.service.utils import initial_database
+
 
 parse = argparse.ArgumentParser()
 parse.add_argument("--config", type=str, required=True, help="Configuration file")
@@ -32,36 +38,47 @@ def run_subprocess_server(model_info: dict, database_path: str, database_dtype: 
     if stream:
         server_kwargs.append("--stream")
         # server_kwargs += f" --prompts {model_info['prompts']}"
-    print(f"server_kwargs {server_kwargs}")
+    # print(f"server_kwargs {server_kwargs}")
     command = ["python", "server/server.py"]
     command.extend(server_kwargs)
     process = subprocess.Popen(command)
     return process
 
-def run_suprocess_ui(host_name, port):
-    base_path = "ui"
-    if sys.platform.startswith('linux'):
-        print("当前环境为 Linux")
-        command = ["npm", "start"]
-    elif sys.platform.startswith('win'):
-        print("当前环境为 Windows")
-        command = ["cmd", "/c","npm", "start"]
-    # command = ["npm", "start"]
-    # 设置环境变量，指定端口号和主机
-    # env = {
-    #     "VITE_REACT_APP_PORT": host_name,  # 设置端口号
-    #     "VITE_REACT_APP_HOST": str(port)  # 设置主机
-    # }
-    # print(env)
-    os.environ["VITE_REACT_APP_PORT"] = str(port)
-    os.environ["VITE_REACT_APP_HOST"] = host_name
-    process = subprocess.Popen(command, cwd=base_path)
+def run_suprocess_ui(host_name, main_port, port):
+    base_path = "ui/dist/"
+    html_file = os.path.join(base_path, "index.html")
+    with open(html_file, 'rt') as f:
+        html_content = f.read()
+
+    # 动态插入的 script 行
+    script_line = f'<script>window.VITE_REACT_APP_PORT = "{main_port}";window.VITE_REACT_APP_HOST="{main_host}"</script>'
+
+    # 在 </body> 标签之前插入 script 行
+    modified_content = html_content.replace('</body>', script_line + '\n</body>')
+
+    # 创建临时 HTML 文件
+    temp_html_file = os.path.join(base_path,'index.html')
+    with open(temp_html_file, 'wt') as f:
+        f.write(modified_content)
+    
+    command = ["python", "-m", "http.server", str(port), "--b", host_name, "--d", base_path]
+    process = subprocess.Popen(command)
     return process
 
 app = FastAPI()
-main_port = find_free_port()
-main_host = None
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=["*"],
+    allow_origin_regex='http.*?://.*',
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+main_port = find_free_port([])
+main_host = "10.140.1.169"
 subprocesses = []
+model_list = []
+db = None
 
 # 在程序退出前终止所有子进程
 def terminate_subprocesses(subprocesses):
@@ -79,8 +96,7 @@ def exit_handler(signum, frame):
 # 启动进程
 @app.on_event("startup")
 async def startup_event():
-    print("*" * 20 + "启动子进程服务" + "*" * 20)
-    global args, subprocesses, main_host
+    global args, subprocesses, main_host, model_list, main_port
     # 加载配置文件所有的变量
     # config_module = importlib.import_module(args.config)
     spec = importlib.util.spec_from_file_location("config", args.config)
@@ -95,6 +111,7 @@ async def startup_event():
     is_stream = config_module.is_stream
     database_path = config_module.database_path
     database_dtype = config_module.database_dtype
+    initial_database(database_path=database_path,db_type=database_dtype)
 
     # check 变量是否出现问题
     if len(model_list) == 0:
@@ -104,27 +121,62 @@ async def startup_event():
 
     # 搜寻空闲的端口
     used_port = [model['port'] for model in model_list if 'port' in model]
+    used_port.append(main_port)
     for model in model_list:
         if 'port' not  in model:
             model['port'] = find_free_port(used_port)
             
     
     for idx, model_info in enumerate(model_list):
-        print("**" * 10 + f"启动后端服务{idx}" +"**" * 10)
-        print(f"nickname: {model_info['nickname']}")
-        print(f"model_name_or_path: {model_info['model_name_or_path']}")
-        print(f"generate_kwargs: {model_info['generate_kwargs']}")
-        print(f"devices: {model_info['devices']}")
-        print(f"IP:Host -> {host_name} : {model_info['port']}")
+        # print("**" * 10 + f"启动后端服务{idx}" +"**" * 10)
+        # print(f"nickname: {model_info['nickname']}")
+        # print(f"model_name_or_path: {model_info['model_name_or_path']}")
+        # print(f"generate_kwargs: {model_info['generate_kwargs']}")
+        # print(f"devices: {model_info['devices']}")
+        # print(f"IP:Host -> {host_name} : {model_info['port']}")
         process = run_subprocess_server(model_info=model_info, database_path=database_path, database_dtype=database_dtype,
                               host_name=host_name, mode=mode, stream=is_stream)
         subprocesses.append(process)
     main_host = host_name
-    subprocesses.append(run_suprocess_ui(host_name=host_name, port=port))
+    
+    print("*"*20 + "启动前端网页服务" + "*"*20)
+    data = [
+        ["URL", f"{host_name}:{port}"],
+    ]
+    table = PrettyTable()
+    table.add_column("Field Name", [row[0] for row in data])
+    table.add_column("Value", [row[1] for row in data])
+
+    print(table)
+    subprocesses.append(run_suprocess_ui(host_name=host_name, main_port=main_port, port=port))
 
 @app.get("/get_model_list")
 def get_model_list():
-    ...
+    global model_list, main_host
+    # 移除URL中可能存在的结尾斜杠
+    use_host = main_host
+    if main_host.endswith('/'):
+        use_host = use_host[:-1]
+    # 拼接URL和端口号
+    urls = [f"{use_host}:{model['port']}" for model in model_list]
+    return {"code": 200, "data": {
+        "urls": urls
+    }}
+
+@app.post("/login/")
+async def login_by_username(username):
+    print(username)
+    # username = request.query_params['username']
+    is_access, query = adjust_username_in_user(username)
+    print(is_access, query)
+    if is_access:
+        return {"code": 200, "data": {"role": query.role,
+                                      "username": query.username, "session_mark_num": query.session_mark_num,
+                                      "single_mark_num": query.single_mark_num,"create_time": query.create_time},
+                "msg": "登录成功!"}
+    else:
+        return {"code": 400, "data": None, "msg": "sql operation error!"}
+
 
 # 关闭进程
 @app.on_event("shutdown")
@@ -132,6 +184,22 @@ async def shutdown_event():
     global subprocesses
     print("*" * 20 + "关闭子进程服务" + "*" * 20)
     terminate_subprocesses(subprocesses=subprocesses)
+    
 
 if __name__ == "__main__":
     uvicorn.run(app, host=main_host, port=main_port)
+    base_path = "ui/dist/"
+    html_file = os.path.join(base_path, "index.html")
+    with open(html_file, 'rt') as f:
+        html_content = f.read()
+
+    # 动态插入的 script 行
+    script_line = f'<script>window.VITE_REACT_APP_PORT = "{main_port}";window.VITE_REACT_APP_HOST="{main_host}"</script>'
+
+    # 在 </body> 标签之前插入 script 行
+    modified_content = html_content.replace(script_line,"")
+
+    # 创建临时 HTML 文件
+    temp_html_file = os.path.join(base_path,'index.html')
+    with open(temp_html_file, 'wt') as f:
+        f.write(modified_content)

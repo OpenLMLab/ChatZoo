@@ -3,7 +3,7 @@
 
 from fastapi import APIRouter, Request
 
-from service.utils import AppConfig
+# from service.utils import AppConfig
 from service.database.crud.user_crud import adjust_username_in_user
 # from service.database.crud.user_curd import adjust_username_in_user
 
@@ -15,7 +15,7 @@ login_router = APIRouter()
 async def login_by_username(username):
     print(username)
     # username = request.query_params['username']
-    config = AppConfig()
+    # config = AppConfig()
     is_access, query = adjust_username_in_user(username)
     if is_access:
         return {"code": 200, "data": {"role": query.role,
