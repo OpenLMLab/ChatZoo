@@ -51,10 +51,19 @@ function App() {
             console.log(res.data.data.role, "111111")
             eventBus.emit("banVote", true)
           }
+          http.get<string, any>("/get_model_list").then(res=>{
+            console.log(res.data.data)
+            // localStorage.setItem("initModelUrls", JSON.stringify(res.data.data))
+            eventBus.emit("initModels", res.data.data)
+            console.log("获取标注数据")
+            })
           navigate('/home');          
         }).catch(() => {
           error("登录失败！")
         });
+
+        
+
         // http.get<string, any>('get_model_list').then((res)=>{
         //     const models_list = res.data.data
         //     let new_models = []

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 const host = (window as any).VITE_REACT_APP_HOST || "10.140.1.169";
-const port = (window as any).VITE_REACT_APP_PORT || "8083";
+const port = (window as any).VITE_REACT_APP_PORT || "1024";
 
 // 后端返回的数据
 interface MyResponse<T> {

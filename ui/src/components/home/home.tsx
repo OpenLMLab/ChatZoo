@@ -11,10 +11,12 @@ import { IdContext, IdContextProps } from '@/utils/idcontexts';
 import { ModelContext, ModelContextProps } from '@/utils/modelcontext';
 import { QuestionContext, QuestionContextProps } from '@/utils/question';
 import { Col, Row } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './home.module.less';
 import style from './home.module.less';
 import http from '@/utils/axios';
+import eventBus from '@/utils/eventBus';
+import { utimes } from 'fs';
 
 function Home() {
     const [mode, setMode] = useState<string | null>('dialogue');
@@ -28,28 +30,109 @@ function Home() {
         id,
         setId,
     };
+    
+    const [models, setModels] = useState<ModelConfig[]>([]);
+    let urls = localStorage.getItem("initModelUrls")
+    // if(urls != undefined || urls != null){
+    //     let initModels: ModelConfig[] = []
+    //     // urls = JSON.parse(urls)
+    //     const urls1 =  ['http://10.140.1.169:8082', 'http://10.140.1.169:8083']
+    //     urls1.forEach(url=>{
+    //       http.get<string, any>(url + '/chat/model_info')
+    //       .then((res) => {
+    //           console.log('返回结果', res.data.data);
+    //           const model = new ModelConfig(
+    //               res.data.data['model_name_or_path'],
+    //               res.data.data['nickname'],
+    //               res.data.data['tokenizer_path'],
+    //               res.data.data['generate_kwargs'],
+    //               res.data.data['device'],
+    //               res.data.data['prompts'],
+    //               url,
+    //               res.data.data['stream'],
+    //               res.data.data['model_id'],
+    //               true,
+    //           );
+    //           initModels.push(model)
+    //           console.log("Home.tsx initModels: ", initModels, url)
+    //           setModels(initModels)
+    //       })
+    //       .catch(() => {
+    //           console.log('添加模型失败!');
+    //       });
+    //   })
+    // }
+    // const [models, setModels] = useState<ModelConfig[]>([
+    //   new ModelConfig(
+    //     "fnlp/moss-moon-003-sft",
+    //     "moss",
+    //     "fnlp/moss-moon-003-sft",
+    //     { max_length: 2048 },
+    //     '0',
+    //     {
+    //       meta_prompt: "",
+    //       user_prompt: "Human: {}\n",
+    //       bot_prompt: "\nAssistant: {}\n",
+    //     },
+    //     "http://10.140.1.169:8082",
+    //     true,
+    //     '0',
+    //     true
+    //   ),
+    //   new ModelConfig(
+    //     "THUDM/chatglm-6b",
+    //     "chatglm2",
+    //     "THUDM/chatglm-6b",
+    //     { max_length: 2048 },
+    //     '1',
+    //     {
+    //       meta_prompt: "",
+    //       user_prompt: "Human: {}\n",
+    //       bot_prompt: "\nAssistant: {}\n",
+    //     },
+    //     "http://10.140.1.169:8083",
+    //     true,
+    //     '1',
+    //     true
+    //   ),
+    // ]);
 
-    const initModels: ModelConfig[] = []
-
-
-    const [models, setModels] = useState<ModelConfig[]>([
-      new ModelConfig(
-        "fnlp/moss-moon-003-sft",
-        "moss_01",
-        "fnlp/moss-moon-003-sft",
-        { max_length: 2048 },
-        '0',
-        {
-          meta_prompt: "",
-          user_prompt: "Human: {}\n",
-          bot_prompt: "\nAssistant: {}\n",
-        },
-        "http://10.140.1.169:8082",
-        true,
-        '0',
-        true
-      ),
-    ]);
+    useEffect(()=>{
+      const InitModel = (urls: Array<string>) => {
+        let initModels: ModelConfig[] = []
+        console.log(urls, "home.tsx")
+        // urls =  ['http://10.140.1.169:8082', 'http://10.140.1.169:8083']
+        urls.forEach(url=>{
+            http.get<string, any>(url + '/chat/model_info')
+            .then((res) => {
+                console.log('返回结果', res.data.data);
+                const model = new ModelConfig(
+                    res.data.data['model_name_or_path'],
+                    res.data.data['nickname'],
+                    res.data.data['tokenizer_path'],
+                    res.data.data['generate_kwargs'],
+                    res.data.data['device'],
+                    res.data.data['prompts'],
+                    url,
+                    res.data.data['stream'],
+                    res.data.data['model_id'],
+                    true,
+                );
+                initModels.push(model)
+                console.log("Home.tsx initModels: ", initModels, url)
+                setModels(initModels)
+            })
+            .catch(() => {
+                console.log('添加模型失败!');
+            });
+        })
+        
+      }
+      eventBus.on("initModels", InitModel)
+      return () => {
+      eventBus.off("initModels", InitModel)
+      }
+    })
     // const model_list = JSON.parse(localStorage.getItem("init_models")!)
     // if(model_list === undefined || model_list ===null){
       
