@@ -6,6 +6,7 @@ import qs from 'qs';
 import http from '@/utils/axios';
 import { useState } from 'react';
 import eventBus from './utils/eventBus';
+import ModelConfig from './components/model/model';
 
 function App() {
     const [messageApi, contextHolder] = message.useMessage();
@@ -54,6 +55,25 @@ function App() {
         }).catch(() => {
           error("登录失败！")
         });
+        // http.get<string, any>('get_model_list').then((res)=>{
+        //     const models_list = res.data.data
+        //     let new_models = []
+        //     models_list.forEach(element => {
+        //         new ModelConfig(
+        //             element.model_name_or_path,
+        //             element.nickname,
+        //             element.tokenizer_path,
+        //             element.generate_kwargs,
+        //             element.devices,
+        //             element.prompts,
+        //             element.url,
+        //             element.stream,
+        //             element.model_id,
+        //             element.start
+        //           ),
+        //     });
+        //     localStorage.setItem("init_models", models_list)
+        // })
     };
 
     const onFinishFailed = (errorInfo: any) => {

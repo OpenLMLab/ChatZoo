@@ -14,6 +14,7 @@ import { Col, Row } from 'antd';
 import { useState } from 'react';
 import './home.module.less';
 import style from './home.module.less';
+import http from '@/utils/axios';
 
 function Home() {
     const [mode, setMode] = useState<string | null>('dialogue');
@@ -43,12 +44,18 @@ function Home() {
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
         },
-        "http://10.140.1.76:8083",
+        "http://10.140.1.169:8082",
         true,
         '0',
         true
       ),
     ]);
+    // const model_list = JSON.parse(localStorage.getItem("init_models")!)
+    // if(model_list === undefined || model_list ===null){
+      
+    // }else{
+    //   setModels(model_list)
+    // }
 
     const modelsValues: ModelContextProps = {
         models,

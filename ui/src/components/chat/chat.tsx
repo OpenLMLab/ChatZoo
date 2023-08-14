@@ -93,6 +93,7 @@ const Chat: React.FC = () => {
     let new_session_list: sessionMesage = {}
     refs.map((ref, index) => {
       if (index < new_models?.length!) {
+        // new_session_list[index] = ref.current.getSessionList()
         new_session_list[new_models[index].model_id] = ref.current.getSessionList()
         console.log('收到对话', ref.current.getSessionList())
       }
@@ -114,9 +115,23 @@ const Chat: React.FC = () => {
     sessionList = new_session_list
     const dialogue_ids: {[key: string]: string} = {}
     // 获取dialogue_id
+    console.log(new_session_list)
     Object.keys(sessionList).map(session => {
-      const lastDialogue = sessionList[session][session.length - 1];
-      dialogue_ids[new_models[Number(session)].nickname] = lastDialogue.id.toString()
+      console.log(sessionList)
+      // 获取最后一条数据
+      const lastDialogue = sessionList[session][sessionList[session].length - 1];
+      // console.log(sessionList[session], session.length - 1, new_session_list)
+      // console.log("debug error ", lastDialogue, new_models, session, Number(session), new_models[session])
+      for (let index = 0; index < new_models.length; index++) {
+        if(new_models[index].model_id == session){
+          // 找到对应模型的名字
+          dialogue_ids[new_models[index].nickname] = lastDialogue.id.toString()
+        }
+        
+      }
+      // console.log("dialogue_id", dialogue_ids)
+      // dialogue_ids[new_models[Number(session)].nickname] = lastDialogue.id.toString()
+
     })
     eventBus.emit('sendVoteDict', dialogue_ids)
     localStorage.setItem(sessionId!, JSON.stringify(new_session_list))

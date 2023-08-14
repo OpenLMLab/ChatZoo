@@ -1,5 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
+const host = (window as any).VITE_REACT_APP_HOST || "10.140.1.169";
+const port = (window as any).VITE_REACT_APP_PORT || "8083";
+
 // 后端返回的数据
 interface MyResponse<T> {
     msg: string;
@@ -15,7 +18,9 @@ interface MyRequest<U> extends AxiosRequestConfig {
 
 class Http {
   timeout: number = 7000;
-  baseURL: string = `http://${import.meta.env.VITE_REACT_APP_HOST}:${import.meta.env.VITE_REACT_APP_PORT}`;
+//   baseURL: string = `http://${import.meta.env.VITE_REACT_APP_HOST}:${import.meta.env.VITE_REACT_APP_PORT}`;
+  baseURL: string = `http://${host}:${port}`;
+
   
   forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
 
