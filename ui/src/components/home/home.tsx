@@ -52,7 +52,7 @@ function Home() {
           user_prompt: "Human: {}\n",
           bot_prompt: "\nAssistant: {}\n",
         },
-        "http://localhost:8083",
+        "http://10.140.1.76:8083",
         true,
         '0',
         true

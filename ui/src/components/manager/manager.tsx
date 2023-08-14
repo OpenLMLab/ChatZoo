@@ -159,11 +159,11 @@ function Manager() {
             const session_id = chatlist_state["session_id"]
              // 切换模式时候判断是否开启对话框
              const index = new_chatList.findIndex(x => x.id === session_id)
-            idContext?.setId(session_id)
             setChatList(new_chatList)
             setCurChatId(session_id)
+            idContext?.setId(session_id)
             // selectChat(session_id)
-            eventBus.emit("banInputEvent", true)
+            eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
             console.log("[Debug] manager.tsx session_id:", session_id, index, new_chatList, !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
