@@ -59,9 +59,10 @@ def run_suprocess_ui(host_name, port):
     return process
 
 app = FastAPI()
-main_port = find_free_port()
+main_port = find_free_port([])
 main_host = None
 subprocesses = []
+model_list = []
 
 # 在程序退出前终止所有子进程
 def terminate_subprocesses(subprocesses):
@@ -80,7 +81,7 @@ def exit_handler(signum, frame):
 @app.on_event("startup")
 async def startup_event():
     print("*" * 20 + "启动子进程服务" + "*" * 20)
-    global args, subprocesses, main_host
+    global args, subprocesses, main_host, model_list, main_port
     # 加载配置文件所有的变量
     # config_module = importlib.import_module(args.config)
     spec = importlib.util.spec_from_file_location("config", args.config)
@@ -104,6 +105,7 @@ async def startup_event():
 
     # 搜寻空闲的端口
     used_port = [model['port'] for model in model_list if 'port' in model]
+    used_port.append(main_port)
     for model in model_list:
         if 'port' not  in model:
             model['port'] = find_free_port(used_port)
@@ -124,7 +126,16 @@ async def startup_event():
 
 @app.get("/get_model_list")
 def get_model_list():
-    ...
+    global model_list, main_host
+    # 移除URL中可能存在的结尾斜杠
+    use_host = main_host
+    if main_host.endswith('/'):
+        use_host = use_host[:-1]
+    # 拼接URL和端口号
+    urls = [f"{use_host}:{model['port']}" for model in model_list]
+    return {"code": 200, "data": {
+        "urls": urls
+    }}
 
 # 关闭进程
 @app.on_event("shutdown")
@@ -135,3 +146,4 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     uvicorn.run(app, host=main_host, port=main_port)
+    
