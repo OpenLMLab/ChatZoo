@@ -1,4 +1,6 @@
-import '@/styles/theme.less';
+import { ColorPicker as AntDColorPicker } from 'antd';
+import { Color } from 'antd/es/color-picker';
+import { ColorFactory } from 'antd/es/color-picker/color';
 import React from 'react';
 import style from './color-picker.module.less';
 
@@ -8,25 +10,39 @@ const ColorPicker: React.FC = () => {
             console.log('to{$color}');
             const root = document.querySelector(':root');
             if (root) {
+                root.style.removeProperty('--primary')
+                root.style.removeProperty('--background-gradient')
                 root.setAttribute('theme', color);
             }
         };
     };
+
+    const handleCustomColor = (color: Color) => {
+        const root = document.querySelector(':root');
+        const hsb = color.toHsb();
+        const bGradStart = new ColorFactory({ h: hsb.h, s: hsb.s, b: hsb.b - 0.1 });
+        if (root) {
+            root.style.setProperty('--primary', color.toHexString())
+            root.style.setProperty('--background-gradient', `linear-gradient(117.2deg, ${bGradStart.toHexString()} 10.6%, #41464a 90.8%)`)
+        }
+    }
+
     return (
         <div className={style.colorpicker}>
-            <div className={style.green} onClick={toColor('green')}></div>
-            <div className={style.blue} onClick={toColor('blue')}></div>
-            <div className={style.orange} onClick={toColor('orange')}></div>
-            <div className={style.red} onClick={toColor('red')}></div>
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 24" fill="none">
-                    <path
-                        d="M12.0938 3C12.646 3 13.0938 3.44772 13.0938 4V11H20.0938C20.646 11 21.0938 11.4477 21.0938 12C21.0938 12.5523 20.646 13 20.0938 13H13.0938V20C13.0938 20.5523 12.646 21 12.0938 21C11.5415 21 11.0938 20.5523 11.0938 20V13H4.09375C3.54147 13 3.09375 12.5523 3.09375 12C3.09375 11.4477 3.54147 11 4.09375 11H11.0938V4C11.0938 3.44772 11.5415 3 12.0938 3Z"
-                        fill="#ffffff7e"
-                    />
-                </svg>
+            <div onClick={toColor('green')}>
+                <AntDColorPicker className={style.color} disabled value='#4c8f70' />
             </div>
-        </div>
+            <div onClick={toColor('blue')}>
+                <AntDColorPicker className={style.color} disabled value="#598aa0" />
+            </div>
+            <div onClick={toColor('orange')}>
+                <AntDColorPicker className={style.color} disabled value='#9a9a4c' />
+            </div>
+            <div onClick={toColor('red')}>
+                <AntDColorPicker className={style.color} disabled value='#a05959' />
+            </div>
+            <AntDColorPicker className={`${style.custom}`} onChangeComplete={(color) => handleCustomColor(color)} />
+        </div >
     );
 };
 
