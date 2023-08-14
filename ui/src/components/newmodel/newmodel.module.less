@@ -1,7 +1,9 @@
+@import '@/styles/theme.less';
+
 .radio {
     :global {
         .ant-radio-button-wrapper {
-            color:black;
+            color: black;
         }
         .ant-radio-group.ant-radio-group-outline {
             .ant-radio-button-wrapper:first-child {
@@ -14,21 +16,21 @@
             }
         }
         .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
-            color: rgba(76, 143, 112, 1);
-            border-color: rgba(76, 143, 112, 1)
+            color: @primary;
+            border-color: @primary;
         }
         .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):first-child {
-            border-color: rgba(76, 143, 112, 1);
+            border-color: @primary;
         }
         .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):last-child {
-            border-color: rgba(76, 143, 112, 1);
+            border-color: @primary;
         }
         .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):nth-child(2) {
-            border-color: rgba(76, 143, 112, 1);
+            border-color: @primary;
         }
         .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
-            background-color: green;
-        } 
+            background-color: @primary;
+        }
     }
 }
 .form {
