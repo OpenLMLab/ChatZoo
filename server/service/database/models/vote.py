@@ -11,6 +11,6 @@ class Vote(BaseModel):
     username = ForeignKeyField(User, backref='votes')
     vote_model = JSONField()
     vote_result = CharField(max_length=100)
-    created_time = DateTimeField(datetime.datetime.now)
+    created_time = DateTimeField(default=datetime.datetime.now)
     dialogue_id = JSONField(null=True)
     turn_id = JSONField(null=True)

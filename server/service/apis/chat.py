@@ -94,6 +94,9 @@ async def chat(request: Request):
             idx += 1
             print(response)
             yield {
+                "id": idx,
+                "event": "message",
+                "retry": 20000,
                 "data": json.dumps({
                     "code": 1,
                     "data": {
@@ -118,6 +121,9 @@ async def chat(request: Request):
         print(is_update, new_dialogue, status)
         if status:
             yield {
+                "id": idx,
+                "event": "message",
+                "retry": 20000,
                 "data": json.dumps({
                     "code": -20003,
                     "data": {
@@ -130,6 +136,9 @@ async def chat(request: Request):
             }
         else:
             yield {
+                    "id": idx,
+                    "event": "message",
+                    "retry": 20000,
                     "data": json.dumps({
                         "code": 0,
                         "data": {
@@ -148,6 +157,24 @@ async def chat(request: Request):
 def get_model_parameters():
     config = AppConfig()
     return {"code": 200, "data": config.model_info["generate_kwargs"], "msg": "ok"}
+
+
+@chat_router.get("/model_info")
+def get_model_info():
+    config = AppConfig()
+    model_info = config.model_info
+    return {"code": 200, "data": {
+        "model_name_or_path": model_info["model_name_or_path"],
+        "nickname": model_info["nickname"],
+        "tokenizer_path": model_info["tokenizer_path"],
+        "generate_kwargs": model_info["generate_kwargs"],
+        "device": model_info["device"],
+        "prompts": model_info["prompts"],
+        "url": model_info["url"],
+        "stream": model_info["stream"],
+        "model_id": model_info["generate_config_id"]
+    }}
+
 
 @chat_router.post("/set_parameters")
 def set_model_parameters(gen_config: dict):

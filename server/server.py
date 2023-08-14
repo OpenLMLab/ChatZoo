@@ -111,7 +111,8 @@ def init_params():
                             prompts=args.prompts)
         generate_config_id = generate_config_instance.generate_config_id
         
-    model_info = pack_model_info(generate_config_id, gen_config, args.nickname, args.model_name_or_path, args.prompts, args.stream)
+    model_info = pack_model_info(generate_config_id, gen_config, args.nickname, args.model_name_or_path, args.prompts, args.stream,
+                                 url=args.host+":"+str(args.port), device=args.devices, tokenizer_path=model_config.tokenizer_path)
 
         
     config = AppConfig(db, bot=bot, model_info=model_info, mode=args.mode)

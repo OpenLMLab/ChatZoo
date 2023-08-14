@@ -122,7 +122,7 @@ def parse_json(json_str):
         raise ValueError("Can not parse to json dict")
 
 
-def pack_model_info(generate_config_id, model_config, nickname, model_name_or_path, prompts, is_stream):
+def pack_model_info(generate_config_id, model_config, nickname, model_name_or_path, prompts, is_stream, url, device, tokenizer_path):
     from collections import OrderedDict
     gen_config = OrderedDict(sorted(model_config.items()))
     model_info = {
@@ -131,7 +131,10 @@ def pack_model_info(generate_config_id, model_config, nickname, model_name_or_pa
         "model_name_or_path": model_name_or_path,
         "generate_config_id": generate_config_id,
         "prompts": prompts,
-        "stream": is_stream
+        "stream": is_stream,
+        "url": url,
+        "device": device,
+        "tokenizer_path": tokenizer_path
     }
     return model_info
 
