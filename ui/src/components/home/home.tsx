@@ -27,18 +27,9 @@ function Home() {
         id,
         setId,
     };
-    // question
-    const [question, setQuestion] = useState<string | null>(null);
-    const questionValues: QuestionContextProps = {
-        question,
-        setQuestion,
-    };
-    // freeze
-    const [freeze, setFreeze] = useState<string | null>(null);
-    const freezeValues: FreezeContextProps = {
-        freeze,
-        setFreeze,
-    };
+
+    const initModels: ModelConfig[] = []
+
 
     const [models, setModels] = useState<ModelConfig[]>([
       new ModelConfig(

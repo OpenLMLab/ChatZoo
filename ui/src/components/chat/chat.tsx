@@ -174,7 +174,6 @@ const Chat: React.FC = () => {
             eventBus.emit("annotateSession", false, sessionId)
           }
         else {
-          console.log("[Debug] 当前为debug模式, 用户对话不会禁止")
           eventBus.emit('banInputEvent', false) 
         }
         // 会话结束后
