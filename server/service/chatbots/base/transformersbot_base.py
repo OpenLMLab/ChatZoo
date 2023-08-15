@@ -170,7 +170,6 @@ class TransformersChatBotBase(ChatBotBase):
                 for output in streamer:
                     response += output
                     cur_length += 1
-                    print(cur_length)
                     response = self.process_response(response)
                     if cur_length >= self.get_generation_setting()["max_length"]:
                         yield response, True

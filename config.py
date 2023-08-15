@@ -8,11 +8,11 @@ model_list = [
         "dtype": "float16",
         "base_model": None,
         "port": 8082, # 若不指定则采用默认的配置参数
-        "prompts": { # 若不指定，则默认找已经定义好的chatbots，若找不到则报错
-             "meta_prompt": "",
-             "user_prompt": "Human: {}\n",
-             "bot_prompt": "Assistant: {}\n"
-         }
+        # "prompts": { # 若不指定，则默认找已经定义好的chatbots，若找不到则报错
+        #      "meta_prompt": "",
+        #      "user_prompt": "Human: {}\n",
+        #      "bot_prompt": "Assistant: {}\n"
+        #  }
     },
     {
         "model_name_or_path": "THUDM/chatglm-6b",
@@ -23,10 +23,29 @@ model_list = [
             "top_p": 0.9, "top_k": 1, "temperature": 0.95,
             "repetition_penalty": 1.02
         },
-        "devices": "2",
+        "devices": "2", 
         "dtype": "float16",
         "base_model": None,
         "port": 8083, # 若不指定则采用默认的配置参数
+    },
+    {
+        "model_name_or_path": "gpt2",
+        "nickname": "gpt2",
+        "tokenizer_path": "gpt2",
+        "generate_kwargs": {
+            "max_length": 250, "num_beams": 1, "do_sample": True,
+            "top_p": 0.9, "top_k": 1, "temperature": 0.95,
+            "repetition_penalty": 1.02
+        },
+        "devices": "3",
+        "dtype": "float16",
+        "base_model": None,
+        "prompts": { # 若不指定，则默认找已经定义好的chatbots，若找不到则报错
+             "meta_prompt": "",
+             "user_prompt": "Human: {}\n",
+             "bot_prompt": "Assistant: {}\n"
+         }
+        # "port": 8083, # 若不指定则采用默认的配置参数
     }
 ]
 user_list = [
