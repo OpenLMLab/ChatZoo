@@ -6,7 +6,6 @@ import qs from 'qs';
 import http from '@/utils/axios';
 import { useState } from 'react';
 import eventBus from './utils/eventBus';
-import ModelConfig from './components/model/model';
 
 function App() {
     const [messageApi, contextHolder] = message.useMessage();
@@ -41,48 +40,28 @@ function App() {
             username: name,
         };
         // 登录
-        console.log('路径', http.baseURL)
         http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
-          console.log('登陆后', res.data.data.role)
+          console.log('登陆后的信息', res.data)
+          if(res.data.code === 403) {
+            error(res.data.msg)
+            return;
+          }
+          localStorage.clear();
           localStorage.setItem('permission', res.data.data.role);
           localStorage.setItem('username', res.data.data.username);
-          console.log("login success")
           if(res.data.data.role == 'debug'){
-            console.log(res.data.data.role, "111111")
             eventBus.emit("banVote", true)
           }
           http.get<string, any>("/get_model_list").then(res=>{
             console.log(res.data.data)
-            // localStorage.setItem("initModelUrls", JSON.stringify(res.data.data))
             eventBus.emit("initModels", res.data.data)
             console.log("获取标注数据")
             })
           navigate('/home');          
-        }).catch(() => {
-          error("登录失败！")
+        }).catch((err) => {
+            console.log('错误信息', err)
+            error("登录失败！")
         });
-
-        
-
-        // http.get<string, any>('get_model_list').then((res)=>{
-        //     const models_list = res.data.data
-        //     let new_models = []
-        //     models_list.forEach(element => {
-        //         new ModelConfig(
-        //             element.model_name_or_path,
-        //             element.nickname,
-        //             element.tokenizer_path,
-        //             element.generate_kwargs,
-        //             element.devices,
-        //             element.prompts,
-        //             element.url,
-        //             element.stream,
-        //             element.model_id,
-        //             element.start
-        //           ),
-        //     });
-        //     localStorage.setItem("init_models", models_list)
-        // })
     };
 
     const onFinishFailed = (errorInfo: any) => {

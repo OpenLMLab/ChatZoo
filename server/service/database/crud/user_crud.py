@@ -7,7 +7,7 @@ from ..models.user import User
 
 def create_user(username: str, session_mark_num: int=0, single_mark_num: int=0, permission:str="root"):
     try:
-        User.create(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, permission=permission)
+        User.create(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission)
         return True
     except:
         traceback.print_exc()
@@ -68,5 +68,11 @@ def insert_many_users(batch_data, chunk_num):
     except:
         traceback.print_exc()
         return False
-    
+
+def insert_or_update_user(username: str, session_mark_num: int=0, single_mark_num: int=0, permission:str="root"):
+    try:
+        User.update(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission)
+    except:
+        User.update(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission)
+
 

@@ -6,6 +6,7 @@ from playhouse.shortcuts import model_to_dict
 from fastapi import APIRouter, Request, Response
 from sse_starlette.sse import EventSourceResponse
 from starlette.responses import StreamingResponse
+from loguru import logger
 
 from service.utils import AppConfig
 from service.database.crud.generate_config_crud import create_generate_config
@@ -38,6 +39,7 @@ async def chat(request: Request):
         dialogue_instance = create_debugmessage(username=username, nickname=config.model_info['nickname'], bot_reponse=None,
                                                 turn_id=turn_id, user_query=prompt, generate_kwargs=debug_generate_config,
                                                 model_name_or_path=config.model_info["model_name_or_path"])
+        logger.info(f"对话 role: {role}")
     else:
         if config.model_info["generate_config_id"] is None:
             result = create_generate_config(nickname=config.model_info["nickname"],
@@ -46,33 +48,17 @@ async def chat(request: Request):
                                 prompts=config.model_info["prompts"])
             print(result)
             config.model_info["generate_config_id"] = result.generate_config_id
+            logger.info(f"对话， 插入生成配置参数! generate_config_id: {result.generate_config_id}")
         # 查询历史的 query
+        # print(turn_id, username, config.model_info)
+        logger.info(f"对话 role: {role}")
         history_dialogue, is_query = query_dialogue_by_turnid_username(turn_id=turn_id, username=username, 
                                                                         generate_config_id=config.model_info["generate_config_id"])
 
         # 先插入问题
         dialogue_instance = create_dialogue_mess(username=username, generate_config_id=config.model_info['generate_config_id'],
                                 bot_response=None, user_query=prompt, turn_id=turn_id)  
-        
-    # if config.mode == 'arena':
-    #     # 开始对话， 检查是否插入参数配置
-    #     if config.model_info["generate_config_id"] is None:
-    #         result = create_generate_config(nickname=config.model_info["nickname"],
-    #                             generate_kwargs=config.model_info["generate_kwargs"],
-    #                             model_name_or_path=config.model_info["model_name_or_path"],
-    #                             prompts=config.model_info["prompts"])
-    #         print(result)
-    #         config.model_info["generate_config_id"] = result.generate_config_id
-    #     # 查询历史的 query
-    #     history_dialogue, is_query = query_dialogue_by_turnid_username(turn_id=turn_id, username=username, 
-    #                                                                     generate_config_id=config.model_info["generate_config_id"])
-    # else:
-    #     history_dialogue, is_query = query_debugmessage_by_turnid_genconfig(turn_id=turn_id, nickname=config.model_info["nickname"])
-    
-    # # 插入问题
-    # dialogue_instance = create_dialogue_mess(username=username, generate_config_id=config.model_info['generate_config_id'],
-    #                          bot_response=None, user_query=prompt, turn_id=turn_id)  
-    print(history_dialogue)
+
     input_query = []
     for item in history_dialogue:
         input_query.append({"role": "HUMAN", "content": item["user_query"]})
@@ -85,14 +71,13 @@ async def chat(request: Request):
         query['params'] = config.model_info["generate_kwargs"]
         
     async def generator(querys, bot, prompt, dialogue_instance, role):
-        print("query", query)
+ 
         gen_response = bot.chat(querys)
         idx = 0
         response = None
         status = False
         for response, status in gen_response:
             idx += 1
-            print(response)
             yield {
                 "id": idx,
                 "event": "message",
@@ -111,14 +96,14 @@ async def chat(request: Request):
                 break
         # 这里进行数据库的插入操作
         new_message = {"BOT": prompt, "HUMAN": response}
-        print("new_message", new_message)
+        logger.info("new_message ", new_message)
         if 'debug' in role:
             is_update, new_dialogue = update_user_query_in_debug_message(dialogue_id=dialogue_instance.dialogue_id,
                                                                          bot_response=response)
         else:
             is_update, new_dialogue = update_user_query_in_dialogue(dialogue_id=dialogue_instance.dialogue_id,
                                                                     bot_response=response)
-        print(is_update, new_dialogue, status)
+        logger.info(f"插入数据库情况： is_update: {is_update}\tnew_dialogue: {new_dialogue}\tstatus:{status}")
         if status:
             yield {
                 "id": idx,
@@ -156,6 +141,7 @@ async def chat(request: Request):
 @chat_router.get("/get_paramters")
 def get_model_parameters():
     config = AppConfig()
+    logger.info("获取模型配置参数")
     return {"code": 200, "data": config.model_info["generate_kwargs"], "msg": "ok"}
 
 
@@ -163,6 +149,7 @@ def get_model_parameters():
 def get_model_info():
     config = AppConfig()
     model_info = config.model_info
+    logger.info("获取模型的信息")
     return {"code": 200, "data": {
         "model_name_or_path": model_info["model_name_or_path"],
         "nickname": model_info["nickname"],

@@ -175,6 +175,7 @@ const Chat: React.FC = () => {
       eventBus.emit('banSessionList', true)  // 禁用会话切换
       eventBus.emit('banModeEvent', true)  // 禁用模式
       eventBus.emit('banInputEvent', true)  // 禁用输入
+      eventBus.emit('banVote', true) // 会话之后vote不能点击
       // 开始对话
       startSse(question, models)
       // 异步保存缓存
@@ -197,6 +198,7 @@ const Chat: React.FC = () => {
         setstopStatus(false)
         eventBus.emit('banSessionList', false) // 禁用会话切换
         eventBus.emit('banModeEvent', false) // 开启模式
+        eventBus.emit('banVote', false) // 会话之后vote不能点击
       }, 10000); // 延迟时间为 1000 毫秒（1秒）
     };
     eventBus.on('sendMessage', listener);

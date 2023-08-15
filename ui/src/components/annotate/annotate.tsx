@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Button, Modal, Radio, RadioChangeEvent, message } from 'antd';
-import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { ModeContext } from '@/utils/contexts';
@@ -17,12 +16,12 @@ const Annotate: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
     const mode = useContext(ModeContext)?.mode;
     const models = useContext(ModelContext)?.models;
-    // 获取角色， 决定是否开始标注
-    const role = localStorage.getItem("permission")
     // 对话id
     const [dialogueIds, setDialogueIds] = useState({});
     // 是否选中都不选
     const [isDis, setIsDis] = useState(false);
+    // 是否都一样
+    const [isEqual, setIsEqual] = useState(false);
     // 关闭标注的开关
     const [banVote, setBanVote] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,6 +45,7 @@ const Annotate: React.FC = () => {
         eventBus.on('sendVoteDict', dialogueListener)
         return () => {
             eventBus.removeListener('banVote', statusListener)
+            eventBus.removeListener('sendVoteDict', dialogueListener)
         }
     }, []);
     const names: string[] = [];
@@ -55,10 +55,10 @@ const Annotate: React.FC = () => {
     };
     // 设置标题
     const title = mode === 'single' ? '单回复标注' : '会话标注';
-    const error = () => {
+    const error = (msg: string) => {
         messageApi.open({
             type: 'error',
-            content: '请选择选项',
+            content: msg
         });
       };
     //完成标注，打开输入框的限制
@@ -87,9 +87,23 @@ const Annotate: React.FC = () => {
         setValue(e.target.value)
     }
     const allDis = () => {
-        setIsDis(!isDis);
-        console.log('都不选');
+        if(isEqual) {
+            if(!isDis) {
+                error('不能同时都不选或都选择')
+            }
+        } else {
+            setIsDis(!isDis);
+        }
     };
+    const allEqual = () => {
+        if(isDis) {
+            if(!isEqual) {
+                error('不能同时都不选或都选择！')
+            }
+        } else {
+            setIsEqual(!isEqual)
+        }
+    }
 
     const getVoteModel = (value: string, model_ids: {[key: string]: any}) => {
         const valueToFind = value; // 要查找的 value
@@ -105,6 +119,8 @@ const Annotate: React.FC = () => {
     let vote_result: any = null
     if(isDis) {
         vote_result = null
+    } else if(isEqual) {
+        vote_result = Object.keys(model_ids)
     } else {
         vote_result = getVoteModel(value, model_ids)
     }
@@ -121,7 +137,6 @@ const Annotate: React.FC = () => {
             dialogue_id: dialogue_id,
             turn_id: turn_id,
         };
-        console.log('打包数据', data);
         http.post<any, any>('/vote?', { data: data })
             .then((res) => {
                 console.log('会话标注成功', res);
@@ -154,7 +169,7 @@ const Annotate: React.FC = () => {
     return (
         <>
             {contextHolder}
-            { role != 'debug' && <Button type='primary' onClick={showModal} disabled={banVote}>标注</Button>}
+            <Button type='primary' onClick={showModal} disabled={banVote}>标注</Button>
             <Modal title={title}
                 open={isModalOpen}
                 onOk={handleOk}
@@ -164,7 +179,7 @@ const Annotate: React.FC = () => {
             >
                 请选择任意符合预期的模型
                 <br />
-                <Radio.Group onChange={onChange} value={value} disabled={isDis} >
+                <Radio.Group onChange={onChange} value={value} disabled={isDis || isEqual} >
                     {
                         Object.keys(model_ids).map(key => {
                             const id = model_ids[key];
@@ -174,7 +189,9 @@ const Annotate: React.FC = () => {
                 </Radio.Group>
                 <br />
                 或者
-                <Button onClick={allDis}>{isDis ? <>选择模型</> : <>都不选</>}</Button>
+                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都不选</Button>
+                或者
+                <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都一样</Button>
             </Modal>
         </>
     );
