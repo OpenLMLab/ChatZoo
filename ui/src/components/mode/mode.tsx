@@ -20,6 +20,8 @@ const Mode = () => {
     const modeContext = useContext(ModeContext);
     const [value, setValue] = useState('dialogue');
     const onChange = (e: RadioChangeEvent) => {
+        // 通知保存数据
+        eventBus.emit("modeChangeEvent", e.target.value)
         modeContext?.setMode(e.target.value);
         setValue(e.target.value);
     };

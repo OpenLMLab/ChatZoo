@@ -40,10 +40,11 @@ const Bottom: React.FC = () => {
     const sessionId = useContext(IdContext)?.id;
     const names: string[] = []
     models?.map(model => names.push(model.nickname))
-    console.log("[Debug] bottom.tsx mode: ", mode)
+    console.log("[Debug] bottom.tsx mode: ", mode, isInput)
     // 禁用输入框的事件
     useEffect(()=>{
         const banInputEvent = (banButton: boolean) => {
+            console.log("触发banInput事件", banButton)
             setisInput(banButton)
         }
         eventBus.on("banInputEvent", banInputEvent)
