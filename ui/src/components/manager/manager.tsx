@@ -103,6 +103,7 @@ function Manager() {
     useEffect(()=>{
         const CurSessionAnnatote = (finishBtn: boolean, id: string) => {
             const index = chatList.findIndex(x => x.id === id)
+            console.log('会话标注未完成', finishBtn)
             chatList[index].notAnnotated = finishBtn
             setChatList(chatList)
         }
@@ -120,6 +121,19 @@ function Manager() {
       eventBus.on('banSessionList', banSessionList)
       return () => {
         eventBus.off('banSessionList', banSessionList)
+      }
+    })
+
+    // 监听对话框是否完成消息，如果完成就更改当前会话的名称
+    useEffect(()=> {
+      const editChat = (newName: string, id: string) => {
+        const index = chatList.findIndex(x => x.id === id)
+        console.log('需要编辑的', chatList, chatList[index], index, id)
+        chatList[index].name = newName
+      }
+      eventBus.on('editChat', editChat)
+      return () => {
+        eventBus.removeListener('editChat', editChat)
       }
     })
 

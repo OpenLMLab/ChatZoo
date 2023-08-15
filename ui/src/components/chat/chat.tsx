@@ -1,11 +1,9 @@
 import ModelConfig from '@/components/model/model';
-import { ModeContext } from '@/utils/contexts';
 import eventBus from '@/utils/eventBus';
-import { FreezeContext } from '@/utils/freezecontext';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { sessionMesage } from '@/utils/sessionInterface';
-import { Input, Modal, Select, Tooltip } from 'antd';
+import { Input, Modal, Select, Tooltip, message } from 'antd';
 import PUYUC from 'chat-webkit';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -21,6 +19,8 @@ import styles from './chat.module.less';
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
   const [stopStatus, setstopStatus] = useState(false)
+  const [messageApi, contextHolder] = message.useMessage(); 
+  const [globalCnt, setGlobalCnt] = useState(0);
   const mcf = new ModelConfig(
     "fnlp/moss-moon-003-sft",
     "moss_01",
@@ -42,15 +42,27 @@ const Chat: React.FC = () => {
   const sessionId = idContext?.id;
   // 用户的角色， 用于决定是否渲染模型管理
   const role = localStorage.getItem('permission')
-  console.log('当前会话', sessionId)
   const models = useContext(ModelContext)?.models;
   const setModels = useContext(ModelContext)
   //  是否暂停模型
-
   const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sessionMesage = {}
   sessionList = JSON.parse(cachedSessionList!)
-  console.log("chat session list", sessionList)
+  // 判断是否有一条消息
+  const keys = Object.keys(sessionList)
+  if(keys.length != 0) {
+    if(sessionList[keys[0]][0]) {
+      const firstMsg = sessionList[keys[0]][0]['message'] 
+      eventBus.emit('editChat', firstMsg, sessionId)
+    }
+  }
+
+  const error = (msg: string) => {
+    messageApi.open({
+        type: 'error',
+        content: msg
+    });
+  };
 
   if (models != null)
     models.forEach((model) => {
@@ -93,7 +105,6 @@ const Chat: React.FC = () => {
     let new_session_list: sessionMesage = {}
     refs.map((ref, index) => {
       if (index < new_models?.length!) {
-        // new_session_list[index] = ref.current.getSessionList()
         new_session_list[new_models[index].model_id] = ref.current.getSessionList()
         console.log('收到对话', ref.current.getSessionList())
       }
@@ -120,8 +131,6 @@ const Chat: React.FC = () => {
       console.log(sessionList)
       // 获取最后一条数据
       const lastDialogue = sessionList[session][sessionList[session].length - 1];
-      // console.log(sessionList[session], session.length - 1, new_session_list)
-      // console.log("debug error ", lastDialogue, new_models, session, Number(session), new_models[session])
       for (let index = 0; index < new_models.length; index++) {
         if(new_models[index].model_id == session){
           // 找到对应模型的名字
@@ -130,9 +139,6 @@ const Chat: React.FC = () => {
         }
         
       }
-      // console.log("dialogue_id", dialogue_ids)
-      // dialogue_ids[new_models[Number(session)].nickname] = lastDialogue.id.toString()
-
     })
     eventBus.emit('sendVoteDict', dialogue_ids)
     localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
@@ -159,6 +165,14 @@ const Chat: React.FC = () => {
   const { TextArea } = Input;
   const { Option } = Select
 
+  // // 监控对话事件
+  // useEffect(() => {
+  //   // 如果长度一致
+  //   if(globalCnt === models?.length) {
+      
+  //   }
+  // },[globalCnt])
+
   // 监控对话事件，在 bottom 组件调用该事件来向对话组件发送消息
   useEffect(() => {
     const listener = (question: string, models: ModelConfig[], mode: string, sessionId: string) => {
@@ -175,31 +189,31 @@ const Chat: React.FC = () => {
       eventBus.emit('banSessionList', true)  // 禁用会话切换
       eventBus.emit('banModeEvent', true)  // 禁用模式
       eventBus.emit('banInputEvent', true)  // 禁用输入
-      eventBus.emit('banVote', true) // 会话之后vote不能点击
+      eventBus.emit('banVote', true) // 禁用vote
       // 开始对话
-      startSse(question, models)
-      // 异步保存缓存
-      setTimeout(() => {
-        getSseStatus();
-        downloadSse(models,mode,sessionId);
-        // 如果是单回复标注那么要禁用输入框
-        if(role != 'debug')
+      if(question === null || question === undefined || question.trim().length === 0) {
+        error('不能发送空消息！')
+      } else {
+        startSse(question, models)  
+        // 异步保存缓存
+        setTimeout(() => {
+          getSseStatus();
+          downloadSse(models,mode,sessionId);
+          // 如果是单回复标注那么要禁用输入框
           if(mode === 'dialogue') {
             eventBus.emit('banInputEvent', false) 
           }else{
             // 开启标注模式
             eventBus.emit("annotateSession", false, sessionId)
           }
-        else {
-          eventBus.emit('banInputEvent', false) 
-        }
-        // 会话结束后
-        // 对话开始前， 开启会话列表
-        setstopStatus(false)
-        eventBus.emit('banSessionList', false) // 禁用会话切换
-        eventBus.emit('banModeEvent', false) // 开启模式
-        eventBus.emit('banVote', false) // 会话之后vote不能点击
-      }, 10000); // 延迟时间为 1000 毫秒（1秒）
+          // 会话结束后
+          // 对话开始前， 开启会话列表
+          setstopStatus(false)
+          eventBus.emit('banSessionList', false) // 禁用会话切换
+          eventBus.emit('banModeEvent', false) // 开启模式
+          eventBus.emit('banVote', false) // 开启标注
+        }, 10000); // 延迟时间为 1000 毫秒（1秒）
+      }
     };
     eventBus.on('sendMessage', listener);
     return () => {
@@ -212,6 +226,7 @@ const Chat: React.FC = () => {
 
   return (
     <>
+      {contextHolder}
       <Modal
         title={<span className={styles.modelConfigTile}>{modalConfig.nickname}模型配置</span>}
         centered
