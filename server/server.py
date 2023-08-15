@@ -7,7 +7,7 @@ from prettytable import PrettyTable
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# from peewee import SqliteDatabase
+from loguru import logger
 
 from service.apis.login import login_router
 from service.apis.chat import chat_router
@@ -90,16 +90,12 @@ def init_params():
         tokenizer_path=args.tokenizer_path, dtype=args.dtype,
         from_s3=args.from_s3, base_model=args.base_model,
     )
-    # print(f"Initializing model...")
-    # print("Using devices:", args.devices)
-    # print("Config:", model_config)
     if model_config.type is not None:
         bot = choose_bot(config=model_config)
     else:
         bot = TransformersChatBotBase(config=model_config)
         bot.set_input_prompt(args.prompts)
         bot.set_generation_setting(args.model_config)
-    # bot = None
     
         
     gen_config = bot.get_generation_setting() if gen_config is None else gen_config
@@ -119,7 +115,7 @@ def init_params():
         
     config = AppConfig(db, bot=bot, model_info=model_info, mode=args.mode)
     
-    print("*"*20 + f"启动{args.nickname}后端服务" + "*"*20)
+    logger.info(f"启动{args.nickname}后端服务")
     table = PrettyTable()
     data = [
         ["URL", f"{args.host}:{args.port}"],
@@ -132,8 +128,8 @@ def init_params():
         ["db_path", args.db_path],
         ["db_type", args.db_type]
     ]
-    table.add_column("Field Name", [row[0] for row in data])
-    table.add_column("Value", [row[1] for row in data])
+    table.add_column("变量名", [row[0] for row in data])
+    table.add_column("值", [row[1] for row in data])
 
     print(table)
     # print(f"Initializing model...")
