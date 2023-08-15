@@ -117,6 +117,19 @@ function Manager() {
       }
     })
 
+    // 监听对话框是否完成消息，如果完成就更改当前会话的名称
+    useEffect(()=> {
+      const editChat = (newName: string, id: string) => {
+        const index = chatList.findIndex(x => x.id === id)
+        console.log('需要编辑的', chatList, chatList[index], index, id)
+        chatList[index].name = newName
+      }
+      eventBus.on('editChat', editChat)
+      return () => {
+        eventBus.removeListener('editChat', editChat)
+      }
+    })
+
 
     // 监听模式的变化, 一旦变化就切换展示的会话信息
     useEffect(()=>{

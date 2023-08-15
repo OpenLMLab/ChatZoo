@@ -24,13 +24,13 @@ function App() {
                 newLoadings[index] = false;
                 return newLoadings;
             });
-        }, 7000);
+        }, 2000);
     };
 
     const error = (msg: string) => {
         messageApi.open({
             type: 'error',
-            content: msg,
+            content: msg
         });
     };
     const navigate = useNavigate();
