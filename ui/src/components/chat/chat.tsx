@@ -19,7 +19,7 @@ import styles from './chat.module.less';
 const Chat: React.FC = () => {
   const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
   const [stopStatus, setstopStatus] = useState(false)
-  const [messageApi, contextHolder] = message.useMessage(); 
+  const [messageApi, contextHolder] = message.useMessage();
   const [globalCnt, setGlobalCnt] = useState(0);
   const mcf = new ModelConfig(
     "fnlp/moss-moon-003-sft",
@@ -50,17 +50,17 @@ const Chat: React.FC = () => {
   sessionList = JSON.parse(cachedSessionList!)
   // 判断是否有一条消息
   const keys = Object.keys(sessionList)
-  if(keys.length != 0) {
-    if(sessionList[keys[0]][0]) {
-      const firstMsg = sessionList[keys[0]][0]['message'] 
+  if (keys.length != 0) {
+    if (sessionList[keys[0]][0]) {
+      const firstMsg = sessionList[keys[0]][0]['message']
       eventBus.emit('editChat', firstMsg, sessionId)
     }
   }
 
   const error = (msg: string) => {
     messageApi.open({
-        type: 'error',
-        content: msg
+      type: 'error',
+      content: msg
     });
   };
 
@@ -124,7 +124,7 @@ const Chat: React.FC = () => {
       new_session_list[key] = session
     });
     sessionList = new_session_list
-    const dialogue_ids: {[key: string]: string} = {}
+    const dialogue_ids: { [key: string]: string } = {}
     // 获取dialogue_id
     console.log(new_session_list)
     Object.keys(sessionList).map(session => {
@@ -132,12 +132,12 @@ const Chat: React.FC = () => {
       // 获取最后一条数据
       const lastDialogue = sessionList[session][sessionList[session].length - 1];
       for (let index = 0; index < new_models.length; index++) {
-        if(new_models[index].model_id == session){
+        if (new_models[index].model_id == session) {
           // 找到对应模型的名字
           dialogue_ids[new_models[index].nickname] = lastDialogue.id.toString()
           break
         }
-        
+
       }
     })
     eventBus.emit('sendVoteDict', dialogue_ids)
@@ -169,7 +169,7 @@ const Chat: React.FC = () => {
   // useEffect(() => {
   //   // 如果长度一致
   //   if(globalCnt === models?.length) {
-      
+
   //   }
   // },[globalCnt])
 
@@ -177,13 +177,13 @@ const Chat: React.FC = () => {
   useEffect(() => {
     const listener = (question: string, models: ModelConfig[], mode: string, sessionId: string) => {
       // 插入会话
-      if(models != null)
-          models.forEach((model) =>{
-            if(!(model.model_id in sessionList)){
-                // 如果不存在就要初始化一个
-                sessionList[model.model_id] = []
-            }
-          })
+      if (models != null)
+        models.forEach((model) => {
+          if (!(model.model_id in sessionList)) {
+            // 如果不存在就要初始化一个
+            sessionList[model.model_id] = []
+          }
+        })
       // 对话开始前， 禁用会话列表, 禁用切换模式, 禁用输入框输入
       setstopStatus(true)
       eventBus.emit('banSessionList', true)  // 禁用会话切换
@@ -191,18 +191,18 @@ const Chat: React.FC = () => {
       eventBus.emit('banInputEvent', true)  // 禁用输入
       eventBus.emit('banVote', true) // 禁用vote
       // 开始对话
-      if(question === null || question === undefined || question.trim().length === 0) {
+      if (question === null || question === undefined || question.trim().length === 0) {
         error('不能发送空消息！')
       } else {
-        startSse(question, models)  
+        startSse(question, models)
         // 异步保存缓存
         setTimeout(() => {
           getSseStatus();
-          downloadSse(models,mode,sessionId);
+          downloadSse(models, mode, sessionId);
           // 如果是单回复标注那么要禁用输入框
-          if(mode === 'dialogue') {
-            eventBus.emit('banInputEvent', false) 
-          }else{
+          if (mode === 'dialogue') {
+            eventBus.emit('banInputEvent', false)
+          } else {
             // 开启标注模式
             eventBus.emit("annotateSession", false, sessionId)
           }
@@ -279,6 +279,7 @@ const Chat: React.FC = () => {
       <div className={`${styles.chatwrap} ${doWrap}`}>
         {models?.map((model: any, index: number) => (
           <div className={styles.chatContainer}>
+            {/* <div className={`${styles.chatContainer} ${!model.start ? styles.pause : ''}`}> */}
             <div className={styles.banner}>
               <div className={styles.typo}>
                 {model.nickname}
@@ -294,7 +295,7 @@ const Chat: React.FC = () => {
                 </Tooltip>
 
                 <Tooltip title={<span className={styles.tooltipTitle}>暂停模型对话</span>} >
-                  <div onClick={() => stopModelSse(model, index, models)} style={stopStatus ? {pointerEvents: 'none', opacity: 0.5} : {}}>
+                  <div onClick={() => stopModelSse(model, index, models)} style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}>
                     {model.start ? (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path d="M9.43701 7.95312C9.9893 7.95312 10.437 8.40084 10.437 8.95312V15.0786C10.437 15.6308 9.9893 16.0786 9.43701 16.0786C8.88473 16.0786 8.43701 15.6308 8.43701 15.0786V8.95312C8.43701 8.40084 8.88473 7.95312 9.43701 7.95312Z" fill="white" fill-opacity="0.85" />
                       <path d="M15.5269 8.95312C15.5269 8.40084 15.0791 7.95312 14.5269 7.95312C13.9746 7.95312 13.5269 8.40084 13.5269 8.95312V15.0786C13.5269 15.6308 13.9746 16.0786 14.5269 16.0786C15.0791 16.0786 15.5269 15.6308 15.5269 15.0786V8.95312Z" fill="white" fill-opacity="0.85" />
@@ -344,14 +345,17 @@ const Chat: React.FC = () => {
 
               </div>
             </div>
+            {/* <div className={styles.main} key={index + ""}> */}
             <div className={styles.main} key={index + ""}>
-              <PUYUC.ChatBox
-                propsSessionList={sessionList[model.model_id]}
-                url={model.url + "/chat/generate?turn_id=" + sessionId + "&username=" + localStorage.getItem('username') + "&role=" + localStorage.getItem('permission')}
-                ref={refs[index]}
-                token={JSON.stringify(model.generate_kwargs)}
-                requestMessageContainerStyle={{ backgroundColor: 'rgba(39, 45, 230, 0.1)' }}
-              />
+              <div className={!model.start ? styles.pause : ''}>
+                <PUYUC.ChatBox
+                  propsSessionList={sessionList[model.model_id]}
+                  url={model.url + "/chat/generate?turn_id=" + sessionId + "&username=" + localStorage.getItem('username') + "&role=" + localStorage.getItem('permission')}
+                  ref={refs[index]}
+                  token={JSON.stringify(model.generate_kwargs)}
+                  requestMessageContainerStyle={{ backgroundColor: 'rgba(39, 45, 230, 0.1)' }}
+                />
+              </div>
             </div>
           </div>
         ))}
