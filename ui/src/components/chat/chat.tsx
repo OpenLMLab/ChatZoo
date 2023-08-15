@@ -54,17 +54,17 @@ const Chat: React.FC = () => {
   sessionList = JSON.parse(cachedSessionList!)
   // 判断是否有一条消息
   const keys = Object.keys(sessionList)
-  if(keys.length != 0) {
-    if(sessionList[keys[0]][0]) {
-      const firstMsg = sessionList[keys[0]][0]['message'] 
+  if (keys.length != 0) {
+    if (sessionList[keys[0]][0]) {
+      const firstMsg = sessionList[keys[0]][0]['message']
       eventBus.emit('editChat', firstMsg, sessionId)
     }
   }
 
   const error = (msg: string) => {
     messageApi.open({
-        type: 'error',
-        content: msg
+      type: 'error',
+      content: msg
     });
   };
 
@@ -164,7 +164,7 @@ const Chat: React.FC = () => {
       new_session_list[key] = session
     });
     sessionList = new_session_list
-    const dialogue_ids: {[key: string]: string} = {}
+    const dialogue_ids: { [key: string]: string } = {}
     // 获取dialogue_id
     console.log(new_session_list)
     Object.keys(sessionList).map(session => {
@@ -172,12 +172,12 @@ const Chat: React.FC = () => {
       // 获取最后一条数据
       const lastDialogue = sessionList[session][sessionList[session].length - 1];
       for (let index = 0; index < new_models.length; index++) {
-        if(new_models[index].model_id == session){
+        if (new_models[index].model_id == session) {
           // 找到对应模型的名字
           dialogue_ids[new_models[index].nickname] = lastDialogue.id.toString()
           break
         }
-        
+
       }
     })
     eventBus.emit('sendVoteDict', dialogue_ids)
@@ -224,7 +224,7 @@ const Chat: React.FC = () => {
       eventBus.emit('banInputEvent', true)  // 禁用输入
       eventBus.emit('banVote', true) // 禁用vote
       // 开始对话
-      if(question === null || question === undefined || question.trim().length === 0) {
+      if (question === null || question === undefined || question.trim().length === 0) {
         error('不能发送空消息！')
       } else {
         startSse(question, modelsr)  
@@ -363,6 +363,7 @@ const Chat: React.FC = () => {
       <div className={`${styles.chatwrap} ${doWrap}`}>
         {models?.map((model: any, index: number) => (
           <div className={styles.chatContainer}>
+            {/* <div className={`${styles.chatContainer} ${!model.start ? styles.pause : ''}`}> */}
             <div className={styles.banner}>
               <div className={styles.typo}>
                 {model.nickname}
@@ -378,7 +379,7 @@ const Chat: React.FC = () => {
                 </Tooltip>
 
                 <Tooltip title={<span className={styles.tooltipTitle}>暂停模型对话</span>} >
-                  <div onClick={() => stopModelSse(model, index, models)} style={stopStatus ? {pointerEvents: 'none', opacity: 0.5} : {}}>
+                  <div onClick={() => stopModelSse(model, index, models)} style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}>
                     {model.start ? (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path d="M9.43701 7.95312C9.9893 7.95312 10.437 8.40084 10.437 8.95312V15.0786C10.437 15.6308 9.9893 16.0786 9.43701 16.0786C8.88473 16.0786 8.43701 15.6308 8.43701 15.0786V8.95312C8.43701 8.40084 8.88473 7.95312 9.43701 7.95312Z" fill="white" fill-opacity="0.85" />
                       <path d="M15.5269 8.95312C15.5269 8.40084 15.0791 7.95312 14.5269 7.95312C13.9746 7.95312 13.5269 8.40084 13.5269 8.95312V15.0786C13.5269 15.6308 13.9746 16.0786 14.5269 16.0786C15.0791 16.0786 15.5269 15.6308 15.5269 15.0786V8.95312Z" fill="white" fill-opacity="0.85" />
@@ -428,6 +429,7 @@ const Chat: React.FC = () => {
 
               </div>
             </div>
+            {/* <div className={styles.main} key={index + ""}> */}
             <div className={styles.main} key={index + ""}>
               <PUYUC.ChatBox
                 sseStopCallback={(url)=>{sseFinishCallable()}}
