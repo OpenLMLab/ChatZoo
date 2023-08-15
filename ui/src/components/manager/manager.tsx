@@ -66,17 +66,23 @@ function Manager() {
     }
 
     const deleteChat = (id: string) => {
-        const newList = chatList.slice();
+        // const newList = chatList.slice();
+        console.log("[debug] 删除组件，删除的id是", id)
+        const newList = JSON.parse(JSON.stringify(chatList));
         const index = chatList.findIndex((x) => x.id === id);
-        console.log('删除的会话', index)
+        console.log('删除的会话', index, id, curChatId)
+        console.log(newList, chatList)
         if (chatList.length >= 1) {
             newList.splice(index, 1);
             setChatList(newList);
-            if (index != 0) {
-                selectChat(chatList[index - 1].id);
-            } else {
-                selectChat(chatList[0].id);
-            }
+            if(id === curChatId)
+                if (index != 0) {
+                    console.log(chatList, "index!=0")
+                    selectChat(newList[index - 1].id);
+                } else {
+                    console.log(chatList, "index=0")
+                    selectChat(newList[0].id);
+                }
         }
     };
 
