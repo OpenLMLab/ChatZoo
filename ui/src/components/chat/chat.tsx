@@ -136,6 +136,7 @@ const Chat: React.FC = () => {
         if(new_models[index].model_id == session){
           // 找到对应模型的名字
           dialogue_ids[new_models[index].nickname] = lastDialogue.id.toString()
+          break
         }
         
       }
