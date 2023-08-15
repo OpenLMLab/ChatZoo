@@ -103,6 +103,7 @@ function Manager() {
     useEffect(()=>{
         const CurSessionAnnatote = (finishBtn: boolean, id: string) => {
             const index = chatList.findIndex(x => x.id === id)
+            console.log('会话标注未完成', finishBtn)
             chatList[index].notAnnotated = finishBtn
             setChatList(chatList)
         }
