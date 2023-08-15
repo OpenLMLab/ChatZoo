@@ -54,6 +54,7 @@ function Manager() {
          /**新增后会立即选中当前的sessionid */
          setCurChatId(newItem.id)
          eventBus.emit('banInputEvent', false)
+         eventBus.emit('banVote', false)
          idContext?.setId(newItem.id)
         /**初始化缓存 */
         const numOfModel = models?.length;
@@ -67,13 +68,14 @@ function Manager() {
     const deleteChat = (id: string) => {
         const newList = chatList.slice();
         const index = chatList.findIndex((x) => x.id === id);
+        console.log('删除的会话', index)
         if (chatList.length >= 1) {
             newList.splice(index, 1);
             setChatList(newList);
             if (index != 0) {
                 selectChat(chatList[index - 1].id);
             } else {
-                selectChat(chatList[chatList.length - 2].id);
+                selectChat(chatList[0].id);
             }
         }
     };
@@ -81,6 +83,7 @@ function Manager() {
     const selectChat = (id:string) => {
         setCurChatId(id)
         idContext?.setId(id)
+        console.log('当前选中的id', id)
         const index = chatList.findIndex(x => x.id === id)
         // 判断是否禁用输入框
         eventBus.emit('banInputEvent', !chatList[index]['notAnnotated'])
@@ -109,7 +112,6 @@ function Manager() {
         setBanSession(banButton);
       }
       eventBus.on('banSessionList', banSessionList)
-
       return () => {
         eventBus.off('banSessionList', banSessionList)
       }
@@ -132,11 +134,10 @@ function Manager() {
             const session_id = chatlist_state["session_id"]
             // 切换模式时候判断是否开启对话框
             const index = new_chatList.findIndex(x => x.id === session_id)
-            idContext?.setId(session_id)
             setChatList(new_chatList)
             setCurChatId(session_id)
+            idContext?.setId(session_id)
             eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
-            console.log('现在的模式是', modeContext)
             eventBus.emit('banVote', !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])

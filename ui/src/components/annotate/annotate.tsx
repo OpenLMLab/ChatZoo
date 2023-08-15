@@ -87,12 +87,22 @@ const Annotate: React.FC = () => {
         setValue(e.target.value)
     }
     const allDis = () => {
-        setIsDis(!isDis);
+        if(isEqual) {
+            if(!isDis) {
+                error('不能同时都不选或都选择')
+            }
+        } else {
+            setIsDis(!isDis);
+        }
     };
     const allEqual = () => {
-        console.log('都不选', isDis)
-        console.log('都一样', isEqual)
-        setIsEqual(!isEqual)
+        if(isDis) {
+            if(!isEqual) {
+                error('不能同时都不选或都选择！')
+            }
+        } else {
+            setIsEqual(!isEqual)
+        }
     }
 
     const getVoteModel = (value: string, model_ids: {[key: string]: any}) => {
@@ -109,6 +119,8 @@ const Annotate: React.FC = () => {
     let vote_result: any = null
     if(isDis) {
         vote_result = null
+    } else if(isEqual) {
+        vote_result = Object.keys(model_ids)
     } else {
         vote_result = getVoteModel(value, model_ids)
     }

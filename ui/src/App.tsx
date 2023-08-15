@@ -46,6 +46,7 @@ function App() {
             error(res.data.msg)
             return;
           }
+          localStorage.clear();
           localStorage.setItem('permission', res.data.data.role);
           localStorage.setItem('username', res.data.data.username);
           if(res.data.data.role == 'debug'){
