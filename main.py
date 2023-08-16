@@ -75,8 +75,8 @@ async def startup_event():
     is_stream = config_module.is_stream
     database_path = config_module.database_path
     database_dtype = config_module.database_dtype
-    initial_database(database_path=database_path,db_type=database_dtype)
-    from playhouse.shortcuts import model_to_dict
+    db = initial_database(database_path=database_path,db_type=database_dtype)
+
     # insert_many_users(user_list, 100)
     # 批量插入改为一条条插入
     logger.info("检查用户信息是否存在,不存在则插入!", user_list)
@@ -84,7 +84,13 @@ async def startup_event():
         try:
             result = insert_or_update_user(username=user['username'], session_mark_num=user['session_mark_num'],
                                 single_mark_num=user['single_mark_num'], permission=user['role'])
-            logger.info(model_to_dict(result))
+            if isinstance(result, int):
+                logger.info(f"更新用户username: {user['username']}成功！")
+            else:
+                if result:
+                    logger.info(f"插入用户数据：username: {result.username} role: {result.role} session_mark_num: {result.session_mark_num} single_mark_num: {result.single_mark_num}")
+                else:
+                    logger.info(f"第{idx}条用户数据插入失败，请检查该数据是否有问题。数据: {user}")
         except:
             raise ValueError(f"第{idx}条用户数据插入失败，请检查该数据是否有问题。数据: {user}")
 
