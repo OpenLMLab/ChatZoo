@@ -309,6 +309,9 @@ const Chat: React.FC = () => {
   }
 
   const [doWrap, updateDoWrap] = useState(styles.noWrap);
+  const handleSwitchLayout = () => {
+    updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap)
+  }
 
   return (
     <>
@@ -317,7 +320,7 @@ const Chat: React.FC = () => {
         {models?.map((model: any, index: number) => (
           <div className={styles.chatContainer}>
             <div className={styles.banner}>
-              <Banner model={model} index={index} models={models} />
+              <Banner model={model} index={index} models={models} handleSwitchLayout={handleSwitchLayout} />
             </div>
             <div className={styles.main} key={index + ""}>
               <div className={!model.start ? styles.pause : ''}>
