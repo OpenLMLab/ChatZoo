@@ -76,14 +76,15 @@ async def startup_event():
     database_path = config_module.database_path
     database_dtype = config_module.database_dtype
     initial_database(database_path=database_path,db_type=database_dtype)
-    
+    from playhouse.shortcuts import model_to_dict
     # insert_many_users(user_list, 100)
     # 批量插入改为一条条插入
-    logger.info("检查用户信息是否存在,不存在则插入!")
+    logger.info("检查用户信息是否存在,不存在则插入!", user_list)
     for idx, user in enumerate(user_list):
         try:
-            insert_or_update_user(username=user['username'], session_mark_num=user['session_mark_num'],
+            result = insert_or_update_user(username=user['username'], session_mark_num=user['session_mark_num'],
                                 single_mark_num=user['single_mark_num'], permission=user['role'])
+            logger.info(model_to_dict(result))
         except:
             raise ValueError(f"第{idx}条用户数据插入失败，请检查该数据是否有问题。数据: {user}")
 
