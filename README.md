@@ -1,11 +1,25 @@
-<p align="center" width="100%">
-    <img src="pics/logo.png" alt="ChatZoo" style=" min-width: 300px; display: block; margin: auto;">
-</p>
 
 # ChatZoo
-[![Code License](https://img.shields.io/badge/Code%20License-Apache%202.0-red)](https://github.com/OpenLMLab/ChatZoo/blob/main/LICENSE)
-[![node 18.15.0](https://img.shields.io/badge/node-18.15.0-green)](https://nodejs.org/en/download/releases)
 
-对话语言模型横向对比工具。
+ChatZoo，一个轻量级的大模型评测工具。
 
-我们提供了一个轻量级的工具，可以将您的模型或者来自 [🤗huggingface](https://huggingface.co/models) 的模型轻松部署到网页中。ChatZoo 还可以将一句提示同时发送到多个模型中进行回答生成，方便地对比模型效果。
+## 新闻
+
+## 目录
+
+<ul>
+    <li><a href="#ChatZoo是什么">ChatZoo是什么?</a></li>
+    <li><a href="#安装">安装</a></li>
+    <li><a href="#使用">使用</a></li>
+    <li><a href="引用我们">引用我们</a></li>
+</ul>
+
+## ChatZoo是什么？
+
+## 安装
+在安装前，你需要确保：
+* PyTorch >= 
+
+## 使用
+
+## 引用我们

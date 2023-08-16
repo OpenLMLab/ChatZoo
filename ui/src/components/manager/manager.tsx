@@ -28,7 +28,7 @@ function Manager() {
     const [curChatId, setCurChatId] = useState<string>(idContext?.id!)
     const [chatList, setChatList] = useState<ChatItem[]>([{
         id: idContext?.id!,
-        name: '初始化会话',
+        name: '新会话' + Date.now().toString(),
         notAnnotated: true,
         mode: modeContext!
     }])
@@ -43,8 +43,6 @@ function Manager() {
 
     const addChat = (modecontext: string, chatList: ChatItem[]) => {
         let notAnnotated = true
-        // if(modeContext != undefined && modeContext == 'model')
-        //     notAnnotated = false
         const newItem = {
             id: Date.now().toString(),
             name: '新会话' + Date.now().toString(),
@@ -130,9 +128,7 @@ function Manager() {
     // 监听对话框是否完成消息，如果完成就更改当前会话的名称
     useEffect(()=> {
       const editChat = (newName: string, id: string) => {
-        console.log("1111111111", chatList)
         const index = chatList.findIndex(x => x.id === id)
-        console.log('需要编辑的', chatList, chatList[index], index, id)
         if(index > -1)
             chatList[index].name = newName
       }
@@ -164,7 +160,6 @@ function Manager() {
             idContext?.setId(session_id)
             console.log(new_chatList[index], "触发模式改变")
             eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
-            // eventBus.emit('banVote', !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
         }

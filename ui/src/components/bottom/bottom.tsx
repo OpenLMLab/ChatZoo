@@ -2,7 +2,7 @@ import Annotate from '@/components/annotate/annotate';
 import NewForm from '@/components/newmodel/newmodel';
 import { ModeContext } from '@/utils/contexts';
 import { DownloadOutlined, PlusOutlined, SendOutlined } from '@ant-design/icons';
-import { Button, ConfigProvider, Input, Popover } from 'antd';
+import { Button, ConfigProvider, Input, Popover, message } from 'antd';
 import React, { useContext, useEffect, useState } from 'react';
 import style from './bottom.module.less';
 import { ModelContext } from '@/utils/modelcontext';
@@ -33,7 +33,7 @@ function handleInput(value: string) {
 const Bottom: React.FC = () => {
     // 控制输入框禁用
     const [isInput, setisInput] = useState(false);
-
+    const [messageApi, contextHolder] = message.useMessage();
     const [inputValue, setInputValue] = useState('');
     const mode = useContext(ModeContext)?.mode;
     const models = useContext(ModelContext)?.models;
@@ -52,6 +52,13 @@ const Bottom: React.FC = () => {
             eventBus.off("banInputEvent", banInputEvent)
         }
     }, [])
+    // 错误全局提示
+    const error = (msg: string) => {
+        messageApi.open({
+          type: 'error',
+          content: msg,
+        });
+      };
     
     // 输入框
     const handleChange = (event: any) => {
@@ -60,8 +67,12 @@ const Bottom: React.FC = () => {
     };
     const handleEnter = () => {
         handleInput(inputValue);
-        eventBus.emit('sendMessage', inputValue, models, mode, sessionId);
-        setInputValue('');
+        if (inputValue === null || inputValue === undefined || inputValue.trim().length === 0) {
+            error('不能发送空消息！')
+        } else {
+            eventBus.emit('sendMessage', inputValue, models, mode, sessionId);
+            setInputValue('');
+        }
     };
 
     // 对话框
@@ -120,6 +131,7 @@ const Bottom: React.FC = () => {
                 },
             }}
         >
+            {contextHolder}
             <div className={style.wrapper}>
                 <div className={style.input}>
                     <Input

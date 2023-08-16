@@ -43,7 +43,7 @@ function App() {
         // 登录
         http.post<string,any>('/login/?'+qs.stringify(data)).then((res) => {
           console.log('登陆后的信息', res.data)
-          if(res.data.code === 403) {
+          if(res.data.code != 200) {
             error(res.data.msg)
             return;
           }

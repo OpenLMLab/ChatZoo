@@ -37,7 +37,6 @@ const Chat: React.FC = () => {
     '0',
     true
   )
-  const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf); // 开启 model 的 title 名字开关
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
   const ref_sessionId = useRef(sessionId)
@@ -54,7 +53,7 @@ const Chat: React.FC = () => {
   const keys = Object.keys(sessionList)
   if (keys.length != 0) {
     if (sessionList[keys[0]][0]) {
-      const firstMsg = sessionList[keys[0]][0]['message']
+      const firstMsg = sessionList[keys[0]][0]['question']
       eventBus.emit('editChat', firstMsg, sessionId)
     }
   }
@@ -74,7 +73,6 @@ const Chat: React.FC = () => {
       }
     })
   const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()]
-  console.log("refssssssss", refs)
   const modelStatus = ['-1', '-1', '-1', '-1']
 
 //处理数据，以便于保存
@@ -110,9 +108,7 @@ const Chat: React.FC = () => {
               }
             })
       localStorage.setItem(session_ids, JSON.stringify(new_session_list))
-  }
-  let cancelIndex = [1, 1, 1, 1]
-  
+  }  
   const startSse = (question: string, new_models: ModelConfig[]) => {
     // 开始会话前先保存
     console.log("startSse", new_models, sessionList)
@@ -127,84 +123,14 @@ const Chat: React.FC = () => {
   const getSseStatus = () => {
     refs.map((ref, index) => {
       if (index < models?.length!) {
-        console.log('模型', index, '的状态是', ref.current.getStatus())
         modelStatus[index] = ref.current.getStatus()
       }
     })
-    console.log('打印当前状态', modelStatus)
   }
 
-  const downloadSse = (new_models: ModelConfig[], mode: string, sessionId: string) => {
-    let new_session_list: sessionMesage = {}
-    refs.map((ref, index) => {
-      if (index < new_models?.length!) {
-        new_session_list[new_models[index].model_id] = ref.current.getSessionList()
-        console.log('收到对话', ref.current.getSessionList())
-      }
-    })
-    Object.keys(new_session_list).forEach(function (key) {
-      let session = new_session_list[key]
-      if (session.length - 1 >= 0) {
-        const last_dict = session[session.length - 1]
-        const new_dict: sseMesage = {
-          "id": last_dict["id"],
-          "status": last_dict["status"],
-          "message": last_dict["message"],
-          "question": last_dict["question"]
-        }
-        session[session.length - 1] = new_dict
-      }
-      new_session_list[key] = session
-    });
-    sessionList = new_session_list
-    const dialogue_ids: { [key: string]: string } = {}
-    // 获取dialogue_id
-    console.log(new_session_list)
-    Object.keys(sessionList).map(session => {
-      console.log(sessionList)
-      // 获取最后一条数据
-      const lastDialogue = sessionList[session][sessionList[session].length - 1];
-      for (let index = 0; index < new_models.length; index++) {
-        if (new_models[index].model_id == session) {
-          // 找到对应模型的名字
-          dialogue_ids[new_models[index].nickname] = lastDialogue.id.toString()
-          break
-        }
-
-      }
-    })
-    eventBus.emit('sendVoteDict', dialogue_ids)
-    localStorage.setItem(sessionId!, JSON.stringify(new_session_list))
-    console.log('已经保存到', sessionId)
-  };
-  // 关闭某个模型
-  const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
-    // 传入要关闭模型的index
-    console.log("关闭模型", close_Model, index)
-    let new_models: ModelConfig[] = []
-    new_models = models?.filter((_, item) => item != index)
-    console.log(new_models)
-    setModels?.setModels(new_models);
-    console.log(models, new_models)
-  }
-  // 暂停某个模型的对话
-  const stopModelSse = (stopModel: ModelConfig, index: number, models: ModelConfig[]) => {
-    console.log("暂停模型", stopModel, index)
-    const new_models = models.slice()
-    new_models[index].start = !new_models[index].start
-    console.log(new_models)
-    setModels?.setModels(new_models);
-  }
-  const { TextArea } = Input;
-  const { Option } = Select
   // 监控对话事件，在 bottom 组件调用该事件来向对话组件发送消息
   useEffect(() => {
     const listener = (question: string, modelsr: ModelConfig[], mode: string, sessionIds: string) => {
-      console.log("[debug] chat.tsx models ", models, modelsr, models == modelsr)
-      console.log("[debug] chat.tsx sessionid ", sessionId, sessionIds, sessionId==sessionIds)
-      console.log("[Debug] chat.tsx mode", mode)
-      console.log("sessionID", sessionList)
-      console.log(refs[0].current.getSessionList())
       // 插入会话
       // 对话开始前本地先保存一波数据
       // saveSessionList(sessionIds)
@@ -215,29 +141,7 @@ const Chat: React.FC = () => {
       eventBus.emit('banVote', true) // 禁用vote
       eventBus.emit('banStop', true)
       // 开始对话
-      if (question === null || question === undefined || question.trim().length === 0) {
-        error('不能发送空消息！')
-      } else {
-        startSse(question, modelsr)  
-        // 异步保存缓存
-        // setTimeout(() => {
-        //   getSseStatus();
-        //   // downloadSse(modelsr,mode,sessionIds);
-        //   // 如果是单回复标注那么要禁用输入框
-        //   if(mode === 'dialogue') {
-        //     eventBus.emit('banInputEvent', false) 
-        //   }else{
-        //     // 开启标注模式
-        //     eventBus.emit("annotateSession", false, sessionIds)
-        //   }
-        //   // 会话结束后
-        //   // 对话开始前， 开启会话列表
-        //   setstopStatus(false)
-        //   eventBus.emit('banSessionList', false) // 禁用会话切换
-        //   eventBus.emit('banModeEvent', false) // 开启模式
-        //   eventBus.emit('banVote', false) // 开启标注
-        // }, 10); // 延迟时间为 1000 毫秒（1秒）
-      }
+      startSse(question, modelsr)  
     };
     eventBus.on('sendMessage', listener);
     return () => {

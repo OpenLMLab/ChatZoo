@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Button, Modal, Radio, RadioChangeEvent, message } from 'antd';
+import { Button, Modal, Radio, RadioChangeEvent, message, notification } from 'antd';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { ModeContext } from '@/utils/contexts';
@@ -38,7 +38,6 @@ const Annotate: React.FC = () => {
             setBanVote(status)
         }
         const dialogueListener = (dialogue_ids: {[key: string]: string}) => {
-            console.log('会话id列表', dialogue_ids)
             setDialogueIds(dialogue_ids)
         }
         eventBus.on('banVote', statusListener)
@@ -76,6 +75,7 @@ const Annotate: React.FC = () => {
             eventBus.emit("annotateSession", false, sessionId)
             eventBus.emit('dialogueFinish', sessionId);
         }
+        // 弹窗提示标注成功
         setIsModalOpen(false);
     };
     const handleCancel = () => {
@@ -138,11 +138,11 @@ const Annotate: React.FC = () => {
             turn_id: turn_id,
         };
         http.post<any, any>('/vote?', { data: data })
-            .then((res) => {
-                console.log('会话标注成功', res);
+            .then(() => {
+                openNotificationWithIcon('success', '标注成功！')
             })
             .catch(() => {
-                console.log('会话标注失败');
+                openNotificationWithIcon('error', '标注失败！')
             });
     };
 
@@ -158,16 +158,27 @@ const Annotate: React.FC = () => {
             turn_id: turn_id,
         };
         http.post<any, any>('/vote?', { data: data })
-            .then((res) => {
-                console.log('会话标注成功', res);
+            .then(() => {
+                openNotificationWithIcon('success', '标注成功！')
             })
             .catch(() => {
-                console.log('会话标注失败');
+                openNotificationWithIcon('error', '标注失败！')
             });
     };
 
+    // 通知提醒框
+    const [api, notificationHolder] = notification.useNotification()
+    type NotificationType = 'success' | 'error';
+    const openNotificationWithIcon = (type: NotificationType, message: string) => {
+        api[type] ({
+            message: message,
+            description: ''
+        })
+    }
+
     return (
         <>
+            {notificationHolder}
             {contextHolder}
             <Button type='primary' onClick={showModal} disabled={banVote}>标注</Button>
             <Modal title={title}
@@ -189,9 +200,9 @@ const Annotate: React.FC = () => {
                 </Radio.Group>
                 <br />
                 或者
-                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都不选</Button>
+                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都符合</Button>
                 或者
-                <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都一样</Button>
+                <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都不符合</Button>
             </Modal>
         </>
     );
