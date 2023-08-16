@@ -25,28 +25,28 @@ const Annotate: React.FC = () => {
     // 关闭标注的开关
     const [banVote, setBanVote] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [messageApi, contextHolder] = message.useMessage();   
+    const [messageApi, contextHolder] = message.useMessage();
     // 拼接id
-    const model_ids: {[key: string]: any} = {}
+    const model_ids: { [key: string]: any } = {};
     models?.forEach((model) => {
-        model_ids[model.nickname] = model.model_id
+        model_ids[model.nickname] = model.model_id;
     });
-    const [value, setValue] = useState("default");
+    const [value, setValue] = useState('default');
     // 监听是否禁用标注，主要用于debug成员
     useEffect(() => {
         const statusListener = (status: boolean) => {
-            setBanVote(status)
-        }
-        const dialogueListener = (dialogue_ids: {[key: string]: string}) => {
-            console.log('会话id列表', dialogue_ids)
-            setDialogueIds(dialogue_ids)
-        }
-        eventBus.on('banVote', statusListener)
-        eventBus.on('sendVoteDict', dialogueListener)
+            setBanVote(status);
+        };
+        const dialogueListener = (dialogue_ids: { [key: string]: string }) => {
+            console.log('会话id列表', dialogue_ids);
+            setDialogueIds(dialogue_ids);
+        };
+        eventBus.on('banVote', statusListener);
+        eventBus.on('sendVoteDict', dialogueListener);
         return () => {
-            eventBus.removeListener('banVote', statusListener)
-            eventBus.removeListener('sendVoteDict', dialogueListener)
-        }
+            eventBus.removeListener('banVote', statusListener);
+            eventBus.removeListener('sendVoteDict', dialogueListener);
+        };
     }, []);
     const names: string[] = [];
     models?.map((model) => names.push(model.nickname));
@@ -58,22 +58,22 @@ const Annotate: React.FC = () => {
     const error = (msg: string) => {
         messageApi.open({
             type: 'error',
-            content: msg
+            content: msg,
         });
-      };
+    };
     //完成标注，打开输入框的限制
     const handleOk = () => {
         // 单标注完成，打开输入框
-        if(mode === 'single') {
+        if (mode === 'single') {
             voteDialogue();
-            eventBus.emit('banInputEvent', false)
+            eventBus.emit('banInputEvent', false);
             // 开启标注
-            eventBus.emit("annotateSession", true, sessionId)
+            eventBus.emit('annotateSession', true, sessionId);
         } else {
             vote();
-            setBanVote(true)
-            console.log('成功标注')
-            eventBus.emit("annotateSession", false, sessionId)
+            setBanVote(true);
+            console.log('成功标注');
+            eventBus.emit('annotateSession', false, sessionId);
             eventBus.emit('dialogueFinish', sessionId);
         }
         setIsModalOpen(false);
@@ -84,45 +84,45 @@ const Annotate: React.FC = () => {
 
     // 单选情况下
     const onChange = (e: RadioChangeEvent) => {
-        setValue(e.target.value)
-    }
+        setValue(e.target.value);
+    };
     const allDis = () => {
-        if(isEqual) {
-            if(!isDis) {
-                error('不能同时都不选或都选择')
+        if (isEqual) {
+            if (!isDis) {
+                error('不能同时都不选或都选择');
             }
         } else {
             setIsDis(!isDis);
         }
     };
     const allEqual = () => {
-        if(isDis) {
-            if(!isEqual) {
-                error('不能同时都不选或都选择！')
+        if (isDis) {
+            if (!isEqual) {
+                error('不能同时都不选或都选择！');
             }
         } else {
-            setIsEqual(!isEqual)
+            setIsEqual(!isEqual);
         }
-    }
+    };
 
-    const getVoteModel = (value: string, model_ids: {[key: string]: any}) => {
+    const getVoteModel = (value: string, model_ids: { [key: string]: any }) => {
         const valueToFind = value; // 要查找的 value
         const foundElement = Object.entries(model_ids).find(([key, value]) => value === valueToFind);
         if (foundElement) {
-          const [key, value] = foundElement;
-          return key;
+            const [key, value] = foundElement;
+            return key;
         } else {
-          return null; // 或者返回适当的默认值，表示未找到元素
-        } 
-    }
+            return null; // 或者返回适当的默认值，表示未找到元素
+        }
+    };
 
-    let vote_result: any = null
-    if(isDis) {
-        vote_result = null
-    } else if(isEqual) {
-        vote_result = Object.keys(model_ids)
+    let vote_result: any = null;
+    if (isDis) {
+        vote_result = null;
+    } else if (isEqual) {
+        vote_result = Object.keys(model_ids);
     } else {
-        vote_result = getVoteModel(value, model_ids)
+        vote_result = getVoteModel(value, model_ids);
     }
 
     // 投票功能
@@ -169,8 +169,11 @@ const Annotate: React.FC = () => {
     return (
         <>
             {contextHolder}
-            <Button type='primary' onClick={showModal} disabled={banVote}>标注</Button>
-            <Modal title={title}
+            <Button type="primary" onClick={showModal} disabled={banVote}>
+                标注
+            </Button>
+            <Modal
+                title={title}
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={handleCancel}
@@ -179,19 +182,21 @@ const Annotate: React.FC = () => {
             >
                 请选择任意符合预期的模型
                 <br />
-                <Radio.Group onChange={onChange} value={value} disabled={isDis || isEqual} >
-                    {
-                        Object.keys(model_ids).map(key => {
-                            const id = model_ids[key];
-                            return <Radio value={id}>{key}</Radio>;
-                        })
-                    }
+                <Radio.Group onChange={onChange} value={value} disabled={isDis || isEqual}>
+                    {Object.keys(model_ids).map((key) => {
+                        const id = model_ids[key];
+                        return <Radio value={id}>{key}</Radio>;
+                    })}
                 </Radio.Group>
                 <br />
                 或者
-                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都不选</Button>
+                <Button onClick={allDis} type={isDis ? 'primary' : 'default'}>
+                    都不选
+                </Button>
                 或者
-                <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都一样</Button>
+                <Button onClick={allEqual} type={isEqual ? 'primary' : 'default'}>
+                    都一样
+                </Button>
             </Modal>
         </>
     );

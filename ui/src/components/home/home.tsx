@@ -18,7 +18,6 @@ import http from '@/utils/axios';
 import eventBus from '@/utils/eventBus';
 import { useLocation } from 'react-router-dom';
 
-
 function Home() {
     const [mode, setMode] = useState<string | null>('dialogue');
     const modeValues: ModeContextProps = {
@@ -31,15 +30,15 @@ function Home() {
         id,
         setId,
     };
-    
+
     const [models, setModels] = useState<ModelConfig[]>([]);
     const location = useLocation();
     const data = location.state;
-    console.log(data)
-    if(data && models.length==0){
-      setModels(data)
+    console.log(data);
+    if (data && models.length == 0) {
+        setModels(data);
     }
-    
+
     // const [models, setModels] = useState<ModelConfig[]>([
     //   new ModelConfig(
     //     "fnlp/moss-moon-003-sft",
@@ -104,7 +103,7 @@ function Home() {
     //             console.log('添加模型失败!');
     //         });
     //     })
-        
+
     //   }
     //   eventBus.on("initModels", InitModel)
     //   return () => {
@@ -113,7 +112,7 @@ function Home() {
     // })
     // const model_list = JSON.parse(localStorage.getItem("init_models")!)
     // if(model_list === undefined || model_list ===null){
-      
+
     // }else{
     //   setModels(model_list)
     // }
@@ -123,40 +122,38 @@ function Home() {
         setModels,
     };
 
-  return (
-    <ModelContext.Provider value={modelsValues} >
-      <div className={style.wrapper}>
-        <IdContext.Provider value={idContextValues}>
-          <ModeContext.Provider value={modeValues}>
-          <Row gutter={24} className={style.row}>
-            <Col span={4} className={style.sider}>
-              <h1 className={style.logo}>ChatZoo</h1>
-              <div className={style.colorpicker}>
-                <ColorPicker />
-              </div>
-              <Manager />
-            </Col>
-                <Col span={20} className={style.main}>
-                  <div className={style.header}>
-                    <div className={style.mode}>
-                      <Mode></Mode>
-                    </div>
-                  </div>
-                    <div className={style.content}>
-                      <div className={style.add}>
-                        {models.length === 0 ? <Add></Add> : <Chat />}
-                      </div>
-                    </div>
-                    <div className={style.footer}>
-                      <Bottom />
-                    </div>
-                </Col>
-          </Row>
-          </ModeContext.Provider>
-        </IdContext.Provider>
-      </div>
-    </ModelContext.Provider>
-  );
+    return (
+        <ModelContext.Provider value={modelsValues}>
+            <div className={style.wrapper}>
+                <IdContext.Provider value={idContextValues}>
+                    <ModeContext.Provider value={modeValues}>
+                        <Row gutter={24} className={style.row}>
+                            <Col span={4} className={style.sider}>
+                                <h1 className={style.logo}>ChatZoo</h1>
+                                <div className={style.colorpicker}>
+                                    <ColorPicker />
+                                </div>
+                                <Manager />
+                            </Col>
+                            <Col span={20} className={style.main}>
+                                <div className={style.header}>
+                                    <div className={style.mode}>
+                                        <Mode></Mode>
+                                    </div>
+                                </div>
+                                <div className={style.content}>
+                                    <div className={style.add}>{models.length === 0 ? <Add></Add> : <Chat />}</div>
+                                </div>
+                                <div className={style.footer}>
+                                    <Bottom />
+                                </div>
+                            </Col>
+                        </Row>
+                    </ModeContext.Provider>
+                </IdContext.Provider>
+            </div>
+        </ModelContext.Provider>
+    );
 }
 
 export default Home;
