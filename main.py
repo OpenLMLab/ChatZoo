@@ -158,7 +158,7 @@ async def login_by_username(username):
                                       "single_mark_num": query.single_mark_num,"create_time": query.create_time},
                 "msg": "登录成功!"}
     else:
-        return {"code": 400, "data": None, "msg": "sql operation error!"}
+        return {"code": 400, "data": None, "msg": "找不到该用户"}
 
 @app.post("/vote/")
 def vote_model(vote_msg: dict):
