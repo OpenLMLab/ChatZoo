@@ -1,115 +1,34 @@
 @import '../../styles/theme.less';
 
-.chatwrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-
-.chatContainer {
-    box-sizing: border-box;
-    // gap: 20px;
-    margin: 1rem;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0px 8px 26px 0px rgba(0, 0, 0, 0.12);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.wrap {
-    flex-wrap: wrap;
-    .chatContainer {
-        flex: 1 0 0.6;
-        min-height: 40%;
-    }
-}
-
-.no-wrap {
-    .chatContainer {
-        width: 60%;
-        min-width: 20%;
-        height: 80vh;
-    }
-}
-
-.pause::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-}
-
-.banner {
-    display: flex;
-    // width: 796px;
-    padding: 4px 24px;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 4px 4px 0px 0px;
-    background: @primary;
-
-    .typo {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-        flex: 1 0 0;
-        overflow: hidden;
-        color: var(--95-text-dark-5, rgba(255, 255, 255, 0.95));
-        font-feature-settings:
-            'clig' off,
-            'liga' off;
-        text-overflow: ellipsis;
-        font-family: PingFang SC;
-        font-size: 16px;
-        font-style: normal;
-        font-weight: 600;
-        line-height: 24px;
-    }
-
-    .func {
-        display: flex;
-        // height: 40px;
-        padding: 10px 0px 10px 6px;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 16px;
-        div {
-            width: 24px;
-            height: 24px;
-        }
-    }
-}
-
-.main {
-    display: flex;
-    position: relative;
-    // flex: 1;
-    height: calc(80vh - 55px);
-    // width: 796px;
-    // width: 100%;
-    height: cal(80vh - 55px);
-    // padding-top: 12px;
-    flex-direction: column;
-    align-items: center;
-    flex-shrink: 0;
-    color: #fff;
-    text-align: justify;
+.typo {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    flex: 1 0 0;
+    overflow: hidden;
+    color: var(--95-text-dark-5, rgba(255, 255, 255, 0.95));
     font-feature-settings:
         'clig' off,
         'liga' off;
+    text-overflow: ellipsis;
     font-family: PingFang SC;
-    font-size: 14px;
+    font-size: 16px;
     font-style: normal;
-    font-weight: 400;
-    line-height: 21px;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.func {
+    display: flex;
+    // height: 40px;
+    padding: 10px 0px 10px 6px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    div {
+        width: 24px;
+        height: 24px;
+    }
 }
 
 .tooltipTitle {
