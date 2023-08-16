@@ -10,7 +10,7 @@ import PUYUC from 'chat-webkit';
 import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterface';
 import { useContext, useEffect, useRef, useState } from 'react';
 import styles from './chat.module.less';
-
+import { chatBoxStyle, requestSessageContainerStyle, responseMessageContainerStyle } from './puyuc.chatbox.style';
 
 /**
  * 1. 获取全局sessionId
@@ -323,14 +323,16 @@ const Chat: React.FC = () => {
               <Banner model={model} index={index} models={models} handleSwitchLayout={handleSwitchLayout} />
             </div>
             <div className={styles.main} key={index + ""}>
-              <div className={!model.start ? styles.pause : ''}>
+              <div className={`${styles.chatBoxWrap} ${!model.start ? styles.pause : ''}`}>
                 <PUYUC.ChatBox
                   sseStopCallback={(url) => { sseFinishCallable() }}
                   propsSessionList={sessionList[model.model_id]}
                   url={model.url + "/chat/generate?turn_id=" + sessionId + "&username=" + localStorage.getItem('username') + "&role=" + localStorage.getItem('permission')}
                   ref={refs[index]}
                   token={JSON.stringify(model.generate_kwargs)}
-                  requestMessageContainerStyle={{ backgroundColor: 'rgba(39, 45, 230, 0.1)' }}
+                  requestMessageContainerStyle={requestSessageContainerStyle}
+                  responseMessageContainerStyle={responseMessageContainerStyle}
+                  style={chatBoxStyle}
                 />
               </div>
             </div>
