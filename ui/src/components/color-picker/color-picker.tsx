@@ -21,9 +21,15 @@ const ColorPicker: React.FC = () => {
         const root = document.querySelector(':root');
         const hsb = color.toHsb();
         const bGradStart = new ColorFactory({ h: hsb.h, s: hsb.s, b: hsb.b - 0.1 });
+        const startRGB = bGradStart.toRgb();
+        const bGradEnd = new ColorFactory({
+            r: startRGB.r > 16 ? startRGB.r - 16 : 0,
+            g: startRGB.g > 64 ? startRGB.g - 64 : 0,
+            b: startRGB.b > 41 ? startRGB.b - 41 : 0
+        })
         if (root instanceof HTMLElement) {
             root.style.setProperty('--primary', color.toHexString())
-            root.style.setProperty('--background-gradient', `linear-gradient(117.2deg, ${bGradStart.toHexString()} 10.6%, #41464a 90.8%)`)
+            root.style.setProperty('--background-gradient', `linear-gradient(117.2deg, ${bGradStart.toHexString()} 10.6%, ${bGradEnd.toHexString()} 90.8%)`)
         }
     }
 
