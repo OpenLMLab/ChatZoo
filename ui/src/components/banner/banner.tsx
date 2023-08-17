@@ -12,8 +12,7 @@ interface BannerProps {
     handleSwitchLayout: () => void;
 }
 
-const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayout }) => {
-    // const [doWrap, updateDoWrap] = useState(styles.noWrap);
+const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayout }) => {;
     const role = localStorage.getItem('permission');
     const [openModelConfig, setOpenModelConfig] = useState(false);
     const [stopStatus, setStopStatus] = useState(false);
@@ -41,6 +40,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         setOpenModelConfig(true);
         setModalConfig(model_info);
     };
+
     // 暂停某个模型的对话
     const stopModelSse = (stopModel: ModelConfig, index: number, models: ModelConfig[]) => {
         eventBus.emit('saveSession');
@@ -50,9 +50,8 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         setModels?.setModels(new_models);
     };
 
+    // 关闭模型对话
     const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
-        // 传入要关闭模型的index
-        console.log('关闭模型', close_Model, index);
         let new_models: ModelConfig[] = [];
         new_models = models?.filter((_, item) => item != index);
         console.log(new_models);

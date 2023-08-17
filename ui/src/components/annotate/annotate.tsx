@@ -5,6 +5,7 @@ import { ModelContext } from '@/utils/modelcontext';
 import { ModeContext } from '@/utils/contexts';
 import http from '@/utils/axios';
 import eventBus from '@/utils/eventBus';
+import { SHA256 } from 'crypto-js';
 
 /**
  * 标注按钮：是否禁用
@@ -26,19 +27,45 @@ const Annotate: React.FC = () => {
     const [banVote, setBanVote] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
-    // 拼接id
+    // vote_model
+    function createHash(value: string): string {
+        const hash = SHA256(value);
+        return hash.toString().slice(0, 8);
+      }
     const model_ids: { [key: string]: any } = {};
     models?.forEach((model) => {
-        model_ids[model.nickname] = model.model_id;
+        const hashid = createHash(JSON.stringify(model.generate_kwargs))
+        model_ids[model.nickname + hashid] = model.model_id;
     });
     const [value, setValue] = useState('default');
+    // 合并字典
+    interface Dict {
+        [key: string]: string;
+      }
+      
+      function mergeDicts(dict1: Dict, dict2: Dict): Dict {
+        const mergedDict: Dict = {};
+      
+        for (const key1 in dict1) {
+          const value1 = dict1[key1];
+      
+          if (dict2.hasOwnProperty(value1)) {
+            const value2 = dict2[value1];
+            mergedDict[key1] = value2;
+          }
+        }
+      
+        return mergedDict;
+      }
+    
     // 监听是否禁用标注，主要用于debug成员
     useEffect(() => {
         const statusListener = (status: boolean) => {
             setBanVote(status)
         }
-        const dialogueListener = (dialogue_ids: {[key: string]: string}) => {
-            setDialogueIds(dialogue_ids)
+        const dialogueListener = (dialogue_ids: Dict) => {
+            const merge_ids = mergeDicts(model_ids, dialogue_ids)
+            setDialogueIds(merge_ids)
         }
         eventBus.on('banVote', statusListener)
         eventBus.on('sendVoteDict', dialogueListener)
@@ -71,7 +98,6 @@ const Annotate: React.FC = () => {
         } else {
             vote();
             setBanVote(true);
-            console.log('成功标注');
             eventBus.emit('annotateSession', false, sessionId);
             eventBus.emit('dialogueFinish', sessionId);
         }
@@ -105,24 +131,25 @@ const Annotate: React.FC = () => {
         }
     };
 
-    const getVoteModel = (value: string, model_ids: { [key: string]: any }) => {
+    const getVoteResult = (value: string, model_ids: { [key: string]: any }) => {
         const valueToFind = value; // 要查找的 value
         const foundElement = Object.entries(model_ids).find(([key, value]) => value === valueToFind);
         if (foundElement) {
             const [key, value] = foundElement;
-            return key;
+            return [key];
         } else {
-            return null; // 或者返回适当的默认值，表示未找到元素
+            return []; // 或者返回适当的默认值，表示未找到元素
         }
     };
 
-    let vote_result: any = null;
+    // 投票结果
+    let vote_result: string[] = [];
     if (isDis) {
-        vote_result = null;
+        vote_result = [];
     } else if (isEqual) {
         vote_result = Object.keys(model_ids);
     } else {
-        vote_result = getVoteModel(value, model_ids);
+        vote_result = getVoteResult(value, model_ids);
     }
 
     // 投票功能
@@ -137,6 +164,7 @@ const Annotate: React.FC = () => {
             dialogue_id: dialogue_id,
             turn_id: turn_id,
         };
+        console.log('投票的信息', data)
         http.post<any, any>('/vote?', { data: data })
             .then(() => {
                 openNotificationWithIcon('success', '标注成功！')
@@ -157,6 +185,7 @@ const Annotate: React.FC = () => {
             dialogue_id: dialogueIds,
             turn_id: turn_id,
         };
+        console.log('投票的信息', data)
         http.post<any, any>('/vote?', { data: data })
             .then(() => {
                 openNotificationWithIcon('success', '标注成功！')
