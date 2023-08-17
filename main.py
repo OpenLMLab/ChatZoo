@@ -85,7 +85,7 @@ async def startup_event():
             result = insert_or_update_user(username=user['username'], session_mark_num=user['session_mark_num'],
                                 single_mark_num=user['single_mark_num'], permission=user['role'])
             if isinstance(result, int):
-                logger.info(f"更新用户username: {user['username']}成功！")
+                logger.info(f"更新用户username: {user['username']} 成功！")
             else:
                 if result:
                     logger.info(f"插入用户数据：username: {result.username} role: {result.role} session_mark_num: {result.session_mark_num} single_mark_num: {result.single_mark_num}")

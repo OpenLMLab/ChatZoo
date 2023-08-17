@@ -68,7 +68,7 @@ def run_suprocess_ui(host_name, main_port, port, main_host):
     script_line = f'<script>window.VITE_REACT_APP_PORT = "{main_port}";window.VITE_REACT_APP_HOST="{main_host}"</script>'
 
     # 在 </body> 标签之前插入 script 行
-    modified_content = html_content.replace('</body>', script_line + '\n</body>')
+    modified_content = html_content.replace('</body>', script_line + '</body>')
 
     # 创建临时 HTML 文件
     temp_html_file = os.path.join(base_path,'index.html')
