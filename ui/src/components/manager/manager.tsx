@@ -1,10 +1,10 @@
-import PUYUC, {IChatItem} from 'chat-webkit'
+import PUYUC, { IChatItem } from 'chat-webkit';
 import { useContext, useState, useEffect, useRef } from 'react';
 import { IdContext } from '@/utils/idcontexts';
 import style from './manager.module.less';
 import { ModelContext } from '@/utils/modelcontext';
 import eventBus from '@/utils/eventBus';
-import {sessionMesage} from '@/utils/sessionInterface'
+import { sessionMesage } from '@/utils/sessionInterface';
 import { ModeContext } from '@/utils/contexts';
 
 interface ChatItem extends IChatItem {
@@ -15,9 +15,9 @@ interface ChatItem extends IChatItem {
  * 至少保持开启一个会话。
  */
 function Manager() {
-  // 模式控制的
-    const modeContext = useContext(ModeContext)?.mode
-    console.log(modeContext, "manager mode")
+    // 模式控制的
+    const modeContext = useContext(ModeContext)?.mode;
+    console.log(modeContext, 'manager mode');
     // 会话是否禁用的开关
     const [banSession, setBanSession] = useState(false);
 
@@ -47,83 +47,83 @@ function Manager() {
             id: Date.now().toString(),
             name: '新会话' + Date.now().toString(),
             notAnnotated: notAnnotated,
-            mode: modecontext
-        }
-        const newList = chatList.slice()  // 复制数组
-        newList.unshift(newItem)   // 向数组开头添加元素
-        setChatList(newList)
-         /**新增后会立即选中当前的sessionid */
-         setCurChatId(newItem.id)
-         eventBus.emit('banInputEvent', false)
-         eventBus.emit('banVote', false)
-         idContext?.setId(newItem.id)
+            mode: modecontext,
+        };
+        const newList = chatList.slice(); // 复制数组
+        newList.unshift(newItem); // 向数组开头添加元素
+        setChatList(newList);
+        /**新增后会立即选中当前的sessionid */
+        setCurChatId(newItem.id);
+        eventBus.emit('banInputEvent', false);
+        eventBus.emit('banVote', false);
+        idContext?.setId(newItem.id);
         /**初始化缓存 */
         const numOfModel = models?.length;
         const initSession: sessionMesage = {};
         for (let i = 0; i < numOfModel!; i++) {
             if (models) initSession[models[i].model_id] = [];
         }
-        localStorage.setItem(newItem.id, JSON.stringify(initSession))
-    }
+        localStorage.setItem(newItem.id, JSON.stringify(initSession));
+    };
 
     const deleteChat = (id: string) => {
         // const newList = chatList.slice();
-        console.log("[debug] 删除组件，删除的id是", id)
+        console.log('[debug] 删除组件，删除的id是', id);
         const newList = JSON.parse(JSON.stringify(chatList));
         const index = chatList.findIndex((x) => x.id === id);
-        console.log('删除的会话', index, id, curChatId)
-        console.log(newList, chatList)
+        console.log('删除的会话', index, id, curChatId);
+        console.log(newList, chatList);
         if (chatList.length >= 1) {
             newList.splice(index, 1);
             setChatList(newList);
-            if(id === curChatId)
+            if (id === curChatId)
                 if (index != 0) {
-                    console.log(chatList, "index!=0")
+                    console.log(chatList, 'index!=0');
                     selectChat(newList[index - 1].id);
                 } else {
-                    console.log(chatList, "index=0")
+                    console.log(chatList, 'index=0');
                     selectChat(newList[0].id);
                 }
         }
     };
 
-    const selectChat = (id:string) => {
-        setCurChatId(id)
-        idContext?.setId(id)
-        console.log('当前选中的id', id)
-        const index = chatList.findIndex(x => x.id === id)
+    const selectChat = (id: string) => {
+        setCurChatId(id);
+        idContext?.setId(id);
+        console.log('当前选中的id', id);
+        const index = chatList.findIndex((x) => x.id === id);
         // 判断是否禁用输入框
-        eventBus.emit('banInputEvent', !chatList[index]['notAnnotated'])
+        eventBus.emit('banInputEvent', !chatList[index]['notAnnotated']);
         // 会话标注 && 已经标注
-        if(modeContext === 'dialogue') {
-          eventBus.emit('banVote', !chatList[index]['notAnnotated'])
+        if (modeContext === 'dialogue') {
+            eventBus.emit('banVote', !chatList[index]['notAnnotated']);
         }
-    }
+    };
 
     // 监听单会话标注是否完成， 完成将sessionList的标注置为可对话
-    useEffect(()=>{
+    useEffect(() => {
         const CurSessionAnnatote = (finishBtn: boolean, id: string) => {
-            const index = chatList.findIndex(x => x.id === id)
-            console.log('会话标注未完成', finishBtn)
-            chatList[index].notAnnotated = finishBtn
-            setChatList(chatList)
-        }
-        eventBus.on("annotateSession", CurSessionAnnatote)
+            const index = chatList.findIndex((x) => x.id === id);
+            console.log('会话标注未完成', finishBtn);
+            chatList[index].notAnnotated = finishBtn;
+            setChatList(chatList);
+        };
+        eventBus.on('annotateSession', CurSessionAnnatote);
         return () => {
-          eventBus.off("annotateSession", CurSessionAnnatote)
-        }
-    })
+            eventBus.off('annotateSession', CurSessionAnnatote);
+        };
+    });
 
     // 监听对话框是否发送消息， 如果发送就要禁用掉会话栏
-    useEffect(()=>{
-      const banSessionList = (banButton: boolean)=>{
-        setBanSession(banButton);
-      }
-      eventBus.on('banSessionList', banSessionList)
-      return () => {
-        eventBus.off('banSessionList', banSessionList)
-      }
-    })
+    useEffect(() => {
+        const banSessionList = (banButton: boolean) => {
+            setBanSession(banButton);
+        };
+        eventBus.on('banSessionList', banSessionList);
+        return () => {
+            eventBus.off('banSessionList', banSessionList);
+        };
+    });
 
     // 监听对话框是否完成消息，如果完成就更改当前会话的名称
     useEffect(()=> {
@@ -163,19 +163,16 @@ function Manager() {
         }else{
           addChat(modeContext!, [])
         }
-        prevMyStateRef.current = modeContext
-      }
-      
-    }, [modeContext])
+    }, [modeContext]);
 
     return (
-        <div className={style.chatmanagement} style={banSession ? {pointerEvents: 'none', opacity: 0.5} : {}}>
-            <PUYUC.ChatManagement  
-                list={chatList} 
+        <div className={style.chatmanagement} style={banSession ? { pointerEvents: 'none', opacity: 0.5 } : {}}>
+            <PUYUC.ChatManagement
+                list={chatList}
                 selectedChatId={curChatId}
-                addCallback={()=>addChat(modeContext!, chatList)} 
-                deleteCallback={deleteChat} 
-                selectCallback={selectChat} 
+                addCallback={() => addChat(modeContext!, chatList)}
+                deleteCallback={deleteChat}
+                selectCallback={selectChat}
             />
         </div>
     );

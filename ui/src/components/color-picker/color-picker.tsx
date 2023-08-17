@@ -10,8 +10,8 @@ const ColorPicker: React.FC = () => {
             console.log('to{$color}');
             const root = document.querySelector(':root');
             if (root instanceof HTMLElement) {
-                root.style.removeProperty('--primary')
-                root.style.removeProperty('--background-gradient')
+                root.style.removeProperty('--primary');
+                root.style.removeProperty('--background-gradient');
                 root.setAttribute('theme', color);
             }
         };
@@ -25,30 +25,33 @@ const ColorPicker: React.FC = () => {
         const bGradEnd = new ColorFactory({
             r: startRGB.r > 16 ? startRGB.r - 16 : 0,
             g: startRGB.g > 64 ? startRGB.g - 64 : 0,
-            b: startRGB.b > 41 ? startRGB.b - 41 : 0
-        })
+            b: startRGB.b > 41 ? startRGB.b - 41 : 0,
+        });
         if (root instanceof HTMLElement) {
-            root.style.setProperty('--primary', color.toHexString())
-            root.style.setProperty('--background-gradient', `linear-gradient(117.2deg, ${bGradStart.toHexString()} 10.6%, ${bGradEnd.toHexString()} 90.8%)`)
+            root.style.setProperty('--primary', color.toHexString());
+            root.style.setProperty(
+                '--background-gradient',
+                `linear-gradient(117.2deg, ${bGradStart.toHexString()} 10.6%, ${bGradEnd.toHexString()} 90.8%)`,
+            );
         }
-    }
+    };
 
     return (
         <div className={style.colorpicker}>
             <div onClick={toColor('green')}>
-                <AntDColorPicker className={style.color} disabled value='#4c8f70' />
+                <AntDColorPicker className={style.color} disabled value="#4c8f70" />
             </div>
             <div onClick={toColor('blue')}>
                 <AntDColorPicker className={style.color} disabled value="#598aa0" />
             </div>
             <div onClick={toColor('orange')}>
-                <AntDColorPicker className={style.color} disabled value='#9a9a4c' />
+                <AntDColorPicker className={style.color} disabled value="#9a9a4c" />
             </div>
             <div onClick={toColor('red')}>
-                <AntDColorPicker className={style.color} disabled value='#a05959' />
+                <AntDColorPicker className={style.color} disabled value="#a05959" />
             </div>
             <AntDColorPicker className={`${style.custom}`} onChangeComplete={(color) => handleCustomColor(color)} />
-        </div >
+        </div>
     );
 };
 

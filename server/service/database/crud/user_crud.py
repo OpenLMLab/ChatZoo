@@ -71,8 +71,13 @@ def insert_many_users(batch_data, chunk_num):
 
 def insert_or_update_user(username: str, session_mark_num: int=0, single_mark_num: int=0, permission:str="root"):
     try:
-        User.update(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission)
+        update_row = User.update(session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission).where(User.username==username).execute()
+        if update_row == 0:
+            return User.create(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission)
+        else:
+            return update_row
     except:
-        User.update(username=username, session_mark_num=session_mark_num, single_mark_num=single_mark_num, role=permission)
+        traceback.print_exc()
+        return None
 
 
