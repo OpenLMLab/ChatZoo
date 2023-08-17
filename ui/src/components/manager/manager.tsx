@@ -163,7 +163,7 @@ function Manager() {
         }else{
           addChat(modeContext!, [])
         }
-    }, [modeContext]);
+    }}, [modeContext]);
 
     return (
         <div className={style.chatmanagement} style={banSession ? { pointerEvents: 'none', opacity: 0.5 } : {}}>
