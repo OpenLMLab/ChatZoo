@@ -1,7 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const host = (window as any).VITE_REACT_APP_HOST || "10.140.1.169";
-const port = (window as any).VITE_REACT_APP_PORT || "1024";
+const host = (window as any).VITE_REACT_APP_HOST || '127.0.0.1';
+const port = (window as any).VITE_REACT_APP_PORT || '1024';
 
 // 后端返回的数据
 interface MyResponse<T> {
@@ -17,12 +17,11 @@ interface MyRequest<U> extends AxiosRequestConfig {
 }
 
 class Http {
-  timeout: number = 7000;
-//   baseURL: string = `http://${import.meta.env.VITE_REACT_APP_HOST}:${import.meta.env.VITE_REACT_APP_PORT}`;
-  baseURL: string = `http://${host}:${port}`;
+    timeout: number = 7000;
+    //   baseURL: string = `http://${import.meta.env.VITE_REACT_APP_HOST}:${import.meta.env.VITE_REACT_APP_PORT}`;
+    baseURL: string = `http://${host}:${port}`;
 
-  
-  forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
+    forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
 
     mergeOptions(options: AxiosRequestConfig) {
         return {

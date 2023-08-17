@@ -79,7 +79,7 @@ async def startup_event():
 
     # insert_many_users(user_list, 100)
     # 批量插入改为一条条插入
-    logger.info("检查用户信息是否存在,不存在则插入!")
+    logger.info("检查用户信息是否存在,不存在则插入!", user_list)
     for idx, user in enumerate(user_list):
         try:
             result = insert_or_update_user(username=user['username'], session_mark_num=user['session_mark_num'],

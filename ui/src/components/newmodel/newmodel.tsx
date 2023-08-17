@@ -43,10 +43,10 @@ const NewForm: React.FC<newFormProps> = ({ open, onCreate, onCancel }) => {
 
     // 创建模型
     const models = useContext(ModelContext)?.models || [];
-    const names = models.map(model => {
+    const names = models.map((model) => {
         return model.nickname;
-    })
-    console.log('已经存在的模型名字', names)
+    });
+    console.log('已经存在的模型名字', names);
     const mct = useContext(ModelContext);
     console.log('外层的模型', models);
     const registerNewModel = (values: any) => {
@@ -141,13 +141,13 @@ const NewForm: React.FC<newFormProps> = ({ open, onCreate, onCancel }) => {
                                 rules={[
                                     { required: true, message: '请输入模型名称' },
                                     {
-                                        validator: ( _, value) => {
-                                            if(names.includes(value)) {
+                                        validator: (_, value) => {
+                                            if (names.includes(value)) {
                                                 return Promise.reject('模型名称已存在，请换一个名字');
                                             }
                                             return Promise.resolve();
-                                        }
-                                    }
+                                        },
+                                    },
                                 ]}
                             >
                                 <Input placeholder="请输入模型名称" bordered={false} />
