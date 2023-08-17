@@ -1,17 +1,30 @@
-import { Button, Form, Input, message } from 'antd';
-import { useNavigate } from 'react-router-dom';
 import style from './App.module.less';
 import './App.module.less';
+import { Button, Form, Input, message } from 'antd';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import qs from 'qs';
 import http from '@/utils/axios';
-import { useState } from 'react';
 import eventBus from './utils/eventBus';
 import ModelConfig from './components/model/model';
 
 function App() {
+
+    // 全局提示
     const [messageApi, contextHolder] = message.useMessage();
-    // 加载
+    // 加载按钮
     const [loadings, setLoadings] = useState<boolean[]>([]);
+    // 路由跳转
+    const navigate = useNavigate();
+
+    const error = (msg: string) => {
+        messageApi.open({
+            type: 'error',
+            content: msg,
+        });
+    };
+
+    // 进入加载中
     const enterLoading = (index: number) => {
         setLoadings((prevLoadings) => {
             const newLoadings = [...prevLoadings];
@@ -28,13 +41,7 @@ function App() {
         }, 2000);
     };
 
-    const error = (msg: string) => {
-        messageApi.open({
-            type: 'error',
-            content: msg,
-        });
-    };
-    const navigate = useNavigate();
+    // 提交
     const onFinish = (values: any) => {
         const name = values['username'];
         const data = {
@@ -43,7 +50,6 @@ function App() {
         // 登录
         http.post<string, any>('/login/?' + qs.stringify(data))
             .then((res) => {
-                console.log('登陆后的信息', res.data);
                 if (res.data.code != 200) {
                     error(res.data.msg);
                     return;
@@ -55,13 +61,10 @@ function App() {
                     eventBus.emit('banVote', true);
                 }
                 http.get<string, any>('/get_model_list').then((res) => {
-                    console.log(res.data.data);
                     let new_model: ModelConfig[] = [];
                     const url_len = res.data.data.length;
-                    console.log(res.data.data.length, '111111111');
                     res.data.data.forEach((url: string) => {
                         http.get<string, any>(url + '/chat/model_info').then((res) => {
-                            console.log('返回结果', res.data.data);
                             const model = new ModelConfig(
                                 res.data.data['model_name_or_path'],
                                 res.data.data['nickname'],
@@ -76,7 +79,6 @@ function App() {
                             );
                             new_model.push(model);
                             // 加载完所有参数才能跳转页面
-                            console.log(url_len, new_model.length);
                             if (url_len == new_model.length) {
                                 navigate('/home', { state: new_model });
                             }
@@ -85,13 +87,13 @@ function App() {
                 });
             })
             .catch((err) => {
-                console.log('错误信息', err);
                 error('登录失败！');
             });
     };
 
-    const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+    // 提交失败
+    const onFinishFailed = () => {
+        error('登录失败！')
     };
 
     return (

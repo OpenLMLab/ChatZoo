@@ -1,30 +1,28 @@
+import style from './manager.module.less';
 import PUYUC, { IChatItem } from 'chat-webkit';
 import { useContext, useState, useEffect, useRef } from 'react';
 import { IdContext } from '@/utils/idcontexts';
-import style from './manager.module.less';
 import { ModelContext } from '@/utils/modelcontext';
-import eventBus from '@/utils/eventBus';
-import { sessionMesage } from '@/utils/sessionInterface';
 import { ModeContext } from '@/utils/contexts';
+import { sessionMesage } from '@/utils/sessionInterface';
+import eventBus from '@/utils/eventBus';
 
+// 拓展后的会话Item
 interface ChatItem extends IChatItem {
     notAnnotated: boolean;
     mode: string;
 }
+
 /**
  * 至少保持开启一个会话。
  */
 function Manager() {
-    // 模式控制的
+    // 模式上下文
     const modeContext = useContext(ModeContext)?.mode;
-    console.log(modeContext, 'manager mode');
-    // 会话是否禁用的开关
-    const [banSession, setBanSession] = useState(false);
-
     const idContext = useContext(IdContext);
     const models = useContext(ModelContext)?.models;
-    const numOfModel = models?.length;
-    const initSession: sessionMesage = {};
+    // 会话是否禁用的开关
+    const [banSession, setBanSession] = useState(false);
     const [curChatId, setCurChatId] = useState<string>(idContext?.id!)
     const [chatList, setChatList] = useState<ChatItem[]>([{
         id: idContext?.id!,
@@ -33,6 +31,8 @@ function Manager() {
         mode: modeContext!
     }])
     const prevMyStateRef = useRef(modeContext);
+    const numOfModel = models?.length;
+    const initSession: sessionMesage = {};
     for (let i = 0; i < numOfModel!; i++) {
         if (models) initSession[models[i].model_id] = [];
     }
@@ -41,6 +41,7 @@ function Manager() {
         localStorage.setItem(idContext?.id!, JSON.stringify(initSession));
     }
 
+    // 添加会话
     const addChat = (modecontext: string, chatList: ChatItem[]) => {
         let notAnnotated = true
         const newItem = {
@@ -66,31 +67,26 @@ function Manager() {
         localStorage.setItem(newItem.id, JSON.stringify(initSession));
     };
 
+    // 删除会话
     const deleteChat = (id: string) => {
-        // const newList = chatList.slice();
-        console.log('[debug] 删除组件，删除的id是', id);
         const newList = JSON.parse(JSON.stringify(chatList));
         const index = chatList.findIndex((x) => x.id === id);
-        console.log('删除的会话', index, id, curChatId);
-        console.log(newList, chatList);
         if (chatList.length >= 1) {
             newList.splice(index, 1);
             setChatList(newList);
             if (id === curChatId)
                 if (index != 0) {
-                    console.log(chatList, 'index!=0');
                     selectChat(newList[index - 1].id);
                 } else {
-                    console.log(chatList, 'index=0');
                     selectChat(newList[0].id);
                 }
         }
     };
 
+    // 选择会话
     const selectChat = (id: string) => {
         setCurChatId(id);
         idContext?.setId(id);
-        console.log('当前选中的id', id);
         const index = chatList.findIndex((x) => x.id === id);
         // 判断是否禁用输入框
         eventBus.emit('banInputEvent', !chatList[index]['notAnnotated']);
@@ -104,7 +100,6 @@ function Manager() {
     useEffect(() => {
         const CurSessionAnnatote = (finishBtn: boolean, id: string) => {
             const index = chatList.findIndex((x) => x.id === id);
-            console.log('会话标注未完成', finishBtn);
             chatList[index].notAnnotated = finishBtn;
             setChatList(chatList);
         };
@@ -158,12 +153,11 @@ function Manager() {
             setChatList(new_chatList)
             setCurChatId(session_id)
             idContext?.setId(session_id)
-            console.log(new_chatList[index], "触发模式改变")
             eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
         }
-    }, [modeContext]);
+    }}, [modeContext]);
 
     return (
         <div className={style.chatmanagement} style={banSession ? { pointerEvents: 'none', opacity: 0.5 } : {}}>

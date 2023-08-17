@@ -19,24 +19,7 @@ import { chatBoxStyle, requestSessageContainerStyle, responseMessageContainerSty
  * 4. 离开界面时存入缓存
  */
 const Chat: React.FC = () => {
-  const [openModelConfig, setOpenModelConfig] = useState(false) // 开启 model 的 generate_kwargs 的配置参数
   const [messageApi, contextHolder] = message.useMessage();
-  const mcf = new ModelConfig(
-    "fnlp/moss-moon-003-sft",
-    "moss_01",
-    "fnlp/moss-moon-003-sft",
-    { max_length: 2048 },
-    '0',
-    {
-      meta_prompt: "",
-      user_prompt: "Human: {}\n",
-      bot_prompt: "\nAssistant: {}\n",
-    },
-    "http://10.140.1.76:8083",
-    true,
-    '0',
-    true
-  )
   const idContext = useContext(IdContext);
   const sessionId = idContext?.id;
   const ref_sessionId = useRef(sessionId)
@@ -44,10 +27,11 @@ const Chat: React.FC = () => {
   const mode = useContext(ModeContext)?.mode
   const models = useContext(ModelContext)?.models;
   const setModels = useContext(ModelContext)
+  // 动态计算宽度
+  const width = 80 / models?.length!;
   //  是否暂停模型
   const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sessionMesage = {}
-  console.log("chat.tsx headrt", sessionList, cachedSessionList)
   sessionList = JSON.parse(cachedSessionList!)
   // 判断是否有一条消息
   const keys = Object.keys(sessionList)
@@ -81,7 +65,6 @@ const Chat: React.FC = () => {
         refs.map((ref, index) => {
             if (index < models?.length!) {
                 new_session_list[models![index].model_id] = ref.current.getSessionList();
-                console.log('收到对话', ref.current.getSessionList());
             }
         });
         Object.keys(new_session_list).forEach(function (key) {
@@ -99,7 +82,6 @@ const Chat: React.FC = () => {
             new_session_list[key] = session;
         });
         sessionList = new_session_list;
-        console.log(sessionList);
         if (models != null)
             models.forEach((model) => {
                 if (!(model.model_id in sessionList)) {
@@ -153,7 +135,6 @@ const Chat: React.FC = () => {
         sessionList = new_session_list;
         const dialogue_ids: { [key: string]: string } = {};
         // 获取dialogue_id
-        console.log(new_session_list);
         Object.keys(sessionList).map((session) => {
             console.log(sessionList);
             // 获取最后一条数据
@@ -187,19 +168,10 @@ const Chat: React.FC = () => {
         console.log(new_models);
         setModels?.setModels(new_models);
     };
-    const { TextArea } = Input;
-    const { Option } = Select;
     // 监控对话事件，在 bottom 组件调用该事件来向对话组件发送消息
     useEffect(() => {
         const listener = (question: string, modelsr: ModelConfig[], mode: string, sessionIds: string) => {
-            console.log('[debug] chat.tsx models ', models, modelsr, models == modelsr);
-            console.log('[debug] chat.tsx sessionid ', sessionId, sessionIds, sessionId == sessionIds);
-            console.log('[Debug] chat.tsx mode', mode);
-            console.log('sessionID', sessionList);
-            console.log(refs[0].current.getSessionList());
             // 插入会话
-            // 对话开始前本地先保存一波数据
-            // saveSessionList(sessionIds)
             // 对话开始前， 禁用会话列表, 禁用切换模式, 禁用输入框输入
             eventBus.emit('banSessionList', true); // 禁用会话切换
             eventBus.emit('banModeEvent', true); // 禁用模式
@@ -211,24 +183,6 @@ const Chat: React.FC = () => {
                 error('不能发送空消息！');
             } else {
                 startSse(question, modelsr);
-                // 异步保存缓存
-                // setTimeout(() => {
-                //   getSseStatus();
-                //   // downloadSse(modelsr,mode,sessionIds);
-                //   // 如果是单回复标注那么要禁用输入框
-                //   if(mode === 'dialogue') {
-                //     eventBus.emit('banInputEvent', false)
-                //   }else{
-                //     // 开启标注模式
-                //     eventBus.emit("annotateSession", false, sessionIds)
-                //   }
-                //   // 会话结束后
-                //   // 对话开始前， 开启会话列表
-                //   setstopStatus(false)
-                //   eventBus.emit('banSessionList', false) // 禁用会话切换
-                //   eventBus.emit('banModeEvent', false) // 开启模式
-                //   eventBus.emit('banVote', false) // 开启标注
-                // }, 10); // 延迟时间为 1000 毫秒（1秒）
             }
         };
         eventBus.on('sendMessage', listener);
@@ -237,6 +191,13 @@ const Chat: React.FC = () => {
             eventBus.removeListener('sendMessage', listener);
         };
     }, []);
+  
+    const [doWrap, updateDoWrap] = useState(styles.noWrap);
+    const handleSwitchLayout = () => {
+        saveSessionList(sessionId!)
+        updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
+    };
+
 
     // 监控会话id变化,如果发现变化就要判断能否保存历史数据。
     useEffect(() => {
@@ -247,10 +208,9 @@ const Chat: React.FC = () => {
                 }
             });
             if (refs[0].current && refs[0].current.getSessionList()) saveSessionList(ref_sessionId.current!);
-            console.log(sessionId, '11111111111');
             ref_sessionId.current = sessionId;
         }
-    }, [sessionId]);
+    }, [sessionId, doWrap]);
 
     // 模式变化监控到，然后保存数据 需要这个的原因是因为切换模式时候，还没来得及触发 sessionid变化的事件来保存就刷新掉了组件的内容
     useEffect(() => {
@@ -273,14 +233,33 @@ const Chat: React.FC = () => {
         };
     });
 
+    // 发送voteDict出去
+    const sendVoteDict = () => {
+      // 获取最新的 Dict
+      let new_session_list: sessionMesage = {};
+      refs.map((ref, index) => {
+        if(index < models?.length!) {
+          new_session_list[models![index].model_id] = ref.current.getSessionList();
+        }
+      });
+      // 这里使用model_id : dialogue_id
+      let dialogue_ids: { [key: number]: string } = {}
+      Object.keys(new_session_list).forEach(function (key) {
+        const session = new_session_list[key]
+        if(session.length >= 1) {
+          const last_dict = session[session.length - 1];
+          dialogue_ids[ key ] = last_dict['id']
+        }
+      })
+      eventBus.emit('sendVoteDict', dialogue_ids)
+    }
+
     const sseFinishCallable = () => {
-        console.log('回调函数哦', ref_ssefinishCallCount.current);
         ref_ssefinishCallCount.current = ref_ssefinishCallCount.current + 1;
         const validNum = models?.filter((model) => model.start === true)?.length ?? 0;
         if (ref_ssefinishCallCount.current == validNum) {
-            console.log('结束了哦');
-            // saveSessionList(sessionId!)
-            getSseStatus();
+            // getSseStatus();
+            sendVoteDict();
             // downloadSse(modelsr,mode,sessionIds);
             // 如果是单回复标注那么要禁用输入框
             if (mode === 'dialogue' || mode === 'model') {
@@ -297,11 +276,6 @@ const Chat: React.FC = () => {
         }
     };
 
-    const [doWrap, updateDoWrap] = useState(styles.noWrap);
-    const handleSwitchLayout = () => {
-        updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
-    };
-
     return (
         <>
             {contextHolder}
@@ -316,7 +290,7 @@ const Chat: React.FC = () => {
                                 handleSwitchLayout={handleSwitchLayout}
                             />
                         </div>
-                        <div className={styles.main} key={index + ''}>
+                        <div className={styles.main} key={index + ''} style={{width: width.toString() + 'vh'}}>
                             <div className={`${styles.chatBoxWrap} ${!model.start ? styles.pause : ''}`}>
                                 <PUYUC.ChatBox
                                     sseStopCallback={(url) => {
