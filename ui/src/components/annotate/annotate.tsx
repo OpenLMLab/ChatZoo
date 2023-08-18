@@ -159,7 +159,7 @@ const Annotate: React.FC = () => {
         const turn_id = sessionId;
         const data = {
             username: username,
-            vote_result: vote_result,
+            vote_result: JSON.stringify(vote_result),
             vote_model: model_ids,
             dialogue_id: dialogue_id,
             turn_id: turn_id,
@@ -180,7 +180,7 @@ const Annotate: React.FC = () => {
         const turn_id = null;
         const data = {
             username: username,
-            vote_result: vote_result,
+            vote_result: JSON.stringify(vote_result),
             vote_model: model_ids,
             dialogue_id: dialogueIds,
             turn_id: turn_id,

@@ -42,7 +42,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     };
 
     // 暂停某个模型的对话
-    const stopModelSse = (stopModel: ModelConfig, index: number, models: ModelConfig[]) => {
+    const stopModelSse = (index: number, models: ModelConfig[]) => {
         eventBus.emit('saveSession');
         const new_models = models.slice();
         new_models[index].start = !new_models[index].start;
@@ -51,12 +51,12 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     };
 
     // 关闭模型对话
-    const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
+    const closeModel = (index: number, models: ModelConfig[]) => {
         let new_models: ModelConfig[] = [];
         new_models = models?.filter((_, item) => item != index);
-        console.log(new_models);
+        console.log('关闭后的模型', new_models);
         setModels?.setModels(new_models);
-        console.log(models, new_models);
+        console.log('关闭后的模型数量', setModels?.models);
     };
     useEffect(() => {
         const banStop = (status: boolean) => {
@@ -69,7 +69,6 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         };
     });
     const { TextArea } = Input;
-    const { Option } = Select;
     return (
         <>
             <Modal
@@ -110,11 +109,24 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                 </div>
 
                 <div className={styles.modelConfigItem}>
-                    {Object.entries(modalConfig.generate_kwargs).map(([key, value]) => (
-                        <div key={key}>
-                            <div className={styles.tooltipTitle}>{key}</div>
-                            <Input value={value} />
-                        </div>
+                {Object.entries(modalConfig.generate_kwargs).map(([key, value]) => (
+                    <div key={key}>
+                        <div className={styles.tooltipTitle}>{key}</div>
+                        <Input
+                        defaultValue={value}
+                        onChange={(event) => {
+                            const updatedValue = event.target.value;
+                            setModalConfig((prevConfig) => ({
+                            ...prevConfig,
+                            generate_kwargs: {
+                                ...prevConfig.generate_kwargs,
+                                [key]: updatedValue,
+                            },
+                            }));
+                            console.log('修改后的配置', modalConfig)
+                        }}
+                        />
+                    </div>
                     ))}
                 </div>
             </Modal>
@@ -137,7 +149,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <Tooltip title={<span className={styles.tooltipTitle}>暂停模型对话</span>}>
                     <div
-                        onClick={() => stopModelSse(model, index, models)}
+                        onClick={() => stopModelSse(index, models)}
                         style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
                     >
                         {model.start ? (
@@ -224,7 +236,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <Tooltip title={<span className={styles.tooltipTitle}>关闭</span>}>
                     {role == 'debug' ? (
-                        <div onClick={() => closeModel(model, index, models)}>
+                        <div onClick={() => closeModel(index, models)}>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
