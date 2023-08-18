@@ -30,35 +30,37 @@ ChatZoo，一款轻量级的大模型评测工具。
 
 ## ChatZoo是什么？
 
-ChatZoo是一款轻量级大模型评测工具。作为一名大模型行业的爱好者或从业者，你可以利用ChatZoo来调试和评测各种大模型的表现。它为你提供了一个交互式的环境，让你能够与多个模型同时对话，并评估它们的响应质量、语义准确性和流畅度。
+ChatZoo是一款轻量级大模型评测工具。作为一名大模型行业的爱好者或从业者，您可以利用ChatZoo来调试和评测各种大模型的表现。它为您提供了一个交互式的环境，让您能够与多个模型同时对话，并评估它们的响应质量、语义准确性和流畅度。
+
+![Image](docs/pics/image.png)
 
 ## 特性
 
 * **轻松上手**
-  仅需一行命令即可快速启动整个服务，让你轻松上手。
+  仅需一行命令即可快速启动整个服务，让您轻松上手。
 * **界面美观**
-  ChatZoo提供一键换肤和代码渲染等功能，让你能够享受到更加个性化和舒适的体验。
+  ChatZoo提供一键换肤和代码渲染等功能，让您能够享受到更加个性化和舒适的体验。
 * **方便导出**
   会话数据支持一键下载，投票结果以图表的方式呈现，便于分析。
 * **隐私保护**
    整个系统支持本地部署，保障聊天数据的隐私安全，确保不会泄露。
 * **开源开放**
-  你可以获取源代码，并自由地添加新功能，使ChatZoo更符合你的需求。
+  您可以获取源代码，并自由地添加新功能，使ChatZoo更符合您的需求。
 
 ## 安装
 
-在安装前，你需要确保：
+在安装前，您需要确保：
 
 * Python3
 * Node.js >= 18.5.0（👉开发者）
 
-你可以直接通过`git clone`来获取整个工程文件：
+您可以直接通过`git clone`来获取整个工程文件：
 
 ```bash
 git clone https://github.com/OpenLMLab/ChatZoo.git
 ```
 
-下载完成后，你只需要在根目录下运行
+下载完成后，您只需要在根目录下运行
 
 ```bash
 pip install -r requirements.txt
@@ -70,7 +72,7 @@ pip install -r requirements.txt
 
 当您成功安装ChatZoo后，只需要在根目录下运行`python main.py --config config.py`即可拉起整个服务。
 
-在`config.py`中，你可以自行修改以设定你需要的配置，下面提供一个基础的样例：
+在`config.py`中，您可以自行修改以设定你需要的配置，下面提供一个基础的样例：
 
 ```python
 # 模型列表：界面打开时出现的模型。（最多4个模型）
@@ -138,7 +140,7 @@ ChatZoo提供三种导入模型的方式：本地模型、外部网页接入和�
 
 #### 本地模型
 
-  ChatZoo通过ChatBot类提供了一些模型的实现，你可以直接使用：
+  ChatZoo通过ChatBot类提供了一些模型的实现，您可以直接使用：
   - [MOSS](https://github.com/OpenLMLab/MOSS)
       - [moss-moon-003-sft](https://huggingface.co/fnlp/moss-moon-003-sft)
       - [moss-moon-003-sft-plugin](https://huggingface.co/fnlp/moss-moon-003-sft-plugin)
@@ -172,11 +174,11 @@ ChatZoo提供三种导入模型的方式：本地模型、外部网页接入和�
 
 ##### 添加自己的模型
 
-你也可以通过继承`ChatBot`类来添加自己的对话模型：
+您也可以通过继承`ChatBot`类来添加自己的对话模型：
 
 ###### 1. 继承 ChatBOT 类
 
-您还可以通过在 `generator/` 路径下新建一个文件，继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
+您可以通过在 `generator/` 路径下新建一个文件，继承 [ChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/chatbot.py) 来展示您自己的对话模型。而如果您的模型是基于 [🤗huggingface](https://huggingface.co/models) 中的模型实现的，那么您可以继承 [TransformersChatBOT](https://github.com/OpenLMLab/ChatZoo/blob/main/generator/transformersbot.py) 类。您需要实现以下函数或属性：
 
 - `load_tokenizer(self)`：从 `config.tokenizer_path` 中加载 `tokenizer` 的函数。如果您继承的是 `TransformersChatBOT`，那么该函数您无需重写。
 - `get_prompt(self, query)`：从聊天记录 `query` 中构造模型输入的 prompt。`query` 是一个列表，每个成员是一个字典，代表一条聊天记录。其格式为：
@@ -206,11 +208,15 @@ ChatZoo提供三种导入模型的方式：本地模型、外部网页接入和�
 
 #### 外部网页接入
 
+敬请期待...
+
 #### 预设模型
+
+敬请期待...
 
 ### 模式介绍
 
-针对不同的应用场景，ChatZoo提供两种模式：调试模式和竞技场模式。你可以在`config.py`中修改`mode`来切换不同的模式。
+针对不同的应用场景，ChatZoo提供两种模式：**调试模式**和**竞技场模式**。您可以在`config.py`中修改`mode`来切换不同的模式。
 
 #### 调试模式
 
@@ -224,7 +230,7 @@ mode = "debug"
 
 ##### 修改模型配置
 
-你可以点击某个模型上方的配置按钮，从而打开修改配置弹窗。
+您可以点击某个模型上方的配置按钮，从而打开修改配置弹窗。
 在修改完配置后，点击`保存`即可成功修改。
 
 ##### 新增模型
@@ -253,14 +259,23 @@ mode = "debug"
 mode = "arena"
 ```
 
-竞技场模式适合标注者，在这个模式下，你无法对模型进行修改，只能与模型进行会话并标注。与模型的会话也分为两种模式：**会话标注**和**单回复标注**
+竞技场模式适合标注者，在这个模式下，您无法对模型进行修改，只能与模型进行会话并标注。与模型的会话也分为两种模式：**会话标注**和**单回复标注**
 
 * **会话标注**
-在会话标注模式下，你可以自由地与大模型进行聊天，并且在任意时候点击“标注”，为你喜欢的大模型进行投票。当你标注结束后，该会话将被标记为“已标注”状态，将不能再进行标注。
+在会话标注模式下，您可以自由地与大模型进行聊天，并且在任意时候点击“标注”，为您喜欢的大模型进行投票。当您标注结束后，该会话将被标记为“已标注”状态，将不能再进行标注。
 
 * **单回复标注**
 在单回复标注模式下，每一次与大模型聊天后，都需要进行标注，才能进入下一轮对话。
 
 ### 结果分析
+
+当您完成标注后，可以通过命令
+
+```bash
+python tools/elo_score.py --config config.py
+```
+
+生成统计数据与结果分析。
+![Result](docs/pics/result.png)
 
 ## 引用我们

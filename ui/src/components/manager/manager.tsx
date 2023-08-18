@@ -142,7 +142,9 @@ function Manager() {
           "session_id": idContext?.id
         }
         // 变化了，存储或者更新 会话列表
+        console.log('保存会话列表', prevMyStateRef.current!)
         localStorage.setItem(prevMyStateRef.current!, JSON.stringify(sessionSate))
+        console.log('当前的模式', modeContext!)
         // 读取切换的模式的会话列表
         if(localStorage.getItem(modeContext!) != undefined && localStorage.getItem(modeContext!)!== null){
             const chatlist_state = JSON.parse(localStorage.getItem(modeContext!)!);
@@ -153,6 +155,7 @@ function Manager() {
             setChatList(new_chatList)
             setCurChatId(session_id)
             idContext?.setId(session_id)
+            console.log('获取的list', new_chatList)
             eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
