@@ -157,6 +157,7 @@ function Manager() {
         }else{
           addChat(modeContext!, [])
         }
+        prevMyStateRef.current = modeContext
     }}, [modeContext]);
 
     return (
