@@ -27,8 +27,6 @@ const Chat: React.FC = () => {
   const mode = useContext(ModeContext)?.mode
   const models = useContext(ModelContext)?.models;
   const setModels = useContext(ModelContext)
-  // 动态计算宽度
-  const width = 80 / models?.length!;
   //  是否暂停模型
   const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sessionMesage = {}
@@ -191,10 +189,12 @@ const Chat: React.FC = () => {
             eventBus.removeListener('sendMessage', listener);
         };
     }, []);
-  
+
+    const [ifWrap, setIfWrap] = useState(false);
     const [doWrap, updateDoWrap] = useState(styles.noWrap);
     const handleSwitchLayout = () => {
         saveSessionList(sessionId!)
+        setIfWrap(!ifWrap)
         updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
     };
 
@@ -276,12 +276,33 @@ const Chat: React.FC = () => {
         }
     };
 
+    // 动态计算宽度
+    let width = 0
+    let height = 0
+    // 横屏模式
+    console.log('是否换行', doWrap, styles.wrap)
+    if(doWrap === styles.wrap) {
+      if(models?.length === 1) {
+        width = 100
+        height = 80
+      } else if(models?.length === 2) {
+        width = 100
+        height = 40
+      } else {
+        width = 40
+        height = 40
+      }
+    } else {
+      width = 100 / models?.length!
+      height = 80
+    }
+
     return (
         <>
             {contextHolder}
             <div className={`${styles.chatwrap} ${doWrap}`}>
                 {models?.map((model: any, index: number) => (
-                    <div className={styles.chatContainer}>
+                    <div className={styles.chatContainer} style={{width: width.toString() + 'vh', height: height.toString() + 'vh'}}>
                         <div className={styles.banner}>
                             <Banner
                                 model={model}
@@ -290,7 +311,7 @@ const Chat: React.FC = () => {
                                 handleSwitchLayout={handleSwitchLayout}
                             />
                         </div>
-                        <div className={styles.main} key={index + ''} style={{width: width.toString() + 'vh'}}>
+                        <div className={styles.main} key={index + ''} >
                             <div className={`${styles.chatBoxWrap} ${!model.start ? styles.pause : ''}`}>
                                 <PUYUC.ChatBox
                                     sseStopCallback={(url) => {
