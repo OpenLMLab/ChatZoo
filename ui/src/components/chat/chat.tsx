@@ -101,7 +101,7 @@ const Chat: React.FC = () => {
 
     // 监控对话事件，在 bottom 组件调用该事件来向对话组件发送消息
     useEffect(() => {
-        const listener = (question: string, modelsr: ModelConfig[], mode: string, sessionIds: string) => {
+        const listener = (question: string, modelsr: ModelConfig[]) => {
             // 插入会话
             // 对话开始前， 禁用会话列表, 禁用切换模式, 禁用输入框输入
             eventBus.emit('banSessionList', true); // 禁用会话切换
@@ -139,7 +139,7 @@ const Chat: React.FC = () => {
             if(newModels !== undefined){
                 newModels[index] = newModelConfig
             }
-            setModels(newModccccccels)
+            setModels(newModels)
         }
         eventBus.on("modifyModels", modifyModels)
         return ()=>{
@@ -206,15 +206,12 @@ const Chat: React.FC = () => {
       eventBus.emit('sendVoteDict', dialogue_ids)
     }
 
+    let model_status = [-2, -2, -2, -2]
     const sseFinishCallable = () => {
         ref_ssefinishCallCount.current = ref_ssefinishCallCount.current + 1;
         const models = model_ref.current
-        console.log('当前的模型是', models, refs, model_ref)
-        
+        console.log('获取状态', refs[ref_ssefinishCallCount.current - 1].current.getStatus())
         const validNum = models?.filter((model) => model.start === true)?.length ?? 0;
-        const refNum = refs.filter((ref) => ref.current !== undefined && ref.current != null)
-        console.log('合法的数量', validNum, ref_ssefinishCallCount.current, refNum)
-        // ref_ssefinishCallCount.current == validNum
         if (ref_ssefinishCallCount.current == validNum || (refs[ref_ssefinishCallCount.current].current === undefined || refs[ref_ssefinishCallCount.current].current === null)) {
             sendVoteDict(models!);
             // 如果是单回复标注那么要禁用输入框

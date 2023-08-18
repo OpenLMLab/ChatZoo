@@ -102,7 +102,7 @@ model_list = [
         "devices": "3",
         # 数据类型
         "dtype": "float16",
-        # 基础模型
+        # 基础模型（仅在LoRA的情况下可以使用）
         "base_model": None,
         # Prompt（若使用ChatZoo内设模型可不指定并使用默认配置，否则会报错）
         "prompts": {
@@ -110,7 +110,7 @@ model_list = [
              "user_prompt": "问: {}\n",
              "bot_prompt": "答: {}\n"
          }
-    },
+    }
 ]
 # 用户列表
 user_list = [
@@ -179,12 +179,44 @@ ChatZoo提供三种导入模型的方式：本地模型、外部网页接入和�
       - [vicuna-13b-delta-v1.1](https://huggingface.co/lmsys/vicuna-13b-delta-v1.1)
   - [FastChat-T5](https://github.com/lm-sys/FastChat)
       - [fastchat-t5-3b-v1.0](https://huggingface.co/lmsys/fastchat-t5-3b-v1.0)
-  - [Openai](https://chat.openai.com)
-      - [chatgpt3.5](https://platform.openai.com/playground)
 
 ##### 添加自己的模型
 
-您也可以通过继承`ChatBot`类来添加自己的对话模型：
+您也可以添加自己的对话模型，以下提供两种方式：
+
+👉**优先推荐**（HuggingFace模型）
+对于HuggingFace中的模型🤗，您可以通过修改`config.py`中的部分字段来导入您需要的模型，比如您想添加`llama`模型，则可以将`config.py`的`model_list`字段修改如下：
+
+```python
+model_list = [
+    {
+        # 模型名称（参考HuggingFace中的名称，必需）
+        "model_name_or_path": "decapoda-research/llama-7b-hf",
+        # 模型昵称（给模型的自定义名称，必需且不重复）
+        "nickname": "llama",
+        # Tokenizer路径（参考HuggingFace中的名称，必需）
+        "tokenizer_path": "decapoda-research/llama-7b-hf",
+        # 生成参数（必须指定）
+        "generate_kwargs": {
+            "max_length": 2048
+        },
+        # GPU
+        "devices": "3",
+        # 数据类型
+        "dtype": "float16",
+        # 基础模型（仅在LoRA的情况下可以使用）
+        "base_model": None,
+        # Prompt（必须指定）
+        "prompts": {
+             "meta_prompt": "",
+             "user_prompt": "问: {}\n",
+             "bot_prompt": "答: {}\n"
+         }
+    }
+]
+```
+
+👉**另一种方式**（非HuggingFace模型的情况）
 
 ###### 1. 继承 ChatBOT 类
 

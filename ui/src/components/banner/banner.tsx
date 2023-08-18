@@ -57,7 +57,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     const stopModelSse = (index: number, models: ModelConfig[]) => {
         eventBus.emit('saveSession');
         const new_models = models.slice();
-        new_models[index].start = !new_models[index].start;
+        new_models[index].start = false;
         console.log(new_models);
         setModels?.setModels(new_models);
     };
@@ -148,13 +148,6 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                             }else{
                                 var updatedValue = event.target.value
                             }
-                            // setModalConfig((prevConfig) => ({
-                            // ...prevConfig,
-                            // generate_kwargs: {
-                            //     ...prevConfig.generate_kwargs,
-                            //     [key]: updatedValue,
-                            // },
-                            // }));
                             new_config.generate_kwargs[key] = updatedValue
                             console.log('修改后的配置', new_config)
                         }}
@@ -166,7 +159,9 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
             <div className={styles.typo}>{model.nickname}</div>
             <div className={styles.func}>
                 <Tooltip title={<span className={styles.tooltipTitle}>切换布局</span>}>
-                    <div onClick={handleSwitchLayout}>
+                    <div onClick={handleSwitchLayout}
+                    style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path
                                 d="M17.064 6.86705L14.2089 13.4861L7.75028 16.1836L10.5857 9.72427L17.064 6.86705Z"
@@ -233,7 +228,10 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                 </Tooltip>
                 <Tooltip title={<span className={styles.tooltipTitle}>设置</span>}>
                     {role == 'debug' ? (
-                        <div onClick={() => handleOpenModal(model)}>
+                        <div 
+                            onClick={() => handleOpenModal(model)}
+                            style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -269,7 +267,10 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <Tooltip title={<span className={styles.tooltipTitle}>关闭</span>}>
                     {role == 'debug' ? (
-                        <div onClick={() => closeModel(index, models)}>
+                        <div 
+                        onClick={() => closeModel(index, models)}
+                        style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
