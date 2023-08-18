@@ -131,21 +131,21 @@ const Chat: React.FC = () => {
         updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
     };
 
-         // 修改配置参数,会调用该函数来修改modelconfig
-         useEffect(() => {
-            const modifyModels = (newModelConfig: ModelConfig, index: number) => {
-                saveSessionList(sessionId!)
-                const newModels = models?.slice(); 
-                if(newModels !== undefined){
-                    newModels[index] = newModelConfig
-                }
-                setModels(newModels)
+    // 修改配置参数,会调用该函数来修改modelconfig
+    useEffect(() => {
+        const modifyModels = (newModelConfig: ModelConfig, index: number) => {
+            saveSessionList(sessionId!)
+            const newModels = models?.slice(); 
+            if(newModels !== undefined){
+                newModels[index] = newModelConfig
             }
-            eventBus.on("modifyModels", modifyModels)
-            return ()=>{
-            eventBus.off("modifyModels", modifyModels)
-            }
-        })
+            setModels(newModccccccels)
+        }
+        eventBus.on("modifyModels", modifyModels)
+        return ()=>{
+        eventBus.off("modifyModels", modifyModels)
+        }
+    })
     
     
 
@@ -185,9 +185,10 @@ const Chat: React.FC = () => {
     });
 
     // 发送voteDict出去
-    const sendVoteDict = () => {
+    const sendVoteDict = (models: ModelConfig[]) => {
       // 获取最新的 Dict
       let new_session_list: sessionMesage = {};
+      console.log("sendVote", models)
       refs.map((ref, index) => {
         if(index < models?.length!) {
           new_session_list[models![index].model_id] = ref.current.getSessionList();
@@ -207,11 +208,15 @@ const Chat: React.FC = () => {
 
     const sseFinishCallable = () => {
         ref_ssefinishCallCount.current = ref_ssefinishCallCount.current + 1;
-        console.log('当前的模型是', models)
+        const models = model_ref.current
+        console.log('当前的模型是', models, refs, model_ref)
+        
         const validNum = models?.filter((model) => model.start === true)?.length ?? 0;
-        console.log('合法的数量', validNum)
-        if (ref_ssefinishCallCount.current == validNum) {
-            sendVoteDict();
+        const refNum = refs.filter((ref) => ref.current !== undefined && ref.current != null)
+        console.log('合法的数量', validNum, ref_ssefinishCallCount.current, refNum)
+        // ref_ssefinishCallCount.current == validNum
+        if (ref_ssefinishCallCount.current == validNum || (refs[ref_ssefinishCallCount.current].current === undefined || refs[ref_ssefinishCallCount.current].current === null)) {
+            sendVoteDict(models!);
             // 如果是单回复标注那么要禁用输入框
             if (mode === 'dialogue' || mode === 'model') {
                 eventBus.emit('banInputEvent', false);
@@ -227,11 +232,17 @@ const Chat: React.FC = () => {
         }
     };
 
+    useEffect(()=>{
+        model_ref.current = models
+        console.log("model_ref", model_ref)
+    }, [models])
+
     // 动态计算宽度
     let width = 0
     let height = 0
     // 横屏模式
-    console.log('是否换行', doWrap, styles.wrap)
+    const model_ref = useRef(models)
+    // console.log('是否换行', doWrap, styles.wrap, models, model_ref)
     if(doWrap === styles.wrap) {
       if(models?.length === 1) {
         width = 100
@@ -266,6 +277,7 @@ const Chat: React.FC = () => {
                             <div className={`${styles.chatBoxWrap} ${!model.start ? styles.pause : ''}`}>
                                 <PUYUC.ChatBox
                                     sseStopCallback={(url) => {
+                                        console.log("ssestop", models)
                                         sseFinishCallable();
                                     }}
                                     propsSessionList={sessionList[model.model_id]}

@@ -41,7 +41,6 @@ function Home() {
         models,
         setModels,
     };
-
     return (
         <ModelContext.Provider value={modelsValues}>
             <div className={style.wrapper}>

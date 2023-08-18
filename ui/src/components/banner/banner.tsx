@@ -65,7 +65,12 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     // 关闭模型对话
     const closeModel = (index: number, models: ModelConfig[]) => {
         let new_models: ModelConfig[] = [];
-        new_models = models?.filter((_, item) => item != index);
+        console.log(index)
+        // new_models = models?.filter((_, item) => item != index);
+        for(let i=0; i<models.length; i++){
+            if(i===index) continue
+            new_models.push(models[i])
+        }
         console.log('关闭后的模型', new_models);
         setModels?.setModels(new_models);
         console.log('关闭后的模型数量', setModels?.models);
