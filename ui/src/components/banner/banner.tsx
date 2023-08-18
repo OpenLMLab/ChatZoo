@@ -72,6 +72,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
             new_models.push(models[i])
         }
         console.log('关闭后的模型', new_models);
+        eventBus.emit('saveSession')
         setModels?.setModels(new_models);
         console.log('关闭后的模型数量', setModels?.models);
     };
