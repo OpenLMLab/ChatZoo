@@ -30,6 +30,7 @@ function Home() {
     };
 
     const [models, setModels] = useState<ModelConfig[]>([]);
+    // 获取登录页面传来的数据
     const location = useLocation();
     const data = location.state;
     console.log(data);

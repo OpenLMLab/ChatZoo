@@ -157,6 +157,7 @@ const Annotate: React.FC = () => {
         const username = localStorage.getItem('username');
         const dialogue_id = null;
         const turn_id = sessionId;
+        console.log("vote session vote_model: ", JSON.stringify(vote_result))
         const data = {
             username: username,
             vote_result: JSON.stringify(vote_result),
@@ -230,9 +231,9 @@ const Annotate: React.FC = () => {
                 </Radio.Group>
                 <br />
                 或者
-                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都符合</Button>
+                <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都符合</Button>
                 或者
-                <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都不符合</Button>
+                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都不符合</Button>
             </Modal>
         </>
     );
