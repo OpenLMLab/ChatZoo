@@ -34,6 +34,18 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         true,
     );
     const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf);
+    const new_config = new ModelConfig(
+        model.model_name_or_path,
+        model.nickname,
+        model.tokenizer_path,
+        model.generate_kwargs,
+        model.device,
+        model.prompts,
+        model.url,
+        model.stream,
+        model.model_id,
+        model.start
+    )
 
     // 模型配置
     const handleOpenModal = (model_info: ModelConfig) => {
@@ -77,7 +89,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                 cancelText="取消"
                 okText="保存"
                 open={openModelConfig}
-                onOk={() => setOpenModelConfig(false)}
+                onOk={() => {setModalConfig(new_config); setOpenModelConfig(false);eventBus.emit("modifyModels", new_config, index); console.log(modalConfig)}}
                 onCancel={() => setOpenModelConfig(false)}
                 className={styles.modelConfig}
             >
@@ -86,6 +98,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                     <Select
                         defaultValue={modalConfig.stream}
                         style={{ width: 120 }}
+                        onChange={(event) =>{new_config["stream"] = event; console.log(new_config)}}
                         options={[
                             { value: false, label: 'false' },
                             { value: true, label: 'true' },
@@ -95,17 +108,23 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <div className={styles.modelConfigItem}>
                     <div className={styles.modelConfigItemInput}>meta_prompt</div>
-                    <TextArea rows={4} placeholder="meta_prompt is" maxLength={6} />
+                    <TextArea rows={4} placeholder={model.prompts.meta_prompt || "meta_prompt is"} maxLength={6} onChange={(event)=>{
+                        new_config.prompts["meta_prompt"] = event.target.value
+                    }}/>
                 </div>
 
                 <div className={styles.modelConfigItem}>
                     <div className={styles.tooltipTitle}>user_prompt</div>
-                    <TextArea rows={4} placeholder="user_prompt is" maxLength={6} />
+                    <TextArea rows={4} placeholder={model.prompts.user_prompt || "user prompt is"} maxLength={6} onChange={(event)=>{
+                        new_config.prompts["user_prompt"] = event.target.value
+                    }}/>
                 </div>
 
                 <div className={styles.modelConfigItem}>
                     <div className={styles.tooltipTitle}>bot_prompt</div>
-                    <TextArea rows={4} placeholder="bot_prompt is" maxLength={6} />
+                    <TextArea rows={4} placeholder={model.prompts.bot_prompt || "bot prompt is"} maxLength={6} onChange={(event)=>{
+                        new_config.prompts["bot_prompt"] = event.target.value
+                    }}/>
                 </div>
 
                 <div className={styles.modelConfigItem}>
@@ -115,15 +134,23 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                         <Input
                         defaultValue={value}
                         onChange={(event) => {
-                            const updatedValue = event.target.value;
-                            setModalConfig((prevConfig) => ({
-                            ...prevConfig,
-                            generate_kwargs: {
-                                ...prevConfig.generate_kwargs,
-                                [key]: updatedValue,
-                            },
-                            }));
-                            console.log('修改后的配置', modalConfig)
+                            // let updatedValue = event.target.value;
+                            if(/^\d+$/.test(event.target.value)){
+                                var updatedValue = parseInt(event.target.value)
+                            }else if(/^\d+\.\d+$/.test(event.target.value)){
+                                var updatedValue = parseFloat(event.target.value)
+                            }else{
+                                var updatedValue = event.target.value
+                            }
+                            // setModalConfig((prevConfig) => ({
+                            // ...prevConfig,
+                            // generate_kwargs: {
+                            //     ...prevConfig.generate_kwargs,
+                            //     [key]: updatedValue,
+                            // },
+                            // }));
+                            new_config.generate_kwargs[key] = updatedValue
+                            console.log('修改后的配置', new_config)
                         }}
                         />
                     </div>

@@ -26,7 +26,7 @@ const Chat: React.FC = () => {
   const ref_ssefinishCallCount = useRef(0)
   const mode = useContext(ModeContext)?.mode
   const models = useContext(ModelContext)?.models;
-  const setModels = useContext(ModelContext)
+  const setModels = useContext(ModelContext)?.setModels
   //  是否暂停模型
   const cachedSessionList = localStorage.getItem(sessionId!);
   let sessionList: sessionMesage = {}
@@ -131,6 +131,23 @@ const Chat: React.FC = () => {
         updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
     };
 
+         // 修改配置参数,会调用该函数来修改modelconfig
+         useEffect(() => {
+            const modifyModels = (newModelConfig: ModelConfig, index: number) => {
+                saveSessionList(sessionId!)
+                const newModels = models?.slice(); 
+                if(newModels !== undefined){
+                    newModels[index] = newModelConfig
+                }
+                setModels(newModels)
+            }
+            eventBus.on("modifyModels", modifyModels)
+            return ()=>{
+            eventBus.off("modifyModels", modifyModels)
+            }
+        })
+    
+    
 
     // 监控会话id变化,如果发现变化就要判断能否保存历史数据。
     useEffect(() => {
@@ -230,7 +247,7 @@ const Chat: React.FC = () => {
       width = 150 / models?.length!
       height = 80
     }
-
+    // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (
         <>
             {contextHolder}
@@ -262,7 +279,7 @@ const Chat: React.FC = () => {
                                         localStorage.getItem('permission')
                                     }
                                     ref={refs[index]}
-                                    token={JSON.stringify(model.generate_kwargs)}
+                                    token={encodeURIComponent(JSON.stringify({"generate_config": model.generate_kwargs, "stream": model.stream, "prompts": model.prompts}))}
                                     requestMessageContainerStyle={requestSessageContainerStyle}
                                     responseMessageContainerStyle={responseMessageContainerStyle}
                                     style={chatBoxStyle}
