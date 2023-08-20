@@ -1,0 +1,46 @@
+@import './var.less';
+
+// 单行省略
+.singleLine() {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+// 多行文本省略
+.ellispsis(@line) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    /* autoprefixer: off */
+    -webkit-box-orient: vertical;
+    /* autoprefixer: on */
+    -webkit-line-clamp: @line;
+}
+// 设置上边线
+.setTopLine(@c: @bgGrey) {
+    position: relative;
+    box-sizing: border-box;
+    &:after {
+        position: absolute;
+        content: '';
+        top: 0;
+        left: 0;
+        height: 1px;
+        width: 100%;
+        background: @c;
+    }
+}
+// 设置下边线
+.setBottomLine(@c: @bgGrey) {
+    position: relative;
+    box-sizing: border-box;
+    &:after {
+        position: absolute;
+        content: '';
+        bottom: 0;
+        left: 0;
+        height: 1px;
+        width: 100%;
+        background: @c;
+    }
+}

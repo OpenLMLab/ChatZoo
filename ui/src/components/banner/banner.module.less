@@ -1,0 +1,76 @@
+@import '../../styles/theme.less';
+
+.typo {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    flex: 1 0 0;
+    overflow: hidden;
+    color: var(--95-text-dark-5, rgba(255, 255, 255, 0.95));
+    font-feature-settings:
+        'clig' off,
+        'liga' off;
+    text-overflow: ellipsis;
+    font-family: PingFang SC;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.func {
+    display: flex;
+    // height: 40px;
+    padding: 10px 0px 10px 6px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 1;
+    div {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+.tooltipTitle {
+    //styleName: 正文/常规text-1-regular;
+    font-family: PingFang SC;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: left;
+}
+
+.modelConfigTile {
+    //styleName: 三级组件标题/加粗title-3-semibold;
+    font-family: PingFang SC;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: 0px;
+    text-align: left;
+}
+.modelConfig {
+    width: Fixed (450px);
+    height: Fixed (622px);
+    top: 89px;
+    border-radius: 4px;
+}
+
+.modelConfigItem {
+    margin-bottom: 10px;
+}
+
+.modelConfigItemInput {
+    width: Hug (74px);
+    height: Fixed (24px);
+    padding: 1px 0px 1px 0px;
+    gap: 4px;
+    font-family: PingFang SC;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: left;
+}

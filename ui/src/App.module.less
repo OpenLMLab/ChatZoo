@@ -1,0 +1,68 @@
+@import '@/styles/theme.less';
+
+.container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: @background-gradient;
+}
+
+.form {
+    width: 450px;
+    height: 243px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px 5%;
+}
+
+.title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    //styleName: 三级组件标题/加粗title-3-semibold;
+    font-family: PingFang SC;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: 0px;
+    text-align: left;
+}
+
+.subform {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    :global {
+        // .ant-col-8 {
+        //     max-width: 100%;
+        // }
+        .ant-form.ant-form-vertical {
+            width: 100%;
+        }
+    }
+}
+
+.label {
+    height: 30%;
+    //styleName: 正文/常规text-1-regular;
+    font-family: PingFang SC;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 21px;
+    letter-spacing: 0px;
+}
+
+.button_wrapper {
+    flex: 1;
+    align-items: right;
+}

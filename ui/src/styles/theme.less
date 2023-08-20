@@ -1,0 +1,34 @@
+@green-background-gradient: linear-gradient(117.2deg, #518673 10.6%, #41464a 90.8%);
+@green-primary: #4c8f70;
+
+@orange-background-gradient: linear-gradient(117.2deg, #828651 10.6%, #283106 90.8%);
+@orange-primary: #9a9a4c;
+
+@blue-background-gradient: linear-gradient(117.2deg, #516e86 10.6%, #412e5d 90.8%);
+@blue-primary: #598aa0;
+
+@red-background-gradient: linear-gradient(117.2deg, #865151 10.6%, #651223 90.8%);
+@red-primary: #a05959;
+
+[theme='green'] {
+    --primary: @green-primary;
+    --background-gradient: @green-background-gradient;
+}
+
+[theme='blue'] {
+    --primary: @blue-primary;
+    --background-gradient: @blue-background-gradient;
+}
+
+[theme='orange'] {
+    --primary: @orange-primary;
+    --background-gradient: @orange-background-gradient;
+}
+
+[theme='red'] {
+    --primary: @red-primary;
+    --background-gradient: @red-background-gradient;
+}
+
+@background-gradient: var(--background-gradient, @green-background-gradient);
+@primary: var(--primary, @green-primary);

@@ -1,0 +1,46 @@
+@import '@/styles/theme.less';
+
+.radio {
+    :global {
+        .ant-radio-button-wrapper {
+            color: black;
+        }
+        .ant-radio-group.ant-radio-group-outline {
+            .ant-radio-button-wrapper:first-child {
+                border-start-start-radius: 0px;
+                border-end-start-radius: 0px;
+            }
+            .ant-radio-button-wrapper:last-child {
+                border-start-end-radius: 0px;
+                border-end-end-radius: 0px;
+            }
+        }
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
+            color: @primary;
+            border-color: @primary;
+        }
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):first-child {
+            border-color: @primary;
+        }
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):last-child {
+            border-color: @primary;
+        }
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):nth-child(2) {
+            border-color: @primary;
+        }
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+            background-color: @primary;
+        }
+    }
+}
+.form {
+    margin-top: 10px;
+    :global {
+        .ant-input-borderless {
+            background-color: rgba(244, 245, 249, 1);
+        }
+        .ant-input {
+            border-radius: 0px;
+        }
+    }
+}

@@ -1,0 +1,50 @@
+@import '@/styles/theme.less';
+
+body,
+html,
+#root {
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    line-height: 21px;
+    overflow: hidden;
+}
+
+#global__message-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 72px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.ant-btn-primary {
+    background-color: @primary;
+}
+.ant-btn-default {
+    background-color: rgba(244, 245, 249, 1);
+}
+
+.ant-btn {
+    padding: 3px 24px 3px 24px;
+    border-radius: 2px;
+    gap: 10px;
+}
+.ant-btn-primary:not(:disabled):not(.ant-btn-disabled):hover {
+    background-color: @primary;
+}
+:where(.css-dev-only-do-not-override-txh9fw).ant-btn-default:not(:disabled):not(.ant-btn-disabled):active {
+    color: @primary;
+    border-color: @primary;
+}
+.ant-btn-default:not(:disabled):not(.ant-btn-disabled):hover {
+    color: @primary;
+    border-color: @primary;
+}
