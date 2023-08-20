@@ -322,3 +322,9 @@ python tools/elo_score.py --config config.py
 ![Result](docs/pics/result.png)
 
 ## 引用我们
+@misc{2023chatzoo,
+    title={ChatZoo: Chat with Models to Debug, Evaluate, and Annotate.},
+    author={OpenLMLab},
+    howpublished = {\url{https://github.com/OpenLMLab/ChatZoo}},
+    year={2023}
+}
