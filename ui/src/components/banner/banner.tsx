@@ -12,8 +12,7 @@ interface BannerProps {
     handleSwitchLayout: () => void;
 }
 
-const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayout }) => {
-    // const [doWrap, updateDoWrap] = useState(styles.noWrap);
+const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayout }) => {;
     const role = localStorage.getItem('permission');
     const [openModelConfig, setOpenModelConfig] = useState(false);
     const [stopStatus, setStopStatus] = useState(false);
@@ -35,29 +34,47 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         true,
     );
     const [modalConfig, setModalConfig] = useState<ModelConfig>(mcf);
+    const new_config = new ModelConfig(
+        model.model_name_or_path,
+        model.nickname,
+        model.tokenizer_path,
+        model.generate_kwargs,
+        model.device,
+        model.prompts,
+        model.url,
+        model.stream,
+        model.model_id,
+        model.start
+    )
 
     // 模型配置
     const handleOpenModal = (model_info: ModelConfig) => {
         setOpenModelConfig(true);
         setModalConfig(model_info);
     };
+
     // 暂停某个模型的对话
-    const stopModelSse = (stopModel: ModelConfig, index: number, models: ModelConfig[]) => {
+    const stopModelSse = (index: number, models: ModelConfig[]) => {
         eventBus.emit('saveSession');
         const new_models = models.slice();
-        new_models[index].start = !new_models[index].start;
+        new_models[index].start = false;
         console.log(new_models);
         setModels?.setModels(new_models);
     };
 
-    const closeModel = (close_Model: ModelConfig, index: number, models: ModelConfig[]) => {
-        // 传入要关闭模型的index
-        console.log('关闭模型', close_Model, index);
+    // 关闭模型对话
+    const closeModel = (index: number, models: ModelConfig[]) => {
         let new_models: ModelConfig[] = [];
-        new_models = models?.filter((_, item) => item != index);
-        console.log(new_models);
+        console.log(index)
+        // new_models = models?.filter((_, item) => item != index);
+        for(let i=0; i<models.length; i++){
+            if(i===index) continue
+            new_models.push(models[i])
+        }
+        console.log('关闭后的模型', new_models);
+        eventBus.emit('saveSession')
         setModels?.setModels(new_models);
-        console.log(models, new_models);
+        console.log('关闭后的模型数量', setModels?.models);
     };
     useEffect(() => {
         const banStop = (status: boolean) => {
@@ -70,7 +87,6 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         };
     });
     const { TextArea } = Input;
-    const { Option } = Select;
     return (
         <>
             <Modal
@@ -79,7 +95,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                 cancelText="取消"
                 okText="保存"
                 open={openModelConfig}
-                onOk={() => setOpenModelConfig(false)}
+                onOk={() => {setModalConfig(new_config); setOpenModelConfig(false);eventBus.emit("modifyModels", new_config, index); console.log(modalConfig)}}
                 onCancel={() => setOpenModelConfig(false)}
                 className={styles.modelConfig}
             >
@@ -88,6 +104,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                     <Select
                         defaultValue={modalConfig.stream}
                         style={{ width: 120 }}
+                        onChange={(event) =>{new_config["stream"] = event; console.log(new_config)}}
                         options={[
                             { value: false, label: 'false' },
                             { value: true, label: 'true' },
@@ -97,32 +114,54 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <div className={styles.modelConfigItem}>
                     <div className={styles.modelConfigItemInput}>meta_prompt</div>
-                    <TextArea rows={4} placeholder="meta_prompt is" maxLength={6} />
+                    <TextArea rows={4} placeholder={model.prompts.meta_prompt || "meta_prompt is"} maxLength={6} onChange={(event)=>{
+                        new_config.prompts["meta_prompt"] = event.target.value
+                    }}/>
                 </div>
 
                 <div className={styles.modelConfigItem}>
                     <div className={styles.tooltipTitle}>user_prompt</div>
-                    <TextArea rows={4} placeholder="user_prompt is" maxLength={6} />
+                    <TextArea rows={4} placeholder={model.prompts.user_prompt || "user prompt is"} maxLength={6} onChange={(event)=>{
+                        new_config.prompts["user_prompt"] = event.target.value
+                    }}/>
                 </div>
 
                 <div className={styles.modelConfigItem}>
                     <div className={styles.tooltipTitle}>bot_prompt</div>
-                    <TextArea rows={4} placeholder="bot_prompt is" maxLength={6} />
+                    <TextArea rows={4} placeholder={model.prompts.bot_prompt || "bot prompt is"} maxLength={6} onChange={(event)=>{
+                        new_config.prompts["bot_prompt"] = event.target.value
+                    }}/>
                 </div>
 
                 <div className={styles.modelConfigItem}>
-                    {Object.entries(modalConfig.generate_kwargs).map(([key, value]) => (
-                        <div key={key}>
-                            <div className={styles.tooltipTitle}>{key}</div>
-                            <Input value={value} />
-                        </div>
+                {Object.entries(modalConfig.generate_kwargs).map(([key, value]) => (
+                    <div key={key}>
+                        <div className={styles.tooltipTitle}>{key}</div>
+                        <Input
+                        defaultValue={value}
+                        onChange={(event) => {
+                            // let updatedValue = event.target.value;
+                            if(/^\d+$/.test(event.target.value)){
+                                var updatedValue = parseInt(event.target.value)
+                            }else if(/^\d+\.\d+$/.test(event.target.value)){
+                                var updatedValue = parseFloat(event.target.value)
+                            }else{
+                                var updatedValue = event.target.value
+                            }
+                            new_config.generate_kwargs[key] = updatedValue
+                            console.log('修改后的配置', new_config)
+                        }}
+                        />
+                    </div>
                     ))}
                 </div>
             </Modal>
             <div className={styles.typo}>{model.nickname}</div>
             <div className={styles.func}>
                 <Tooltip title={<span className={styles.tooltipTitle}>切换布局</span>}>
-                    <div onClick={handleSwitchLayout}>
+                    <div onClick={handleSwitchLayout}
+                    style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path
                                 d="M17.064 6.86705L14.2089 13.4861L7.75028 16.1836L10.5857 9.72427L17.064 6.86705Z"
@@ -138,7 +177,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <Tooltip title={<span className={styles.tooltipTitle}>暂停模型对话</span>}>
                     <div
-                        onClick={() => stopModelSse(model, index, models)}
+                        onClick={() => stopModelSse(index, models)}
                         style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
                     >
                         {model.start ? (
@@ -189,7 +228,10 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                 </Tooltip>
                 <Tooltip title={<span className={styles.tooltipTitle}>设置</span>}>
                     {role == 'debug' ? (
-                        <div onClick={() => handleOpenModal(model)}>
+                        <div 
+                            onClick={() => handleOpenModal(model)}
+                            style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
@@ -225,7 +267,10 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
                 <Tooltip title={<span className={styles.tooltipTitle}>关闭</span>}>
                     {role == 'debug' ? (
-                        <div onClick={() => closeModel(model, index, models)}>
+                        <div 
+                        onClick={() => closeModel(index, models)}
+                        style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
