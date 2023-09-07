@@ -55,10 +55,12 @@ function Manager() {
         const new_models = models?.slice()
         for (let i = 0; i < numOfModel!; i++) {
             if (models){
+                // @ts-ignore
                 new_models[i].start = stopSession[new_models[i].model_id]
             }
         }
-        setModels(new_models)
+        // @ts-ignore
+        setModels(new_models!)
     }
 
     // 添加会话
@@ -97,10 +99,12 @@ function Manager() {
         const new_models = models?.slice()
         for (let i = 0; i < numOfModel!; i++) {
             if (models){
+                // @ts-ignore
                 new_models[i].start = stopSession[new_models[i].model_id]
             }
         }
-        setModels(new_models)
+        // @ts-ignore
+        setModels(new_models!)
     };
 
     // 删除会话
@@ -135,11 +139,13 @@ function Manager() {
         const new_models = models?.slice()
         for (let i = 0; i < numOfModel!; i++) {
             if (models){
+                // @ts-ignore
                 new_models[i].start = stopSession[new_models[i].model_id]
             }
         }
         console.log("切换会话", new_models, stopSession)
-        setModels(new_models)
+        // @ts-ignore
+        setModels(new_models!)
     };
 
     // 监听单会话标注是否完成， 完成将sessionList的标注置为可对话

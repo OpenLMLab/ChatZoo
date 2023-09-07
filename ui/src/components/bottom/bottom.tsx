@@ -120,7 +120,7 @@ const Bottom: React.FC = () => {
     if(models?.length==1) {
         width = 155
     }else if(models?.length! > 1){
-        width = 200 + parseInt(models?.length!) * 2
+        width = 200 + models?.length! * 2
     }
     return (
         <ConfigProvider

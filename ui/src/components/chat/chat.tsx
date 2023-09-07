@@ -142,6 +142,7 @@ const Chat: React.FC = () => {
             if(newModels !== undefined){
                 newModels[index] = newModelConfig
             }
+            // @ts-ignore
             setModels(newModels)
         }
         eventBus.on("modifyModels", modifyModels)
@@ -203,6 +204,7 @@ const Chat: React.FC = () => {
         const session = new_session_list[key]
         if(session.length >= 1) {
           const last_dict = session[session.length - 1];
+          // @ts-ignore
           dialogue_ids[ key ] = last_dict['id']
         }
       })

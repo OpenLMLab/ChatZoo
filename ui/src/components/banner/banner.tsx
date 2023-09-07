@@ -166,8 +166,11 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                             }else if(/^\d+\.\d+$/.test(event.target.value)){
                                 var updatedValue = parseFloat(event.target.value)
                             }else{
+                                // 忽略检查
+                                // @ts-ignore 
                                 var updatedValue = event.target.value
                             }
+                            // @ts-ignore
                             new_config.generate_kwargs[key] = updatedValue
                             console.log('修改后的配置', new_config)
                         }}
