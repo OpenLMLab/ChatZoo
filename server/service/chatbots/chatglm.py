@@ -12,7 +12,7 @@ class ChatGLMBOT(TransformersChatBotBase):
         super(ChatGLMBOT, self).__init__(config)
         self.prompts = {
             "meta_prompt": "",
-            "user_prompt": "[Round {}]\n答：{}\n",
+            "user_prompt": "答：{}\n",
             "bot_prompt": "问：{}\n"
         }
         

@@ -34,13 +34,18 @@ async def chat(request: Request):
     if 'debug' in role:
         # debug 成员，此时headers 的 Authorization 为 generate_kwargs
         # 鉴权信息
-        debug_generate_config = json.loads(request.headers["Authorization"])
+        # print(request.headers["Authorization"])
+        model_info = json.loads(unquote(request.headers["Authorization"]))
+        debug_generate_config = model_info['generate_config']
+        # debug_generate_config = json.loads(request.headers["Authorization"])
         history_dialogue, is_query = query_debugmessage_by_turnid_genconfig(turn_id=turn_id, nickname=config.model_info["nickname"])
         dialogue_instance = create_debugmessage(username=username, nickname=config.model_info['nickname'], bot_reponse=None,
                                                 turn_id=turn_id, user_query=prompt, generate_kwargs=debug_generate_config,
                                                 model_name_or_path=config.model_info["model_name_or_path"])
-        logger.info(f"对话 role: {role}")
+        logger.info(f"对话 role: {role} debug_generate_config: {debug_generate_config}")
+        
     else:
+        # config.model_info["generate_config_id"] = None
         if config.model_info["generate_config_id"] is None:
             result = create_generate_config(nickname=config.model_info["nickname"],
                                 generate_kwargs=config.model_info["generate_kwargs"],
@@ -50,8 +55,7 @@ async def chat(request: Request):
             config.model_info["generate_config_id"] = result.generate_config_id
             logger.info(f"对话， 插入生成配置参数! generate_config_id: {result.generate_config_id}")
         # 查询历史的 query
-        # print(turn_id, username, config.model_info)
-        logger.info(f"对话 role: {role}")
+        logger.info(f"对话 role: {role}", config.model_info["generate_config_id"])
         history_dialogue, is_query = query_dialogue_by_turnid_username(turn_id=turn_id, username=username, 
                                                                         generate_config_id=config.model_info["generate_config_id"])
 
@@ -66,7 +70,11 @@ async def chat(request: Request):
     input_query.append({"role":"HUMAN", "content": prompt})
     query = {"query": input_query, "params": config.model_info["generate_kwargs"], "is_stream": config.model_info["stream"]}
     if 'debug' in role:
-        query['params'] = debug_generate_config
+        if "stream" in model_info:
+            query["is_stream"] = model_info.pop("stream")
+        query['params'] = debug_generate_config   
+        logger.info(f"更新的参数: {debug_generate_config}")
+        logger.info(f"查询输入: {query}", )
     else:
         query['params'] = config.model_info["generate_kwargs"]
         

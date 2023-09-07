@@ -32,7 +32,9 @@ def update_vote(vote_id: int, username: int, vote_model: dict, vote_result: str,
     
 def read_all_votes():
     try:
-        return Vote.select()
+        results = Vote.select()
+        vote_dicts = [model_to_dict(result) for result in results]
+        return vote_dicts
     except:
         traceback.print_exc()
         return None

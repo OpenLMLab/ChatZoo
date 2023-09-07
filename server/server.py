@@ -68,7 +68,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["*"],
+    allow_origins=["*"],
     allow_origin_regex='http.*?://.*',
     allow_credentials=True,
     allow_methods=["*"],
@@ -92,6 +92,8 @@ def init_params():
     )
     if model_config.type is not None:
         bot = choose_bot(config=model_config)
+        if args.prompts is None:
+            args.prompts = bot.prompts or {"meta_prompt": "", "user_prompt": "", "bot_prompt": ""}
     else:
         bot = TransformersChatBotBase(config=model_config)
         bot.set_input_prompt(args.prompts)
@@ -103,7 +105,7 @@ def init_params():
         raise ValueError("generate_kwargs couldnot be None, you should initial generate_kwargs!")
     
     # 如果为 arena 模式， 则将配置文件的模型配置参数写入数据库中
-    generate_config_id = str(int(time.time()))
+    generate_config_id = hash(args.model_name_or_path+args.nickname+json.dumps(gen_config))
     if args.mode == "arena":
         generate_config_instance = create_generate_config(nickname=args.nickname, generate_kwargs=gen_config, model_name_or_path=args.model_name_or_path,
                             prompts=args.prompts)
