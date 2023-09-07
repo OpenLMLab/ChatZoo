@@ -115,6 +115,13 @@ const Bottom: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
+    // 计算视图长度
+    let width = 0
+    if(models?.length==1) {
+        width = 155
+    }else if(models?.length! > 1){
+        width = 200 + parseInt(models?.length!) * 2
+    }
     return (
         <ConfigProvider
             theme={{
@@ -131,7 +138,7 @@ const Bottom: React.FC = () => {
             }}
         >
             {contextHolder}
-            <div className={style.wrapper}>
+            <div className={style.wrapper} style={{width: width.toString() + "vh"}}>
                 <div className={style.input}>
                     <Input
                         placeholder="介绍一下你自己吧"

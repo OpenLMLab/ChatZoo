@@ -29,8 +29,10 @@ const Chat: React.FC = () => {
   const setModels = useContext(ModelContext)?.setModels
   //  是否暂停模型
   const cachedSessionList = localStorage.getItem(sessionId!);
+  console.log("CacheSession", cachedSessionList, sessionId)
   let sessionList: sessionMesage = {}
   sessionList = JSON.parse(cachedSessionList!)
+
   // 判断是否有一条消息
   const keys = Object.keys(sessionList)
   if (keys.length != 0) {
@@ -127,7 +129,8 @@ const Chat: React.FC = () => {
     const [doWrap, updateDoWrap] = useState(styles.noWrap);
     const handleSwitchLayout = () => {
         saveSessionList(sessionId!)
-        setIfWrap(!ifWrap)
+        // setIfWrap(!ifWrap)
+        console.log("切换模式", width)
         updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
     };
 
@@ -248,12 +251,18 @@ const Chat: React.FC = () => {
         width = 100
         height = 40
       } else {
-        width = 40
+        width = 80
         height = 40
       }
     } else {
-      width = 150 / models?.length!
-      height = 80
+        if(models?.length==1) {
+            width = 155 / models?.length!
+            height = 80
+        }else{
+            width = 200 / models?.length!
+            height = 80
+        }
+      
     }
     // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (

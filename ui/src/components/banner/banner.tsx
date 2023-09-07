@@ -4,6 +4,7 @@ import eventBus from '@/utils/eventBus';
 import { ModelContext } from '@/utils/modelcontext';
 import { Input, Modal, Select, Tooltip } from 'antd';
 import { useContext, useEffect, useState } from 'react';
+import { IdContext } from '@/utils/idcontexts';
 
 interface BannerProps {
     model: ModelConfig;
@@ -12,11 +13,17 @@ interface BannerProps {
     handleSwitchLayout: () => void;
 }
 
+// 会话关闭模型的信息
+interface stopSession {
+    [key: string]: boolean;
+}
+
 const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayout }) => {;
     const role = localStorage.getItem('permission');
     const [openModelConfig, setOpenModelConfig] = useState(false);
     const [stopStatus, setStopStatus] = useState(false);
     const setModels = useContext(ModelContext);
+    const sessionId = useContext(IdContext)?.id
     const mcf = new ModelConfig(
         'fnlp/moss-moon-003-sft',
         'moss_01',
@@ -46,6 +53,12 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         model.model_id,
         model.start
     )
+    const cahcheSessionStopInfo = localStorage.getItem(sessionId!+"stop")
+    let sessionStopInfo: stopSession = {}
+    if(cahcheSessionStopInfo != null)
+        sessionStopInfo = JSON.parse(cahcheSessionStopInfo!)
+    console.log("sessionStopInfo", sessionStopInfo)
+    const [stopSessionState, setStopSessionState] = useState(sessionStopInfo[models[index].model_id])
 
     // 模型配置
     const handleOpenModal = (model_info: ModelConfig) => {
@@ -55,11 +68,18 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
     // 暂停某个模型的对话
     const stopModelSse = (index: number, models: ModelConfig[]) => {
+        sessionStopInfo[models[index].model_id] = false
+        console.log(sessionStopInfo, "stopSession")
+        // setStopSessionState(true)
+        localStorage.setItem(sessionId!+"stop", JSON.stringify(sessionStopInfo))
+
         eventBus.emit('saveSession');
         const new_models = models.slice();
         new_models[index].start = false;
         console.log(new_models);
         setModels?.setModels(new_models);
+
+        
     };
 
     // 关闭模型对话
@@ -180,7 +200,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                         onClick={() => stopModelSse(index, models)}
                         style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
                     >
-                        {model.start ? (
+                        {models[index].start ? (
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="24"
