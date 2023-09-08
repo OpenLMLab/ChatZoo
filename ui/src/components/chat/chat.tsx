@@ -131,6 +131,12 @@ const Chat: React.FC = () => {
         updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
     };
 
+    useEffect(()=>{
+        if(models?.length <= 2){
+            updateDoWrap(styles.noWrap)
+        }
+    }, [models])
+
     // 修改配置参数,会调用该函数来修改modelconfig
     useEffect(() => {
         const modifyModels = (newModelConfig: ModelConfig, index: number) => {
@@ -248,7 +254,7 @@ const Chat: React.FC = () => {
         width = 100
         height = 40
       } else {
-        width = 40
+        width = 35
         height = 40
       }
     } else {
@@ -259,13 +265,14 @@ const Chat: React.FC = () => {
         }
         height = 80
     }
+
     // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (
         <>
             {contextHolder}
             <div className={`${styles.chatwrap} ${doWrap}`}>
                 {models?.map((model: any, index: number) => (
-                    <div className={styles.chatContainer} style={{width: width.toString() + 'vw', height: height.toString() + 'vh'}}>
+                    <div className={styles.chatContainer} style={{height: height.toString()+"vh"}}>
                         <div className={styles.banner}>
                             <Banner
                                 model={model}

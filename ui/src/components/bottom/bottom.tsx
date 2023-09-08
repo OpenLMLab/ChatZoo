@@ -139,7 +139,7 @@ const Bottom: React.FC = () => {
             }}
         >
             {contextHolder}
-            <div className={style.wrapper} style={{width: width.toString()+ "vw"}}>
+            <div className={style.wrapper}>
                 <div className={style.input}>
                     <Input
                         placeholder="介绍一下你自己吧"
