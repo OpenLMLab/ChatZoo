@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const host = (window as any).VITE_REACT_APP_HOST || '10.140.1.169';
+const host = (window as any).VITE_REACT_APP_HOST || '10.140.0.138';
 const port = (window as any).VITE_REACT_APP_PORT || '1024';
 
 // 后端返回的数据
@@ -19,8 +19,8 @@ interface MyRequest<U> extends AxiosRequestConfig {
 class Http {
     timeout: number = 7000;
     //   baseURL: string = `http://${import.meta.env.VITE_REACT_APP_HOST}:${import.meta.env.VITE_REACT_APP_PORT}`;
-    // baseURL: string = `http://${host}:${port}`;
-    baseURL: string = 'http://10.140.1.169:1024'
+    baseURL: string = `http://${host}:${port}`;
+    // baseURL: string = 'http://10.140.1.169:1024'
 
     forbidMsgWhiteList: string[] = []; // 不做统一错误提示的接口白名单
 
