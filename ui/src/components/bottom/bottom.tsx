@@ -115,6 +115,15 @@ const Bottom: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
+    // 处理禁止输入后点击输入框
+    const handleClickInputAfterBanner = () => {
+        console.log("点击我！", isInput)
+        if(isInput){
+            // 开启禁用点击，输入开启标注模式
+            eventBus.emit("openVoteModal")
+        }
+    }
+
     // 计算视图长度
     let width = 0
     if(models?.length == 1){
@@ -140,7 +149,7 @@ const Bottom: React.FC = () => {
         >
             {contextHolder}
             <div className={style.wrapper}>
-                <div className={style.input}>
+                <div className={style.input} onMouseDown={()=> handleClickInputAfterBanner()}>
                     <Input
                         placeholder="介绍一下你自己吧"
                         bordered={false}
@@ -155,6 +164,7 @@ const Bottom: React.FC = () => {
                             icon={<SendOutlined />}
                             style={{ color: 'rgba(255, 255, 255, 0.85)' }}
                             ghost
+                            onClick={()=>handleEnter()}
                         ></Button>
                     </div>
                 </div>

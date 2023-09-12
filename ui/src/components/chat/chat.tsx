@@ -132,6 +132,7 @@ const Chat: React.FC = () => {
     };
 
     useEffect(()=>{
+        // @ts-ignore 忽略该行的类型检查或警告
         if(models?.length <= 2){
             updateDoWrap(styles.noWrap)
         }
@@ -272,7 +273,7 @@ const Chat: React.FC = () => {
             {contextHolder}
             <div className={`${styles.chatwrap} ${doWrap}`}>
                 {models?.map((model: any, index: number) => (
-                    <div className={styles.chatContainer} style={{height: height.toString()+"vh"}}>
+                    <div className={styles.chatContainer}>
                         <div className={styles.banner}>
                             <Banner
                                 model={model}
