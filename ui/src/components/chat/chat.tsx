@@ -252,8 +252,12 @@ const Chat: React.FC = () => {
         height = 40
       }
     } else {
-      width = 150 / models?.length!
-      height = 80
+        if(models?.length == 1){
+            width = 77
+        }else{
+            width = 100 / models?.length!
+        }
+        height = 80
     }
     // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (
@@ -261,7 +265,7 @@ const Chat: React.FC = () => {
             {contextHolder}
             <div className={`${styles.chatwrap} ${doWrap}`}>
                 {models?.map((model: any, index: number) => (
-                    <div className={styles.chatContainer} style={{width: width.toString() + 'vh', height: height.toString() + 'vh'}}>
+                    <div className={styles.chatContainer} style={{width: width.toString() + 'vw', height: height.toString() + 'vh'}}>
                         <div className={styles.banner}>
                             <Banner
                                 model={model}
