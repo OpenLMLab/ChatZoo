@@ -149,7 +149,10 @@ const Bottom: React.FC = () => {
         >
             {contextHolder}
             <div className={style.wrapper}>
-                <div className={style.input} onMouseDown={()=> handleClickInputAfterBanner()}>
+                <div className={style.input}>
+                    <div className={style.inputCover} onMouseDown={()=> handleClickInputAfterBanner()}
+                        style={!isInput?{display: "none"} : {}}
+                    ></div>
                     <Input
                         placeholder="介绍一下你自己吧"
                         bordered={false}
