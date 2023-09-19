@@ -51,7 +51,7 @@ user_list = [
     {"username": "hjw_debug", "role": "debug", "session_mark_num": 100, "single_mark_num": 100},
     {"username": "gtl_debug", "role": "debug", "session_mark_num": 100, "single_mark_num": 100}
 ]
-host_name = "10.140.0.138" # 默认为 localhost
+host_name = "10.140.60.11" # 默认为 localhost
 port = 8080 # 前端使用的端口
 mode = "debug"# 启动的模式
 is_stream = True # 是否开启流式输出
