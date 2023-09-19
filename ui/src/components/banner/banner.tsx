@@ -1,6 +1,7 @@
 import styles from '@/components/banner/banner.module.less';
 import ModelConfig from '@/components/model/model';
 import eventBus from '@/utils/eventBus';
+import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { Input, Modal, Select, Tooltip } from 'antd';
 import { useContext, useEffect, useState } from 'react';
@@ -12,11 +13,17 @@ interface BannerProps {
     handleSwitchLayout: () => void;
 }
 
+// 会话关闭模型的信息
+interface stopSession {
+    [key: string]: boolean;
+}
+
 const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayout }) => {;
     const role = localStorage.getItem('permission');
     const [openModelConfig, setOpenModelConfig] = useState(false);
     const [stopStatus, setStopStatus] = useState(false);
     const setModels = useContext(ModelContext);
+    const sessionId = useContext(IdContext)?.id
     const mcf = new ModelConfig(
         'fnlp/moss-moon-003-sft',
         'moss_01',
@@ -46,6 +53,15 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         model.model_id,
         model.start
     )
+    // 暂停会话的数据更新加载
+    const cahcheSessionStopInfo = localStorage.getItem(sessionId!+"stop")
+    let sessionStopInfo: stopSession = {}
+    if(cahcheSessionStopInfo != null)
+        sessionStopInfo = JSON.parse(cahcheSessionStopInfo!)
+    console.log("sessionStopInfo", sessionStopInfo)
+    const [stopSessionState, setStopSessionState] = useState(sessionStopInfo[models[index].model_id])
+
+
 
     // 模型配置
     const handleOpenModal = (model_info: ModelConfig) => {
@@ -55,6 +71,11 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
 
     // 暂停某个模型的对话
     const stopModelSse = (index: number, models: ModelConfig[]) => {
+        sessionStopInfo[models[index].model_id] = false
+        console.log(sessionStopInfo, "stopSession")
+        // setStopSessionState(true)
+        localStorage.setItem(sessionId!+"stop", JSON.stringify(sessionStopInfo))
+
         eventBus.emit('saveSession');
         const new_models = models.slice();
         new_models[index].start = false;
@@ -87,6 +108,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
         };
     });
     const { TextArea } = Input;
+
     return (
         <>
             <Modal
@@ -158,9 +180,10 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
             </Modal>
             <div className={styles.typo}>{model.nickname}</div>
             <div className={styles.func}>
-                <Tooltip title={<span className={styles.tooltipTitle}>切换布局</span>}>
+                <Tooltip title={<span className={styles.tooltipTitle} >切换布局</span>}>
                     <div onClick={handleSwitchLayout}
-                    style={stopStatus ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                    style={{...(stopStatus ? { pointerEvents: 'none', opacity: 0.5 ,} : {}),
+                     ...(models.length <= 2 ? {display: "none"}: {})}}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path

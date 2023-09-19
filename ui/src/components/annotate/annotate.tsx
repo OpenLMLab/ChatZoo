@@ -43,20 +43,20 @@ const Annotate: React.FC = () => {
         [key: string]: string;
       }
       
-      function mergeDicts(dict1: Dict, dict2: Dict): Dict {
-        const mergedDict: Dict = {};
-      
-        for (const key1 in dict1) {
-          const value1 = dict1[key1];
-      
-          if (dict2.hasOwnProperty(value1)) {
-            const value2 = dict2[value1];
-            mergedDict[key1] = value2;
-          }
+    function mergeDicts(dict1: Dict, dict2: Dict): Dict {
+    const mergedDict: Dict = {};
+    
+    for (const key1 in dict1) {
+        const value1 = dict1[key1];
+    
+        if (dict2.hasOwnProperty(value1)) {
+        const value2 = dict2[value1];
+        mergedDict[key1] = value2;
         }
-      
-        return mergedDict;
-      }
+    }
+    
+    return mergedDict;
+    }
     
     // 监听是否禁用标注，主要用于debug成员
     useEffect(() => {
@@ -151,7 +151,7 @@ const Annotate: React.FC = () => {
     } else {
         vote_result = getVoteResult(value, model_ids);
     }
-
+    console.log("投票结果", vote_result)
     // 投票功能
     const vote = () => {
         const username = localStorage.getItem('username');
@@ -166,13 +166,26 @@ const Annotate: React.FC = () => {
             turn_id: turn_id,
         };
         console.log('投票的信息', data)
-        http.post<any, any>('/vote?', { data: data })
+
+        // 区别 debug 投票还是 arena 模式投票， 根据 permission 来判别
+        const permission = localStorage.getItem('permission')
+        if(permission == "debug"){
+            http.post<any, any>('/vote?', { data: data })
             .then(() => {
                 openNotificationWithIcon('success', '标注成功！')
             })
             .catch(() => {
                 openNotificationWithIcon('error', '标注失败！')
             });
+        }else{
+            http.post<any, any>('/vote?', { data: data })
+            .then(() => {
+                openNotificationWithIcon('success', '标注成功！')
+            })
+            .catch(() => {
+                openNotificationWithIcon('error', '标注失败！')
+            });
+        }
     };
 
     // 会话标注完成：
@@ -187,13 +200,26 @@ const Annotate: React.FC = () => {
             turn_id: turn_id,
         };
         console.log('投票的信息', data)
-        http.post<any, any>('/vote?', { data: data })
+        // 区别 debug 投票还是 arena 模式投票， 根据 permission 来判别
+        const permission = localStorage.getItem('permission')
+        if(permission == "debug"){
+            http.post<any, any>('/vote?', { data: data })
             .then(() => {
                 openNotificationWithIcon('success', '标注成功！')
             })
             .catch(() => {
                 openNotificationWithIcon('error', '标注失败！')
             });
+        }else{
+            http.post<any, any>('/vote?', { data: data })
+            .then(() => {
+                openNotificationWithIcon('success', '标注成功！')
+            })
+            .catch(() => {
+                openNotificationWithIcon('error', '标注失败！')
+            });
+        }
+        
     };
 
     // 通知提醒框
@@ -205,6 +231,16 @@ const Annotate: React.FC = () => {
             description: ''
         })
     }
+
+    // 监控 bottom组件的输入框点击事件
+    useEffect(()=>{
+        const openVote = ()=>{
+            showModal()
+        }
+        return ()=>{
+            eventBus.on("openVoteModal", openVote)
+        }
+    })
 
     return (
         <>
