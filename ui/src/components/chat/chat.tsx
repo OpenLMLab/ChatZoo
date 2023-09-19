@@ -29,6 +29,7 @@ const Chat: React.FC = () => {
   const setModels = useContext(ModelContext)?.setModels
   //  是否暂停模型
   const cachedSessionList = localStorage.getItem(sessionId!);
+  console.log("cachedSession", cachedSessionList, models)
   let sessionList: sessionMesage = {}
   sessionList = JSON.parse(cachedSessionList!)
   // 判断是否有一条消息
@@ -59,11 +60,18 @@ const Chat: React.FC = () => {
     //处理数据，以便于保存
     const saveSessionList = (session_ids: string) => {
         let new_session_list: sessionMesage = {};
+        // @ts-ignore
+        const model_ids = JSON.parse(localStorage.getItem(session_ids+"model_sequeue"))
         refs.map((ref, index) => {
-            if (index < models?.length!) {
-                new_session_list[models![index].model_id] = ref.current.getSessionList();
+            if (index < model_ids?.length!) {
+                new_session_list[model_ids[index]] = ref.current.getSessionList();
             }
         });
+        // refs.map((ref, index) => {
+        //     if (index < models?.length!) {
+        //         new_session_list[models![index].model_id] = ref.current.getSessionList();
+        //     }
+        // });
         Object.keys(new_session_list).forEach(function (key) {
             let session = new_session_list[key];
             if (session.length - 1 >= 0) {
@@ -79,13 +87,20 @@ const Chat: React.FC = () => {
             new_session_list[key] = session;
         });
         sessionList = new_session_list;
-        if (models != null)
-            models.forEach((model) => {
-                if (!(model.model_id in sessionList)) {
+        if (model_ids != null)
+            model_ids.forEach((model_id: string) => {
+                if (!(model_id in sessionList)) {
                     // 如果不存在就要初始化一个
-                    sessionList[model.model_id] = [];
+                    sessionList[model_id] = [];
                 }
             });
+        // if (models != null)
+        //     models.forEach((model) => {
+        //         if (!(model.model_id in sessionList)) {
+        //             // 如果不存在就要初始化一个
+        //             sessionList[model.model_id] = [];
+        //         }
+        //     });
         localStorage.setItem(session_ids, JSON.stringify(new_session_list));
     };
 
@@ -146,6 +161,7 @@ const Chat: React.FC = () => {
             if(newModels !== undefined){
                 newModels[index] = newModelConfig
             }
+            // @ts-ignore
             setModels(newModels)
         }
         eventBus.on("modifyModels", modifyModels)
@@ -207,6 +223,7 @@ const Chat: React.FC = () => {
         const session = new_session_list[key]
         if(session.length >= 1) {
           const last_dict = session[session.length - 1];
+          // @ts-ignore
           dialogue_ids[ key ] = last_dict['id']
         }
       })
@@ -266,6 +283,7 @@ const Chat: React.FC = () => {
         }
         height = 80
     }
+    console.log("sessionList Log", sessionList)
 
     // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (

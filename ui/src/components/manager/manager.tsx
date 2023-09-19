@@ -6,6 +6,8 @@ import { ModelContext } from '@/utils/modelcontext';
 import { ModeContext } from '@/utils/contexts';
 import { sessionMesage } from '@/utils/sessionInterface';
 import eventBus from '@/utils/eventBus';
+import { mode } from 'crypto-js';
+import ModelConfig from '../model/model';
 
 // 拓展后的会话Item
 interface ChatItem extends IChatItem {
@@ -50,6 +52,13 @@ function Manager() {
     if (localStorage.getItem(idContext?.id!) == undefined || null) {
         localStorage.setItem(idContext?.id!, JSON.stringify(initSession));
         localStorage.setItem(idContext?.id!+"stop", JSON.stringify(initStopSession));
+        
+        // 保存当前会话的模型顺序信息
+        const model_ids: string[] = []
+        models?.forEach((model: ModelConfig)=>{
+            model_ids.push(model.model_id)
+        })
+        localStorage.setItem(idContext?.id+"model_sequeue", JSON.stringify(model_ids))
 
         // 将暂停的信息更新到models中
         const new_models = models?.slice()
@@ -97,12 +106,22 @@ function Manager() {
         localStorage.setItem(newItem.id+"stop", JSON.stringify(stopSessionMsg));
         // 暂停情况
         const new_models = models?.slice()
+        new_models?.sort(()=> Math.random() - 0.5)  // 使用随机排序函数对数组进行排序
+
         for (let i = 0; i < numOfModel!; i++) {
             if (models){
                 // @ts-ignore
                 new_models[i].start = stopSessionMsg[new_models[i].model_id]
             }
         }
+
+        // 保存当前会话的模型顺序信息
+        const model_ids: string[] = []
+        new_models?.forEach((model: ModelConfig)=>{
+            model_ids.push(model.model_id)
+        })
+        localStorage.setItem(newItem.id+"model_sequeue", JSON.stringify(model_ids))
+
         // @ts-ignore
         setModels(new_models!)
     };
@@ -135,9 +154,23 @@ function Manager() {
             eventBus.emit('banVote', !chatList[index]['notAnnotated']);
         }
 
+        // 加载当前会话的模型顺序然后更改模型的顺序
+        const model_sequeue = JSON.parse(localStorage.getItem(id+"model_sequeue")!)
+        const new_models: ModelConfig[] = [];
+        for(let i=0; i<numOfModel!; i++){
+            for(let j=0; j<numOfModel!; j++){
+                // @ts-ignore
+                if(models[j].model_id == model_sequeue[i]){
+                    // @ts-ignore
+                    new_models.push(models[j])
+                    break
+                }
+            }
+        }
+        console.log("new_models1", new_models, model_sequeue)
         // 加载暂停模型
         const stopSession = JSON.parse(localStorage.getItem(id+"stop")!)
-        const new_models = models?.slice()
+        // const new_models = models?.slice()
         for (let i = 0; i < numOfModel!; i++) {
             if (models){
                 // @ts-ignore
@@ -145,6 +178,7 @@ function Manager() {
             }
         }
         console.log("切换会话", new_models, stopSession)
+
         // @ts-ignore
         setModels(new_models!)
     };

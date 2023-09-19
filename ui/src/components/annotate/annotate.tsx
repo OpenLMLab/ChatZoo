@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Button, Modal, Radio, RadioChangeEvent, message, notification } from 'antd';
+import { Button, Modal, Radio, RadioChangeEvent, message, notification, Space } from 'antd';
 import { IdContext } from '@/utils/idcontexts';
 import { ModelContext } from '@/utils/modelcontext';
 import { ModeContext } from '@/utils/contexts';
@@ -34,8 +34,10 @@ const Annotate: React.FC = () => {
       }
     const model_ids: { [key: string]: any } = {};
     models?.forEach((model) => {
-        const hashid = createHash(JSON.stringify(model.generate_kwargs))
-        model_ids[model.nickname + hashid] = model.model_id;
+        // 加上哈希后缀
+        // const hashid = createHash(JSON.stringify(model.generate_kwargs))
+        // model_ids[model.nickname + hashid] = model.model_id;
+        model_ids[model.nickname] = model.model_id;
     });
     const [value, setValue] = useState('default');
     // 合并字典
@@ -110,6 +112,15 @@ const Annotate: React.FC = () => {
 
     // 单选情况下
     const onChange = (e: RadioChangeEvent) => {
+        console.log("radio: ", e)
+        // if(e.target.value == "都符合"){
+        //     allEqual()
+        // }else if(e.target.value == "都不符合"){
+        //     allDis()
+        // }
+        // else{
+        //     setValue(e.target.value);
+        // }
         setValue(e.target.value);
     };
     const allDis = () => {
@@ -144,13 +155,20 @@ const Annotate: React.FC = () => {
 
     // 投票结果
     let vote_result: string[] = [];
-    if (isDis) {
+    if (value == "都不符合") {
         vote_result = [];
-    } else if (isEqual) {
+    } else if (value == "都符合") {
         vote_result = Object.keys(model_ids);
     } else {
         vote_result = getVoteResult(value, model_ids);
     }
+    // if (isDis) {
+    //     vote_result = [];
+    // } else if (isEqual) {
+    //     vote_result = Object.keys(model_ids);
+    // } else {
+    //     vote_result = getVoteResult(value, model_ids);
+    // }
     console.log("投票结果", vote_result)
     // 投票功能
     const vote = () => {
@@ -237,11 +255,12 @@ const Annotate: React.FC = () => {
         const openVote = ()=>{
             showModal()
         }
+        eventBus.on("openVoteModal", openVote)
         return ()=>{
-            eventBus.on("openVoteModal", openVote)
+            eventBus.off("openVoteModal", openVote)
         }
     })
-
+    console.log(value, model_ids)
     return (
         <>
             {notificationHolder}
@@ -259,17 +278,23 @@ const Annotate: React.FC = () => {
             >
                 请选择任意符合预期的模型
                 <br />
-                <Radio.Group onChange={onChange} value={value} disabled={isDis || isEqual}>
+                {/* <Radio.Group onChange={onChange} value={value} disabled={isDis || isEqual}> */}
+                <Radio.Group onChange={onChange} value={value}>
+                    <Space direction="vertical">
                     {Object.keys(model_ids).map((key) => {
                         const id = model_ids[key];
+                        // console.log("radio id: ", id)
                         return <Radio value={id}>{key}</Radio>;
                     })}
+                    <Radio value={"都符合"}>都符合</Radio>
+                    <Radio value={"都不符合"}>都不符合</Radio>
+                    </Space>
                 </Radio.Group>
-                <br />
+                {/* <br />
                 或者
                 <Button onClick={allEqual} type={isEqual ? 'primary':'default'}>都符合</Button>
                 或者
-                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都不符合</Button>
+                <Button onClick={allDis} type={isDis? 'primary': 'default'}>都不符合</Button> */}
             </Modal>
         </>
     );
