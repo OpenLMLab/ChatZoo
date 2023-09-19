@@ -13,6 +13,11 @@ interface ChatItem extends IChatItem {
     mode: string;
 }
 
+// 会话关闭模型的信息
+interface stopSession {
+    [key: string]: boolean;
+}
+
 /**
  * 至少保持开启一个会话。
  */
@@ -21,6 +26,7 @@ function Manager() {
     const modeContext = useContext(ModeContext)?.mode;
     const idContext = useContext(IdContext);
     const models = useContext(ModelContext)?.models;
+    const setModels = useContext(ModelContext)?.setModels
     // 会话是否禁用的开关
     const [banSession, setBanSession] = useState(false);
     const [curChatId, setCurChatId] = useState<string>(idContext?.id!)
@@ -33,12 +39,28 @@ function Manager() {
     const prevMyStateRef = useRef(modeContext);
     const numOfModel = models?.length;
     const initSession: sessionMesage = {};
+    const initStopSession: stopSession = {}  // 初始化每个对话的暂停模型信息
     for (let i = 0; i < numOfModel!; i++) {
-        if (models) initSession[models[i].model_id] = [];
+        if (models){
+            initSession[models[i].model_id] = [];
+            initStopSession[models[i].model_id] = true;
+        }
     }
     /**TODO：防止溢出 */
     if (localStorage.getItem(idContext?.id!) == undefined || null) {
         localStorage.setItem(idContext?.id!, JSON.stringify(initSession));
+        localStorage.setItem(idContext?.id!+"stop", JSON.stringify(initStopSession));
+
+        // 将暂停的信息更新到models中
+        const new_models = models?.slice()
+        for (let i = 0; i < numOfModel!; i++) {
+            if (models){
+                // @ts-ignore
+                new_models[i].start = initStopSession[new_models[i].model_id]
+            }
+        }
+        // @ts-ignore
+        setModels(new_models!)
     }
 
     // 添加会话
@@ -61,10 +83,28 @@ function Manager() {
         /**初始化缓存 */
         const numOfModel = models?.length;
         const initSession: sessionMesage = {};
+        const stopSessionMsg: stopSession = {}
         for (let i = 0; i < numOfModel!; i++) {
-            if (models) initSession[models[i].model_id] = [];
+            if (models){
+                initSession[models[i].model_id] = [];
+                stopSessionMsg[models[i].model_id] = true;
+            }
         }
         localStorage.setItem(newItem.id, JSON.stringify(initSession));
+
+        // 暂停对话的信息
+        console.log("新增会话", stopSessionMsg)
+        localStorage.setItem(newItem.id+"stop", JSON.stringify(stopSessionMsg));
+        // 暂停情况
+        const new_models = models?.slice()
+        for (let i = 0; i < numOfModel!; i++) {
+            if (models){
+                // @ts-ignore
+                new_models[i].start = stopSessionMsg[new_models[i].model_id]
+            }
+        }
+        // @ts-ignore
+        setModels(new_models!)
     };
 
     // 删除会话
@@ -94,6 +134,19 @@ function Manager() {
         if (modeContext === 'dialogue') {
             eventBus.emit('banVote', !chatList[index]['notAnnotated']);
         }
+
+        // 加载暂停模型
+        const stopSession = JSON.parse(localStorage.getItem(id+"stop")!)
+        const new_models = models?.slice()
+        for (let i = 0; i < numOfModel!; i++) {
+            if (models){
+                // @ts-ignore
+                new_models[i].start = stopSession[new_models[i].model_id]
+            }
+        }
+        console.log("切换会话", new_models, stopSession)
+        // @ts-ignore
+        setModels(new_models!)
     };
 
     // 监听单会话标注是否完成， 完成将sessionList的标注置为可对话

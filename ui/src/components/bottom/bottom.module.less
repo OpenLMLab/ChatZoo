@@ -28,7 +28,20 @@
     justify-content: flex-end;
     align-items: center;
     gap: 10px;
+    position: relative;
 }
+
+.input-cover {
+    position: absolute;
+    // background-color: red;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    cursor: pointer;
+}
+
 .icon {
     object-fit: cover; /* 让图标填充整个区域并保持其宽高比 */
     background: transparent;
@@ -41,6 +54,9 @@
     // max-height: 52px;
     display: flex;
     align-items: center;
+    // margin-left: 3rem;
+    // margin-right: 3rem;
+    margin: 0 2rem;
 }
 
 .popoverTitle {

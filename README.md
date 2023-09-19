@@ -1,3 +1,7 @@
+<p align="center" width="100%">
+    <img src="docs/pics/logo.png" alt="ChatZoo" style=" min-width: 300px; display: block; margin: auto;">
+</p>
+
 # ChatZoo
 
 ChatZoo，一款轻量级的大模型评测工具。
