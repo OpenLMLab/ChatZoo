@@ -13,6 +13,8 @@ import ModelConfig from '../model/model';
 interface ChatItem extends IChatItem {
     notAnnotated: boolean;
     mode: string;
+    // 当前对话是否需要开始投票
+    beginVote: boolean 
 }
 
 // 会话关闭模型的信息
@@ -36,7 +38,8 @@ function Manager() {
         id: idContext?.id!,
         name: '新会话' + Date.now().toString(),
         notAnnotated: true,
-        mode: modeContext!
+        mode: modeContext!,
+        beginVote: false
     }])
     const prevMyStateRef = useRef(modeContext);
     const numOfModel = models?.length;
@@ -61,15 +64,15 @@ function Manager() {
         localStorage.setItem(idContext?.id+"model_sequeue", JSON.stringify(model_ids))
 
         // 将暂停的信息更新到models中
-        const new_models = models?.slice()
-        for (let i = 0; i < numOfModel!; i++) {
-            if (models){
-                // @ts-ignore
-                new_models[i].start = initStopSession[new_models[i].model_id]
-            }
-        }
-        // @ts-ignore
-        setModels(new_models!)
+        // const new_models = models?.slice()
+        // for (let i = 0; i < numOfModel!; i++) {
+        //     if (models){
+        //         // @ts-ignore
+        //         new_models[i].start = initStopSession[new_models[i].model_id]
+        //     }
+        // }
+        // // @ts-ignore
+        // setModels(new_models!)
     }
 
     // 添加会话
@@ -80,6 +83,7 @@ function Manager() {
             name: '新会话' + Date.now().toString(),
             notAnnotated: notAnnotated,
             mode: modecontext,
+            beginVote: false
         };
         const newList = chatList.slice(); // 复制数组
         newList.unshift(newItem); // 向数组开头添加元素
@@ -100,6 +104,9 @@ function Manager() {
             }
         }
         localStorage.setItem(newItem.id, JSON.stringify(initSession));
+
+        // 关闭annotate组件的标注按钮，因为新建后对话是空的
+        eventBus.emit("detectChatBegin", false)
 
         // 暂停对话的信息
         console.log("新增会话", stopSessionMsg)
@@ -153,6 +160,8 @@ function Manager() {
         if (modeContext === 'dialogue') {
             eventBus.emit('banVote', !chatList[index]['notAnnotated']);
         }
+        // 判断当前对话是否能标注
+        eventBus.emit("detectChatBegin", chatList[index]['beginVote'])
 
         // 加载当前会话的模型顺序然后更改模型的顺序
         const model_sequeue = JSON.parse(localStorage.getItem(id+"model_sequeue")!)
@@ -190,9 +199,16 @@ function Manager() {
             chatList[index].notAnnotated = finishBtn;
             setChatList(chatList);
         };
+        const CurSessionBeginVote = (finishBtn: boolean, id: string) =>{
+            const index = chatList.findIndex((x) => x.id === id);
+            chatList[index].beginVote = finishBtn;
+            setChatList(chatList);
+        }
         eventBus.on('annotateSession', CurSessionAnnatote);
+        eventBus.on('beginVoteSession', CurSessionBeginVote)
         return () => {
             eventBus.off('annotateSession', CurSessionAnnatote);
+            eventBus.off('beginVoteSession', CurSessionBeginVote)
         };
     });
 

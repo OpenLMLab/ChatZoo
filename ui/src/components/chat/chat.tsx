@@ -105,6 +105,8 @@ const Chat: React.FC = () => {
     };
 
     const startSse = (question: string, new_models: ModelConfig[]) => {
+        // 判断当前对话是否开始过的事件，用于bottom的标注按钮是否能开启的检测事件
+        eventBus.emit("detectChatBegin", true)
         // 开始会话前先保存
         refs.map((ref, index) => {
             if (index < new_models?.length && new_models[index].start) {
@@ -169,8 +171,6 @@ const Chat: React.FC = () => {
         eventBus.off("modifyModels", modifyModels)
         }
     })
-    
-    
 
     // 监控会话id变化,如果发现变化就要判断能否保存历史数据。
     useEffect(() => {
@@ -250,6 +250,7 @@ const Chat: React.FC = () => {
             eventBus.emit('banVote', false); // 开启标注
             eventBus.emit('banStop', false);
             ref_ssefinishCallCount.current = 0;
+            eventBus.emit('beginVoteSession', true, sessionId) // 当前对话完，需要将manager的标注设置为true
         }
     };
 
@@ -284,6 +285,9 @@ const Chat: React.FC = () => {
         height = 80
     }
     console.log("sessionList Log", sessionList)
+
+    // 获取当前对话的模式，以便于展示页面上交谈的模型
+    const modeName = localStorage.getItem('permission')
 
     // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (
@@ -323,7 +327,7 @@ const Chat: React.FC = () => {
                                     responseMessageContainerStyle={responseMessageContainerStyle}
                                     style={chatBoxStyle}
                                     userAvatar = {<>{localStorage.getItem('username')}</>}
-                                    modelAvatar = {<>{model.nickname}</>}
+                                    modelAvatar = {<>{modeName == 'debug' ? model.nickname: 'Model_'+ String.fromCharCode(index+65)}</>}
                                 />
                             </div>
                         </div>

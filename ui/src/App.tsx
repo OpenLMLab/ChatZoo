@@ -60,6 +60,11 @@ function App() {
                 if (res.data.data.role == 'debug') {
                     eventBus.emit('banVote', true);
                 }
+                http.get<string, any>("/get_label_prompt").then((res)=>{
+                    const label_prompts = res.data.data
+                    console.log(label_prompts, "自定义的标签或者默认的标注标签")
+                    localStorage.setItem("label_prompt", JSON.stringify(label_prompts))
+                })
                 http.get<string, any>('/get_model_list').then((res) => {
                     let new_model: ModelConfig[] = [];
                     const url_len = res.data.data.length;
