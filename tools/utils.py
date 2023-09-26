@@ -279,8 +279,12 @@ def get_user_mark_num(vote_list):
         turn_id_len=('turn_id', lambda x: x.notna().sum())
     ).reset_index()
     return grouped
-    # grouped_single = df_single.groupby('username').size().reset_index(name='dialogue_count')
-    # grouped_overall = df_overall.groupby('username').size().reset_index(name='overall_count')
-    # df = grouped_single.merge(grouped_overall[['username', 'overall_count']], on='username', how='left').fillna(0)
-    # return df
-    
+
+def check_nickname_unique(model_list: list):
+    nickname_list = []
+    for model_dict in model_list:
+        nickname_list.append(model_dict['nickname'])
+    if len(set(nickname_list)) == len(nickname_list):
+        return True
+    else:
+        return False

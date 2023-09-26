@@ -14,3 +14,5 @@ class Vote(BaseModel):
     created_time = DateTimeField(default=datetime.datetime.now)
     dialogue_id = JSONField(null=True)
     turn_id = JSONField(null=True)
+    # 保存模型的展示顺序
+    vote_model_sequeue = CharField()

@@ -30,20 +30,20 @@ model_list = [
         #      "bot_prompt": "Assistant: {}\n"
         #  }
     },
-    {
-        "model_name_or_path": "THUDM/chatglm-6b",
-        "nickname": "chatglm2",
-        "tokenizer_path": "THUDM/chatglm-6b",
-        "generate_kwargs": {
-            "max_length": 2048, "num_beams": 1, "do_sample": True,
-            "top_p": 0.9, "top_k": 1, "temperature": 0.95,
-            "repetition_penalty": 1.02
-        },
-        "devices": "2", 
-        "dtype": "float16",
-        "base_model": None,
-        "port": 8083, # 若不指定则采用默认的配置参数
-    },
+    # {
+    #     "model_name_or_path": "THUDM/chatglm-6b",
+    #     "nickname": "chatglm2",
+    #     "tokenizer_path": "THUDM/chatglm-6b",
+    #     "generate_kwargs": {
+    #         "max_length": 2048, "num_beams": 1, "do_sample": True,
+    #         "top_p": 0.9, "top_k": 1, "temperature": 0.95,
+    #         "repetition_penalty": 1.02
+    #     },
+    #     "devices": "2", 
+    #     "dtype": "float16",
+    #     "base_model": None,
+    #     "port": 8083, # 若不指定则采用默认的配置参数
+    # },
 ]
 user_list = [
     {"username": "hjw", "role": "annotate", "session_mark_num": 100, "single_mark_num": 100},
@@ -51,9 +51,12 @@ user_list = [
     {"username": "hjw_debug", "role": "debug", "session_mark_num": 100, "single_mark_num": 100},
     {"username": "gtl_debug", "role": "debug", "session_mark_num": 100, "single_mark_num": 100}
 ]
-host_name = "10.140.60.11" # 默认为 localhost
+# 标注标签的名字
+# label_prompt = ["harmful", "difficulty", "likert"]
+
+host_name = "10.140.60.12" # 默认为 localhost
 port = 8080 # 前端使用的端口
-mode = "debug"# 启动的模式
+mode = "arena"# 启动的模式
 is_stream = True # 是否开启流式输出
 
 database_dtype = "sqlite" 

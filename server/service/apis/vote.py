@@ -12,9 +12,10 @@ def vote_model(vote_msg: dict):
     vote_model = vote_msg.get("vote_model")
     dialogue_id = vote_msg.get("dialogue_id")
     turn_id = vote_msg.get("turn_id")
+    vote_model_sequeue = vote_msg.get("model_sequeue")
     
     vote_instance = create_vote(username=username, vote_model=vote_model, vote_result=vote_result, dialogue_id=dialogue_id,
-                           turn_id=turn_id)
+                           turn_id=turn_id, vote_model_sequeue=vote_model_sequeue)
     if vote_instance:
         return {"code": 200, "response": "ok", "data": vote_instance}
     else:

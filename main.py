@@ -8,7 +8,7 @@ from loguru import logger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from tools.utils import find_free_port, run_subprocess_server, run_suprocess_ui
+from tools.utils import find_free_port, run_subprocess_server, run_suprocess_ui, check_nickname_unique
 
 from server.service.database.crud.user_crud import adjust_username_in_user
 from server.service.database.crud.user_crud import insert_many_users, insert_or_update_user
@@ -45,6 +45,14 @@ main_host = config_module.host_name
 main_port = find_free_port([])
 # logger.add(sink="console")   # 配置日志输出到控制台
 sys_mode = config_module.mode
+
+# 检查模型的 nickname 不能一样
+if not check_nickname_unique(model_list=model_list):
+    raise ValueError(f"请保证所有模型的 nickname 都一致")
+
+# 检查模型的个数，如果定义了 label_prompt， 那么就不能超过3个
+if len(model_list) > 5:
+    raise ValueError(f"if you set `label_prompt`, model_list could not larger than 2")
 
 # 在程序退出前终止所有子进程
 def terminate_subprocesses(subprocesses):
@@ -174,14 +182,31 @@ def vote_model(vote_msg: dict):
     vote_model = vote_msg.get("vote_model")
     dialogue_id = vote_msg.get("dialogue_id")
     turn_id = vote_msg.get("turn_id")
+    vote_model_sequeue = vote_msg.get("model_sequeue")
     logger.info(f"投票：username: {username} vote_model: {vote_model} vote_result: {vote_result} dialogue_id: {dialogue_id} turn_id: {turn_id}")
     vote_instance = create_vote(username=username, vote_model=vote_model, vote_result=vote_result, dialogue_id=dialogue_id,
-                           turn_id=turn_id)
+                           turn_id=turn_id, vote_model_sequeue=vote_model_sequeue)
     if vote_instance:
         return {"code": 200, "response": "ok", "data": vote_instance}
     else:
         return {"code": 400, "response": "sql error!"}
 
+
+@app.get("/get_label_prompt")
+def get_label_prompt():
+    global config_module
+    try:
+        # 自定义的 label, 若只有一个模型，那么模板为原本的label；若是两个模型，则是 A label B 和 B label A的对称结构
+        label_prompt = {"data": config_module.label_prompt, "user_prompt": True}
+    except:
+        # nickname 为 label
+        if config_module.mode == 'arena':
+            label_prompt = [f"Model_{chr(ord('A')+item)}" for item in range(len(config_module.model_list))]
+        else:
+            label_prompt = [item["nickname"] for item in config_module.model_list]
+        label_prompt.extend(["都不符合", "都符合"])
+        label_prompt = {"data": label_prompt, "user_prompt": False}
+    return {"data": label_prompt, "code": 200, "response": "ok"}
 
 # 关闭进程
 @app.on_event("shutdown")
