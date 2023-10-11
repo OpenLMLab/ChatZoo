@@ -114,8 +114,9 @@ async def startup_event():
     for model in model_list:
         if 'port' not  in model:
             model['port'] = find_free_port(used_port)
+            used_port.append(model['port'])
             
-    
+
     for idx, model_info in enumerate(model_list):
         # print("**" * 10 + f"启动后端服务{idx}" +"**" * 10)
         # print(f"nickname: {model_info['nickname']}")
@@ -167,6 +168,9 @@ async def login_by_username(username):
         # 在 debug 模式下， 非 debug 用户应该没法登录
         if 'debug' in sys_mode and 'debug' not in query.role:
             return {"code": 403, "data": None, "msg": "Debug模式, 标注用户无法登录"}
+        # 在 arena 模式下， debug 用户无法登录
+        if 'arena' in sys_mode and 'annotate' not in query.role:
+            return {"code": 403, "data": None, "msg": "Arena模式, debug用户无法登录"}
             
         return {"code": 200, "data": {"role": query.role,
                                       "username": query.username, "session_mark_num": query.session_mark_num,

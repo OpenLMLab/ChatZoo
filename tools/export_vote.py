@@ -15,4 +15,5 @@ spec.loader.exec_module(config_module)
 # 初始化数据库
 db = initial_database(database_path=config_module.database_path,db_type=config_module.database_dtype)
 all_vote_list = read_all_votes()
-print(all_vote_list)
+for vote_info in all_vote_list:
+    print(vote_info)
