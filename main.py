@@ -212,6 +212,17 @@ def get_label_prompt():
         label_prompt = {"data": label_prompt, "user_prompt": False}
     return {"data": label_prompt, "code": 200, "response": "ok"}
 
+
+# 获取自定义的关键词
+@app.get("/get_keywords")
+def get_keywords():
+    global config_module
+    try:
+        keywords = config_module.keywords
+    except:
+        keywords = []
+    return {"data": keywords, "code": 200, "response": "ok"}
+
 # 关闭进程
 @app.on_event("shutdown")
 async def shutdown_event():
