@@ -68,7 +68,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8080"],
     allow_origin_regex='http.*?://.*',
     allow_credentials=True,
     allow_methods=["*"],
@@ -105,7 +105,7 @@ def init_params():
         raise ValueError("generate_kwargs couldnot be None, you should initial generate_kwargs!")
     
     # 如果为 arena 模式， 则将配置文件的模型配置参数写入数据库中
-    generate_config_id = hash(args.model_name_or_path+args.nickname+json.dumps(gen_config))
+    generate_config_id = hash((str(gen_config),args.model_name_or_path, str(args.prompts), args.tokenizer_path, args.port,  time.ctime(time.time())))
     if args.mode == "arena":
         generate_config_instance = create_generate_config(nickname=args.nickname, generate_kwargs=gen_config, model_name_or_path=args.model_name_or_path,
                             prompts=args.prompts)

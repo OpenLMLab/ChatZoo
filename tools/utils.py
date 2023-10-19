@@ -11,6 +11,7 @@ def find_free_port(used_port: list):
     # 获取当前正在使用的端口号列表
     used_ports = [conn.laddr.port for conn in psutil.net_connections()]
     used_ports.extend(used_port)
+    print(used_port)
     
     # 遍历端口号范围，找到未被使用的端口
     for port in range(1024, 65536):
@@ -279,8 +280,12 @@ def get_user_mark_num(vote_list):
         turn_id_len=('turn_id', lambda x: x.notna().sum())
     ).reset_index()
     return grouped
-    # grouped_single = df_single.groupby('username').size().reset_index(name='dialogue_count')
-    # grouped_overall = df_overall.groupby('username').size().reset_index(name='overall_count')
-    # df = grouped_single.merge(grouped_overall[['username', 'overall_count']], on='username', how='left').fillna(0)
-    # return df
-    
+
+def check_nickname_unique(model_list: list):
+    nickname_list = []
+    for model_dict in model_list:
+        nickname_list.append(model_dict['nickname'])
+    if len(set(nickname_list)) == len(nickname_list):
+        return True
+    else:
+        return False

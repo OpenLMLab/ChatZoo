@@ -101,7 +101,7 @@ class ModelConfig:
                 )
                 self.dtype = torch.float32
 
-
+    
     def __repr__(self) -> str:
 
         width = os.get_terminal_size().columns // 2 * 2

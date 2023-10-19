@@ -18,9 +18,6 @@ class TransformersChatBotBase(ChatBotBase):
     @property
     def model_cls(self):
         return AutoModelForCausalLM
-        raise NotImplementedError(
-            "Every model should set its own model class."
-        )
     
     def get_generation_setting(self):
         return self.generation_setting

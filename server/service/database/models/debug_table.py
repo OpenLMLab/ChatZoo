@@ -14,3 +14,6 @@ class DebugMessage(BaseModel):
     create_time = DateTimeField(default=datetime.datetime.now)
     model_name_or_path = CharField(max_length=100)
     turn_id = CharField()
+    # 投票数据，支持空值
+    vote_model = JSONField(null=True)
+    vote_result = CharField(max_length=100, null=True)

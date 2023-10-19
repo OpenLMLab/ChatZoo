@@ -5,9 +5,10 @@ from playhouse.shortcuts import model_to_dict
 from ..models.vote import Vote
 
 
-def create_vote(username: str, vote_model: dict, vote_result: str, dialogue_id, turn_id):
+def create_vote(username: str, vote_model: dict, vote_result: str, dialogue_id, turn_id, vote_model_sequeue):
     try:
-        item =  Vote.create(username=username, vote_model=vote_model, vote_result=vote_result, dialogue_id=dialogue_id, turn_id=turn_id)
+        item =  Vote.create(username=username, vote_model=vote_model, vote_result=vote_result,
+                            dialogue_id=dialogue_id, turn_id=turn_id, vote_model_sequeue=vote_model_sequeue)
         return model_to_dict(item)
     except:
         traceback.print_exc()
@@ -21,10 +22,10 @@ def delete_vote_by_vote_id(vote_id: int):
         traceback.print_exc()
         return False
 
-def update_vote(vote_id: int, username: int, vote_model: dict, vote_result: str, dialogue_id: bool):
+def update_vote(vote_id: int, username: int, vote_model: dict, vote_result: str, dialogue_id: bool, vote_model_squeue):
     try:
         Vote.update(username=username, vote_model=vote_model, vote_result=vote_result,
-                    dialogue_id=dialogue_id).where(Vote.vote_id == vote_id)
+                    dialogue_id=dialogue_id, vote_model_squeue=vote_model_squeue).where(Vote.vote_id == vote_id)
         return True
     except:
         traceback.print_exc()
