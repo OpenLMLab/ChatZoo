@@ -52,7 +52,7 @@ function Manager() {
         }
     }
     /**TODO：防止溢出 */
-    if (localStorage.getItem(idContext?.id!) == undefined || null) {
+    if (localStorage.getItem(idContext?.id!) == undefined || localStorage.getItem(idContext?.id!) == null) {
         localStorage.setItem(idContext?.id!, JSON.stringify(initSession));
         localStorage.setItem(idContext?.id!+"stop", JSON.stringify(initStopSession));
         
@@ -189,7 +189,7 @@ function Manager() {
         console.log("切换会话", new_models, stopSession)
 
         // @ts-ignore
-        setModels(new_models!)
+        setModels(new_models!)    
     };
 
     // 监听单会话标注是否完成， 完成将sessionList的标注置为可对话
@@ -227,12 +227,17 @@ function Manager() {
     useEffect(()=> {
       const editChat = (newName: string, id: string) => {
         const index = chatList.findIndex(x => x.id === id)
-        if(index > -1)
-            chatList[index].name = newName
+        if(index > -1){
+            if(chatList[index].name.indexOf("新会话") >= 0){
+                chatList[index].name = newName
+                setChatList(chatList)
+            }       
+        }
+            
       }
       eventBus.on('editChat', editChat)
       return () => {
-        eventBus.removeListener('editChat', editChat)
+        eventBus.off('editChat', editChat)
       }
     })
 
@@ -245,20 +250,20 @@ function Manager() {
           "session_id": idContext?.id
         }
         // 变化了，存储或者更新 会话列表
-        console.log('保存会话列表', prevMyStateRef.current!)
+        console.log('保存会话列表', prevMyStateRef.current!, idContext?.id)
         localStorage.setItem(prevMyStateRef.current!, JSON.stringify(sessionSate))
         console.log('当前的模式', modeContext!)
-        // 读取切换的模式的会话列表
+        // 读取切换的模式的会话列表*
         if(localStorage.getItem(modeContext!) != undefined && localStorage.getItem(modeContext!)!== null){
             const chatlist_state = JSON.parse(localStorage.getItem(modeContext!)!);
             const new_chatList: ChatItem[] = chatlist_state["chatlist"]
             const session_id = chatlist_state["session_id"]
             // 切换模式时候判断是否开启对话框
             const index = new_chatList.findIndex(x => x.id === session_id)
+            idContext?.setId(session_id)
             setChatList(new_chatList)
             setCurChatId(session_id)
-            idContext?.setId(session_id)
-            console.log('获取的list', new_chatList)
+            console.log('获取的list', new_chatList, index, session_id)
             eventBus.emit("banInputEvent", !new_chatList[index]['notAnnotated'])
         }else{
           addChat(modeContext!, [])
@@ -274,6 +279,10 @@ function Manager() {
                 addCallback={() => addChat(modeContext!, chatList)}
                 deleteCallback={deleteChat}
                 selectCallback={selectChat}
+                ellipsis={1}
+                addTip={"创建新会话"}
+                maxCountAddTip={"会话数量达到上限"}
+                maxChatCount={10}
             />
         </div>
     );

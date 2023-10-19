@@ -57,6 +57,7 @@ function App() {
                 localStorage.clear();
                 localStorage.setItem('permission', res.data.data.role);
                 localStorage.setItem('username', res.data.data.username);
+                localStorage.setItem('sys_mode', res.data.data.sys_mode)
                 if (res.data.data.role == 'debug') {
                     eventBus.emit('banVote', true);
                 }
@@ -65,6 +66,13 @@ function App() {
                     console.log(label_prompts, "自定义的标签或者默认的标注标签")
                     localStorage.setItem("label_prompt", JSON.stringify(label_prompts))
                 })
+                // 获取关键词然后存储到localStorage
+                // http.get<string, any>("/get_keywords").then((res)=>{
+                //     const kw =res.data.data
+                //     console.log(kw, "加载自定义的关键词")
+                //     localStorage.setItem("kws", JSON.stringify(kw))
+                // })
+
                 http.get<string, any>('/get_model_list').then((res) => {
                     let new_model: ModelConfig[] = [];
                     const url_len = res.data.data.length;

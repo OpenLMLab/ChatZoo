@@ -1,0 +1,40 @@
+.annotateBorder,
+.annotateModel {
+    display: flex;
+    flex-direction: column;
+    border: 0.5px grey;
+    border-radius: 5px;
+    margin: 0.7rem;
+    justify-content: space-around;
+    padding: 0.5rem;
+    width: max-content;
+}
+
+.annotateText {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: large;
+}
+
+.annotateBorder {
+    // background-color: #d2d7c9;
+}
+
+.annotateModel {
+    // background-color: #bddbce;
+}
+.annotateWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+:global {
+    .ant-modal-content {
+        width: fit-content;
+    }
+    .ant-space {
+        height: 100%;
+        justify-content: space-between;
+    }
+}

@@ -69,6 +69,7 @@ const Bottom: React.FC = () => {
         if (inputValue === null || inputValue === undefined || inputValue.trim().length === 0) {
             error('不能发送空消息！')
         } else {
+            eventBus.emit('editChat', inputValue, sessionId)
             eventBus.emit('sendMessage', inputValue, models, mode, sessionId);
             setInputValue('');
         }

@@ -58,7 +58,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     let sessionStopInfo: stopSession = {}
     if(cahcheSessionStopInfo != null)
         sessionStopInfo = JSON.parse(cahcheSessionStopInfo!)
-    console.log("sessionStopInfo", sessionStopInfo)
+    // console.log("sessionStopInfo", sessionStopInfo)
     const [stopSessionState, setStopSessionState] = useState(sessionStopInfo[models[index].model_id])
 
 

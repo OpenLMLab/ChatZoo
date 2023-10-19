@@ -29,7 +29,7 @@ const Chat: React.FC = () => {
   const setModels = useContext(ModelContext)?.setModels
   //  是否暂停模型
   const cachedSessionList = localStorage.getItem(sessionId!);
-  console.log("cachedSession", cachedSessionList, models)
+//   console.log("cachedSession", cachedSessionList, models)
   let sessionList: sessionMesage = {}
   sessionList = JSON.parse(cachedSessionList!)
   // 判断是否有一条消息
@@ -37,7 +37,7 @@ const Chat: React.FC = () => {
   if (keys.length != 0) {
     if (sessionList[keys[0]][0]) {
       const firstMsg = sessionList[keys[0]][0]['question']
-      eventBus.emit('editChat', firstMsg, sessionId)
+    //   eventBus.emit('editChat', firstMsg, sessionId)
     }
   }
 
@@ -251,6 +251,11 @@ const Chat: React.FC = () => {
             eventBus.emit('banStop', false);
             ref_ssefinishCallCount.current = 0;
             eventBus.emit('beginVoteSession', true, sessionId) // 当前对话完，需要将manager的标注设置为true
+            // 第一次问题对话后将左侧列表改为问题未标题
+            // if(refs[0] && refs[0].current.getSessionList().length == 0){
+            //     console.log(question, "changeChatName")
+            //     eventBus.emit('editChat', question, sessionId)
+            // }
         }
     };
 
@@ -284,12 +289,11 @@ const Chat: React.FC = () => {
         }
         height = 80
     }
-    console.log("sessionList Log", sessionList)
+    // console.log("sessionList Log", sessionList)
 
     // 获取当前对话的模式，以便于展示页面上交谈的模型
     const modeName = localStorage.getItem('permission')
 
-    // console.log("111111", {"generate_config": models[0].generate_kwargs, "stream": models[0].stream, "prompts": models[0].prompts})
     return (
         <>
             {contextHolder}
