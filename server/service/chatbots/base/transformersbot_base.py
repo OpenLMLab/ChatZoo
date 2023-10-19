@@ -95,7 +95,7 @@ class TransformersChatBotBase(ChatBotBase):
         :param prompt: str. The prompt string.
         :return: dict. Later it will be passed to ``model.generate``.
         """
-        input_dict = self.tokenizer(prompt, return_tensors="pt")
+        input_dict = self.tokenizer(prompt, return_tensors="pt", return_token_type_ids=False)
         for key, value in input_dict.items():
             try:
                 if torch.cuda.device_count() >= 1:

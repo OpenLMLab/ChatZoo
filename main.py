@@ -174,7 +174,8 @@ async def login_by_username(username):
             
         return {"code": 200, "data": {"role": query.role,
                                       "username": query.username, "session_mark_num": query.session_mark_num,
-                                      "single_mark_num": query.single_mark_num,"create_time": query.create_time},
+                                      "single_mark_num": query.single_mark_num,"create_time": query.create_time,
+                                      "sys_mode": sys_mode},
                 "msg": "登录成功!"}
     else:
         return {"code": 400, "data": None, "msg": "找不到该用户"}
@@ -187,7 +188,7 @@ def vote_model(vote_msg: dict):
     dialogue_id = vote_msg.get("dialogue_id")
     turn_id = vote_msg.get("turn_id")
     vote_model_sequeue = vote_msg.get("model_sequeue")
-    logger.info(f"投票：username: {username} vote_model: {vote_model} vote_result: {vote_result} dialogue_id: {dialogue_id} turn_id: {turn_id}")
+    logger.info(f"投票：username: {username} vote_model: {vote_model} vote_result: {vote_result} dialogue_id: {dialogue_id} turn_id: {turn_id} vote_model_sequeue: {vote_model_sequeue}")
     vote_instance = create_vote(username=username, vote_model=vote_model, vote_result=vote_result, dialogue_id=dialogue_id,
                            turn_id=turn_id, vote_model_sequeue=vote_model_sequeue)
     if vote_instance:
@@ -214,14 +215,14 @@ def get_label_prompt():
 
 
 # 获取自定义的关键词
-@app.get("/get_keywords")
-def get_keywords():
-    global config_module
-    try:
-        keywords = config_module.keywords
-    except:
-        keywords = []
-    return {"data": keywords, "code": 200, "response": "ok"}
+# @app.get("/get_keywords")
+# def get_keywords():
+#     global config_module
+#     try:
+#         keywords = config_module.keywords
+#     except:
+#         keywords = []
+#     return {"data": keywords, "code": 200, "response": "ok"}
 
 # 关闭进程
 @app.on_event("shutdown")
