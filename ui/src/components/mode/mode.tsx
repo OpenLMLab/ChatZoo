@@ -53,16 +53,24 @@ const Mode = () => {
     });
 
     return (
-        <div className={style.radio}>
-            <Radio.Group
-                options={currOption}
-                onChange={onChange}
-                value={value}
-                disabled={banMode}
-                optionType="button"
-                buttonStyle="outline"
-            />
+        <div className={style.mode_display}>
+            {/* <div className={style.tag}>
+                <Tag color="blue">杜甫</Tag>
+                <Tag color="red">李白</Tag>
+                <Tag color="green">唐朝历史</Tag>
+            </div> */}
+            <div className={style.radio}>
+                <Radio.Group
+                    options={currOption}
+                    onChange={onChange}
+                    value={value}
+                    disabled={banMode}
+                    optionType="button"
+                    buttonStyle="outline"
+                />
+            </div>
         </div>
+        
     );
 };
 

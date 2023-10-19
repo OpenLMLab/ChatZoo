@@ -58,7 +58,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     let sessionStopInfo: stopSession = {}
     if(cahcheSessionStopInfo != null)
         sessionStopInfo = JSON.parse(cahcheSessionStopInfo!)
-    console.log("sessionStopInfo", sessionStopInfo)
+    // console.log("sessionStopInfo", sessionStopInfo)
     const [stopSessionState, setStopSessionState] = useState(sessionStopInfo[models[index].model_id])
 
 
@@ -109,6 +109,14 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
     });
     const { TextArea } = Input;
 
+    // 模型的名字，标注模式为字母，debug模式为nickname。
+    const modeName = localStorage.getItem('permission')!
+    let modelName = model.nickname
+    if (modeName.indexOf('debug') < 0){
+        console.log("index", index, String.fromCharCode(index+65), modeName)
+        modelName =  'Model_'+ String.fromCharCode(index+65)
+    }
+    
     return (
         <>
             <Modal
@@ -168,8 +176,10 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                             }else if(/^\d+\.\d+$/.test(event.target.value)){
                                 var updatedValue = parseFloat(event.target.value)
                             }else{
+                                // @ts-ignore
                                 var updatedValue = event.target.value
                             }
+                            // @ts-ignore
                             new_config.generate_kwargs[key] = updatedValue
                             console.log('修改后的配置', new_config)
                         }}
@@ -178,7 +188,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                     ))}
                 </div>
             </Modal>
-            <div className={styles.typo}>{model.nickname}</div>
+            <div className={styles.typo}>{modelName}</div>
             <div className={styles.func}>
                 <Tooltip title={<span className={styles.tooltipTitle} >切换布局</span>}>
                     <div onClick={handleSwitchLayout}
@@ -304,7 +314,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                                 <path
                                     d="M19.4523 5.89065C19.8421 5.49943 19.841 4.86626 19.4497 4.47644C19.0585 4.08662 18.4253 4.08775 18.0355 4.47898L11.9851 10.5511L5.91311 4.50085C5.52189 4.11103 4.88872 4.11217 4.4989 4.50339C4.10908 4.89462 4.11021 5.52778 4.50144 5.9176L10.5735 11.9679L4.45398 18.1093C4.06416 18.5006 4.06529 19.1337 4.45652 19.5236C4.84774 19.9134 5.48091 19.9122 5.87073 19.521L11.9902 13.3795L18.1318 19.4991C18.523 19.889 19.1562 19.8878 19.546 19.4966C19.9358 19.1054 19.9347 18.4722 19.5435 18.0824L13.4019 11.9628L19.4523 5.89065Z"
                                     fill="white"
-                                    fill-opacity="0.85"
+                                    fillOpacity="0.85"
                                 />
                             </svg>
                         </div>
@@ -320,7 +330,7 @@ const Banner: React.FC<BannerProps> = ({ model, index, models, handleSwitchLayou
                                 <path
                                     d="M19.4523 5.89065C19.8421 5.49943 19.841 4.86626 19.4497 4.47644C19.0585 4.08662 18.4253 4.08775 18.0355 4.47898L11.9851 10.5511L5.91311 4.50085C5.52189 4.11103 4.88872 4.11217 4.4989 4.50339C4.10908 4.89462 4.11021 5.52778 4.50144 5.9176L10.5735 11.9679L4.45398 18.1093C4.06416 18.5006 4.06529 19.1337 4.45652 19.5236C4.84774 19.9134 5.48091 19.9122 5.87073 19.521L11.9902 13.3795L18.1318 19.4991C18.523 19.889 19.1562 19.8878 19.546 19.4966C19.9358 19.1054 19.9347 18.4722 19.5435 18.0824L13.4019 11.9628L19.4523 5.89065Z"
                                     fill="white"
-                                    fill-opacity="0.85"
+                                    fillOpacity="0.85"
                                 />
                             </svg>
                         </div>
