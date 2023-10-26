@@ -77,7 +77,7 @@ user_list = [
 # label_prompt = ["harmful", "difficulty", "likert"]
 # label_prompt = ["significantly better", "better", "slightly better", "tie"]
 
-host_name = "10.140.66.63" # 默认为 localhost
+host_name = "10.140.66.104" # 默认为 localhost
 port = 8080 # 前端使用的端口
 mode = "debug"# 启动的模式
 is_stream = True # 是否开启流式输出

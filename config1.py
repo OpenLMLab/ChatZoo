@@ -19,7 +19,7 @@ model_list = [
     },
     {
         "model_name_or_path": "baichuan-inc/Baichuan2-7B-Base",
-        "nickname": "baichuan",
+        "nickname": "baichuan2",
         "tokenizer_path": "baichuan-inc/Baichuan2-7B-Base",
         "generate_kwargs": {
             "max_length": 2048, "num_beams": 1, "do_sample": True,

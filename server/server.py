@@ -20,7 +20,7 @@ from service.chatbots.base import TransformersChatBotBase
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", default=8081, type=int)
 parser.add_argument("--host", default="localhost", type=str)
-parser.add_argument("--devices", default="0", type=str)
+parser.add_argument("--devices", default="", type=str)
 parser.add_argument("--nickname", type=str, required=True)
 parser.add_argument("--model_name_or_path", type=str, help="Path of pretrained model.")
 parser.add_argument(
@@ -60,6 +60,9 @@ parser.add_argument(
 parser.add_argument(
     "--prompts", default=None, type=parse_json
 )
+parser.add_argument(
+    "--type", default=None, type=str
+)
 parser.add_argument("--stream", default=False, action="store_true")
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
@@ -89,6 +92,7 @@ def init_params():
         prompts=args.prompts,
         tokenizer_path=args.tokenizer_path, dtype=args.dtype,
         from_s3=args.from_s3, base_model=args.base_model,
+        type=args.type
     )
     if model_config.type is not None:
         bot = choose_bot(config=model_config)
@@ -132,12 +136,7 @@ def init_params():
     ]
     table.add_column("变量名", [row[0] for row in data])
     table.add_column("值", [row[1] for row in data])
-
     print(table)
-    # print(f"Initializing model...")
-    # print("Using devices:", args.devices)
-    # print("Config:", model_config)
-    # print(f"URL: {args.host}:{args.port}")
 
 app.include_router(login_router, prefix="/login")
 app.include_router(chat_router, prefix="/chat")

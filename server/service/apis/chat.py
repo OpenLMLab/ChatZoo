@@ -3,9 +3,8 @@ import json
 from urllib.parse import unquote
 from playhouse.shortcuts import model_to_dict
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
 from sse_starlette.sse import EventSourceResponse
-from starlette.responses import StreamingResponse
 from loguru import logger
 
 from service.utils import AppConfig
@@ -25,6 +24,69 @@ async def chat(request: Request):
     # 输入的对话
     prompt = unquote(request.headers['prompt'])
     print("prompt", prompt)
+    
+    sys_mode = config.mode
+    # 单独处理特殊的evaluation模式
+    if sys_mode == "evaluation":
+        ds_name = request.query_params['ds_name']
+        query_idx = request.query_params["query_idx"]
+        query = {"query_idx": query_idx, "ds_name": ds_name, "is_stream": config.model_info["stream"]}
+        async def generator(querys, bot):
+ 
+            gen_response = bot.chat(querys)
+            idx = 0
+            response = None
+            status = False
+            for response, status in gen_response:
+                idx += 1
+                yield {
+                    "id": idx,
+                    "event": "message",
+                    "retry": 20000,
+                    "data": json.dumps({
+                        "code": 1,
+                        "data": {
+                            "context": response,
+                            "id": dialogue_instance.dialogue_id,
+                            "request": prompt,
+                            "response": response
+                        }
+                    })
+                }
+                if await request.is_disconnected():
+                    break
+            if status:
+                yield {
+                    "id": idx,
+                    "event": "message",
+                    "retry": 20000,
+                    "data": json.dumps({
+                        "code": -20003,
+                        "data": {
+                            "context": "",
+                            "id": dialogue_instance.dialogue_id,
+                            "request": prompt,
+                            "response": response
+                        }
+                    })
+                }
+            else:
+                yield {
+                        "id": idx,
+                        "event": "message",
+                        "retry": 20000,
+                        "data": json.dumps({
+                            "code": 0,
+                            "data": {
+                                "context": "",
+                                "id": dialogue_instance.dialogue_id,
+                                "request": prompt,
+                                "response": response
+                            }
+                        })
+                }
+    
+        return EventSourceResponse(generator(query, config.bot))
     
     # 会话id 和 user 信息
     turn_id = request.query_params['turn_id']
@@ -188,3 +250,23 @@ def set_model_parameters(gen_config: dict):
         return {"code": 200, "msg": "ok", "data": response}
     else:
         return {"code": 400, "msg": "error", "data": response}
+
+@chat_router.post("/get_ds_instance")
+def get_ds_instance(request: Request):
+    config = AppConfig()
+    ds_name = request.query_params['ds_name']
+    query_idx = request.query_params["query_idx"]
+    instance = config.bot.get_ds_instance(ds_name, query_idx)
+    return {"code": 200, "msg": "ok", "data": instance}
+
+@chat_router.post("/get_ds_chip")
+def get_ds_chip(request: Request):
+    config = AppConfig()
+    ds_name = request.query_params['ds_name']
+    start_idx = request.query_params["start_idx"]
+    end_idx = request.query_params["end_idx"]
+    rsp_list = config.bot.get_ds_chip(ds_name, start_idx, end_idx)
+    return {
+        "code": 200, "msg": "ok", "data": {"model_id": config.model_info["generate_config_id"],
+                                           "data": rsp_list}
+    }

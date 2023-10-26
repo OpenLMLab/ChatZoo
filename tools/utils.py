@@ -34,11 +34,17 @@ def run_subprocess_server(model_info: dict, database_path: str, database_dtype: 
     Returns:
         _type_: _description_
     """
-    server_kwargs = ["--port", str(model_info['port']), "--host", host_name, "--devices",  model_info['devices'],  "--nickname", model_info['nickname'], 
-                     "--model_name_or_path", model_info['model_name_or_path'],  "--dtype", model_info['dtype'], "--tokenizer_path", model_info['tokenizer_path'], 
-                     "--model_config", json.dumps(model_info['generate_kwargs']), "--db_type", database_dtype, 
+    if mode == 'evaluation':
+        server_kwargs = ["--port", str(model_info['port']), "--host", host_name,  "--nickname", model_info['nickname'], 
+                     "--model_name_or_path", model_info['model_name_or_path'], 
+                     "--db_type", database_dtype, "--type", "evaluation",
                      "--db_path", database_path, "--mode", mode]
-    if model_info['base_model']:
+    else:
+        server_kwargs = ["--port", str(model_info['port']), "--host", host_name, "--devices",  model_info['devices'],  "--nickname", model_info['nickname'], 
+                        "--model_name_or_path", model_info['model_name_or_path'],  "--dtype", model_info['dtype'], "--tokenizer_path", model_info['tokenizer_path'], 
+                        "--model_config", json.dumps(model_info['generate_kwargs']), "--db_type", database_dtype, 
+                        "--db_path", database_path, "--mode", mode]
+    if "base_model" in model_info and model_info["base_model"]:
         server_kwargs.append("--base_model")
         server_kwargs.append(model_info['base_model'])
     if "prompts" in model_info:
@@ -50,6 +56,7 @@ def run_subprocess_server(model_info: dict, database_path: str, database_dtype: 
     # print(f"server_kwargs {server_kwargs}")
     command = ["python", "server/server.py"]
     command.extend(server_kwargs)
+    print(command)
     process = subprocess.Popen(command)
     return process
 
