@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import './home.module.less';
 import style from './home.module.less';
 import { useLocation } from 'react-router-dom';
+import EvalBottom from '../evalbottom/evalbottom';
 
 function Home() {
 
@@ -21,7 +22,7 @@ function Home() {
         mode,
         setMode,
     };
-    
+
     // sessionId
     const [id, setId] = useState<string | null>(Date.now().toString());
     const idContextValues: IdContextProps = {
@@ -41,7 +42,7 @@ function Home() {
         models,
         setModels,
     };
-
+    const sys_mode = localStorage.getItem("sys_mode")
     // 关键词的开关列表
     // const [kw_list, setKW] = useState<string []>([]);
     // const all_kws = JSON.parse(localStorage.getItem("kws")!)
@@ -55,8 +56,8 @@ function Home() {
     //     setKW(showKW)
     //     localStorage.setItem("kw"+ id, JSON.stringify(showKW))
     // }
-        
-    
+
+
     // 切换会话时候需要切换关键词
     // useEffect(()=>{
     //     const changeKW = (chatId: string)=>{
@@ -122,8 +123,9 @@ function Home() {
                                 <div className={style.content}>
                                     <div className={style.add}>{models.length === 0 ? <Add></Add> : <Chat />}</div>
                                 </div>
+
                                 <div className={style.footer}>
-                                    <Bottom />
+                                    {sys_mode === 'evaluation' ? <EvalBottom></EvalBottom> : <Bottom></Bottom>}
                                 </div>
                             </Col>
                         </Row>

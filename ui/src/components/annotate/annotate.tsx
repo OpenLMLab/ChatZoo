@@ -179,14 +179,14 @@ const Annotate: React.FC = () => {
         setValue(newValue);
     };
 
-   // 投票前检测是否选中了标签
-   const checkSelected = (value: any, models: ModelConfig[]) => {
+    // 投票前检测是否选中了标签
+    const checkSelected = (value: any, models: ModelConfig[]) => {
 
-   }
+    }
 
     // 如果模型的数量小于等于2，那么标注的标签只有一个，故取第一个value的值即可。
     let vote_result: string[] | string = value;
-    if(sys_mode != 'rlhf'){
+    if (sys_mode != 'rlhf') {
         vote_result = value[0]
     }
 
@@ -513,7 +513,7 @@ const Annotate: React.FC = () => {
                         </Radio.Group>
                     </div>
                 )}
-                
+
             </Modal>
         </>
     );

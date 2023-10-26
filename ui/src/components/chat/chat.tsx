@@ -11,6 +11,7 @@ import { sseMesage } from 'chat-webkit/dist/types/components/chat-box/chatInterf
 import { useContext, useEffect, useRef, useState } from 'react';
 import styles from './chat.module.less';
 import { chatBoxStyle, requestSessageContainerStyle, responseMessageContainerStyle } from './puyuc.chatbox.style';
+import http from '@/utils/axios';
 
 /**
  * 1. 获取全局sessionId
@@ -19,27 +20,24 @@ import { chatBoxStyle, requestSessageContainerStyle, responseMessageContainerSty
  * 4. 离开界面时存入缓存
  */
 const Chat: React.FC = () => {
-  const [messageApi, contextHolder] = message.useMessage();
-  const idContext = useContext(IdContext);
-  const sessionId = idContext?.id;
-  const ref_sessionId = useRef(sessionId)
-  const ref_ssefinishCallCount = useRef(0)
-  const mode = useContext(ModeContext)?.mode
-  const models = useContext(ModelContext)?.models;
-  const setModels = useContext(ModelContext)?.setModels
-  //  是否暂停模型
-  const cachedSessionList = localStorage.getItem(sessionId!);
-//   console.log("cachedSession", cachedSessionList, models)
-  let sessionList: sessionMesage = {}
-  sessionList = JSON.parse(cachedSessionList!)
-  // 判断是否有一条消息
-  const keys = Object.keys(sessionList)
-  if (keys.length != 0) {
-    if (sessionList[keys[0]][0]) {
-      const firstMsg = sessionList[keys[0]][0]['question']
-    //   eventBus.emit('editChat', firstMsg, sessionId)
+    const [messageApi, contextHolder] = message.useMessage();
+    const idContext = useContext(IdContext);
+    const sessionId = idContext?.id;
+    const ref_sessionId = useRef(sessionId)
+    const ref_ssefinishCallCount = useRef(0)
+    const mode = useContext(ModeContext)?.mode
+    const models = useContext(ModelContext)?.models;
+    const setModels = useContext(ModelContext)?.setModels
+    //  是否暂停模型
+    let cachedSessionList = localStorage.getItem(sessionId!);
+    const sys_mode = localStorage.getItem("sys_mode")
+    if (sys_mode == "evaluation") {
+        cachedSessionList = localStorage.getItem("cacheSession")
+        var [sessionList, setSessionList] = useState<sessionMesage>(JSON.parse(cachedSessionList!))
+    } else {
+        var sessionList: sessionMesage = {}
+        sessionList = JSON.parse(cachedSessionList!)
     }
-  }
 
     const error = (msg: string) => {
         messageApi.open({
@@ -48,20 +46,22 @@ const Chat: React.FC = () => {
         });
     };
 
-    if (models != null)
+    if (models != null) {
         models.forEach((model) => {
             if (!(model.model_id in sessionList)) {
                 // 如果不存在就要初始化一个
                 sessionList[model.model_id] = [];
             }
         });
+        // setSessionList(new_sessionList)
+    }
     const refs = [useRef<any>(), useRef<any>(), useRef<any>(), useRef<any>()];
 
     //处理数据，以便于保存
     const saveSessionList = (session_ids: string) => {
         let new_session_list: sessionMesage = {};
         // @ts-ignore
-        const model_ids = JSON.parse(localStorage.getItem(session_ids+"model_sequeue"))
+        const model_ids = JSON.parse(localStorage.getItem(session_ids + "model_sequeue"))
         refs.map((ref, index) => {
             if (index < model_ids?.length!) {
                 new_session_list[model_ids[index]] = ref.current.getSessionList();
@@ -72,6 +72,7 @@ const Chat: React.FC = () => {
         //         new_session_list[models![index].model_id] = ref.current.getSessionList();
         //     }
         // });
+        console.log("sessionList", new_session_list)
         Object.keys(new_session_list).forEach(function (key) {
             let session = new_session_list[key];
             if (session.length - 1 >= 0) {
@@ -86,7 +87,7 @@ const Chat: React.FC = () => {
             }
             new_session_list[key] = session;
         });
-        sessionList = new_session_list;
+        const sessionList = new_session_list;
         if (model_ids != null)
             model_ids.forEach((model_id: string) => {
                 if (!(model_id in sessionList)) {
@@ -94,13 +95,7 @@ const Chat: React.FC = () => {
                     sessionList[model_id] = [];
                 }
             });
-        // if (models != null)
-        //     models.forEach((model) => {
-        //         if (!(model.model_id in sessionList)) {
-        //             // 如果不存在就要初始化一个
-        //             sessionList[model.model_id] = [];
-        //         }
-        //     });
+        // setSessionList(sessionList)
         localStorage.setItem(session_ids, JSON.stringify(new_session_list));
     };
 
@@ -148,9 +143,9 @@ const Chat: React.FC = () => {
         updateDoWrap(doWrap == styles.noWrap ? styles.wrap : styles.noWrap);
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         // @ts-ignore 忽略该行的类型检查或警告
-        if(models?.length <= 2){
+        if (models?.length <= 2) {
             updateDoWrap(styles.noWrap)
         }
     }, [models])
@@ -159,16 +154,16 @@ const Chat: React.FC = () => {
     useEffect(() => {
         const modifyModels = (newModelConfig: ModelConfig, index: number) => {
             saveSessionList(sessionId!)
-            const newModels = models?.slice(); 
-            if(newModels !== undefined){
+            const newModels = models?.slice();
+            if (newModels !== undefined) {
                 newModels[index] = newModelConfig
             }
             // @ts-ignore
             setModels(newModels)
         }
         eventBus.on("modifyModels", modifyModels)
-        return ()=>{
-        eventBus.off("modifyModels", modifyModels)
+        return () => {
+            eventBus.off("modifyModels", modifyModels)
         }
     })
 
@@ -188,7 +183,7 @@ const Chat: React.FC = () => {
     // 模式变化监控到，然后保存数据 需要这个的原因是因为切换模式时候，还没来得及触发 sessionid变化的事件来保存就刷新掉了组件的内容
     useEffect(() => {
         const eventChange = () => {
-            console.log('下载会话',refs[0].current.getSessionList() )
+            console.log('下载会话', refs[0].current.getSessionList())
             if (refs[0].current && refs[0].current.getSessionList()) saveSessionList(sessionId!);
         };
         eventBus.on('modeChangeEvent', eventChange);
@@ -209,25 +204,25 @@ const Chat: React.FC = () => {
 
     // 发送voteDict出去
     const sendVoteDict = (models: ModelConfig[]) => {
-      // 获取最新的 Dict
-      let new_session_list: sessionMesage = {};
-      console.log("sendVote", models)
-      refs.map((ref, index) => {
-        if(index < models?.length!) {
-          new_session_list[models![index].model_id] = ref.current.getSessionList();
-        }
-      });
-      // 这里使用model_id : dialogue_id
-      let dialogue_ids: { [key: number]: string } = {}
-      Object.keys(new_session_list).forEach(function (key) {
-        const session = new_session_list[key]
-        if(session.length >= 1) {
-          const last_dict = session[session.length - 1];
-          // @ts-ignore
-          dialogue_ids[ key ] = last_dict['id']
-        }
-      })
-      eventBus.emit('sendVoteDict', dialogue_ids)
+        // 获取最新的 Dict
+        let new_session_list: sessionMesage = {};
+        console.log("sendVote", models)
+        refs.map((ref, index) => {
+            if (index < models?.length!) {
+                new_session_list[models![index].model_id] = ref.current.getSessionList();
+            }
+        });
+        // 这里使用model_id : dialogue_id
+        let dialogue_ids: { [key: number]: string } = {}
+        Object.keys(new_session_list).forEach(function (key) {
+            const session = new_session_list[key]
+            if (session.length >= 1) {
+                const last_dict = session[session.length - 1];
+                // @ts-ignore
+                dialogue_ids[key] = last_dict['id']
+            }
+        })
+        eventBus.emit('sendVoteDict', dialogue_ids)
     }
 
     let model_status = [-2, -2, -2, -2]
@@ -259,10 +254,74 @@ const Chat: React.FC = () => {
         }
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         model_ref.current = models
         console.log("model_ref", model_ref)
     }, [models])
+
+    useEffect(() => {
+        // 用于标注数据展示的监听函数
+        const pageChange = (pageNum: number, pageSize: number) => {
+            console.log("[Debug] pageChange ", "eval_page_change", pageNum)
+            let newSessionList: sessionMesage = {}
+            models?.forEach((model: ModelConfig) => {
+                http.post<string, any>(model.url +
+                    "/chat/get_ds_instance?" +
+                    "ds_name=" + localStorage.getItem("selectDs") +
+                    "&query_idx=" + (pageNum - 1)
+                ).then(res => {
+                    const data = res.data.data
+                    newSessionList[model.model_id] = []
+                    if (data["exist"])
+                        newSessionList[model.model_id].push({
+                            id: "1",
+                            status: 0,
+                            message: data["response"],
+                            question: data["prompt"],
+                        })
+                    if (Object.keys(models).length === Object.keys(newSessionList).length) {
+                        localStorage.setItem("cacheSession", JSON.stringify(newSessionList))
+                        setSessionList(newSessionList)
+                    }
+                })
+            })
+            // models?.forEach((model: ModelConfig) => {
+            //     const data = {
+            //         ds_name: localStorage.getItem("selectDs"),
+            //         start_idx: (pageNum - 1) * pageSize,
+            //         end_idx: pageNum * pageSize
+            //     }
+            //     http.post<any, any>(model.url + "/chat/get_ds_chip?", { data: data }).then((res) => {
+            //         const model_id = res.data.data["model_id"]
+            //         const rst_list = res.data.data["data"]
+            //         const history_data: sseMesage[] = []
+            //         rst_list.forEach((rst: any, idx: string) => {
+            //             history_data.push({
+            //                 id: idx,
+            //                 status: 0,
+            //                 message: rst["response"],
+            //                 question: rst["prompt"],
+            //             })
+            //         })
+            //         sessionList[model_id] = history_data
+            //         if (Object.keys(sessionList).length == Object.keys(models).length) {
+
+            //         }
+            //     })
+            // })
+        }
+        // 用于manager切换数据集时候更改展示的内容
+        const managerDsChange = (new_session_list: sessionMesage) => {
+            setSessionList(new_session_list)
+        }
+
+        eventBus.on("eval_page_change", pageChange)
+        eventBus.on("managerDsChange", managerDsChange)
+        return () => {
+            eventBus.off("eval_page_change", pageChange)
+            eventBus.off("managerDsChange", managerDsChange)
+        }
+    })
 
     // 动态计算宽度
     let width = 0
@@ -270,26 +329,26 @@ const Chat: React.FC = () => {
     // 横屏模式
     const model_ref = useRef(models)
     // console.log('是否换行', doWrap, styles.wrap, models, model_ref)
-    if(doWrap === styles.wrap) {
-      if(models?.length === 1) {
-        width = 100
-        height = 80
-      } else if(models?.length === 2) {
-        width = 100
-        height = 40
-      } else {
-        width = 35
-        height = 40
-      }
+    if (doWrap === styles.wrap) {
+        if (models?.length === 1) {
+            width = 100
+            height = 80
+        } else if (models?.length === 2) {
+            width = 100
+            height = 40
+        } else {
+            width = 35
+            height = 40
+        }
     } else {
-        if(models?.length == 1){
+        if (models?.length == 1) {
             width = 77
-        }else{
+        } else {
             width = 100 / models?.length!
         }
         height = 80
     }
-    // console.log("sessionList Log", sessionList)
+    console.log("sessionList Log", sessionList)
 
     // 获取当前对话的模式，以便于展示页面上交谈的模型
     const modeName = localStorage.getItem('permission')
@@ -326,12 +385,12 @@ const Chat: React.FC = () => {
                                         localStorage.getItem('permission')
                                     }
                                     ref={refs[index]}
-                                    token={encodeURIComponent(JSON.stringify({"generate_config": model.generate_kwargs, "stream": model.stream, "prompts": model.prompts}))}
+                                    token={encodeURIComponent(JSON.stringify({ "generate_config": model.generate_kwargs, "stream": model.stream, "prompts": model.prompts }))}
                                     requestMessageContainerStyle={requestSessageContainerStyle}
                                     responseMessageContainerStyle={responseMessageContainerStyle}
                                     style={chatBoxStyle}
-                                    userAvatar = {<>{localStorage.getItem('username')}</>}
-                                    modelAvatar = {<>{modeName == 'debug' ? model.nickname: 'Model_'+ String.fromCharCode(index+65)}</>}
+                                    userAvatar={<>{localStorage.getItem('username')}</>}
+                                    modelAvatar={<>{modeName == 'debug' ? model.nickname : 'Model_' + String.fromCharCode(index + 65)}</>}
                                 />
                             </div>
                         </div>

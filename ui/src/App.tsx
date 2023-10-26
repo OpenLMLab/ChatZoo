@@ -7,6 +7,7 @@ import qs from 'qs';
 import http from '@/utils/axios';
 import eventBus from './utils/eventBus';
 import ModelConfig from './components/model/model';
+import { sessionMesage } from './utils/sessionInterface';
 
 function App() {
 
@@ -54,6 +55,7 @@ function App() {
                     error(res.data.msg);
                     return;
                 }
+                let selectDs = ""
                 localStorage.clear();
                 localStorage.setItem('permission', res.data.data.role);
                 localStorage.setItem('username', res.data.data.username);
@@ -61,11 +63,23 @@ function App() {
                 if (res.data.data.role == 'debug') {
                     eventBus.emit('banVote', true);
                 }
-                http.get<string, any>("/get_label_prompt").then((res)=>{
+                http.get<string, any>("/get_label_prompt").then((res) => {
                     const label_prompts = res.data.data
                     console.log(label_prompts, "自定义的标签或者默认的标注标签")
                     localStorage.setItem("label_prompt", JSON.stringify(label_prompts))
                 })
+
+                http.get<string, any>("/get_session_list").then((res) => {
+                    const dataset_name = res.data.data
+                    console.log(res.data, "获取数据集的名字")
+                    if (res.data.code == 200) {
+                        console.log(dataset_name, "获取数据集的名字")
+                        selectDs = dataset_name[0]
+                        localStorage.setItem("selectDs", selectDs)
+                        localStorage.setItem("dataset_name", JSON.stringify(dataset_name))
+                    }
+                })
+
                 // 获取关键词然后存储到localStorage
                 // http.get<string, any>("/get_keywords").then((res)=>{
                 //     const kw =res.data.data
@@ -93,7 +107,40 @@ function App() {
                             new_model.push(model);
                             // 加载完所有参数才能跳转页面
                             if (url_len == new_model.length) {
-                                navigate('/home', { state: new_model });
+                                if (localStorage.getItem("sys_mode") !== "evaluation")
+                                    navigate('/home', { state: new_model });
+                                else {
+                                    let modelsMap = {}
+                                    new_model.forEach((res) => {
+                                        // @ts-ignore
+                                        modelsMap[res.model_id] = res
+                                    })
+                                    localStorage.setItem("modelsMap", JSON.stringify(modelsMap))
+                                    // 初始化Evaluation会话的内容
+                                    let sessionList: sessionMesage = {}
+                                    const query_len = url_len
+                                    new_model.forEach((model_: ModelConfig) => {
+                                        http.post<string, any>(model_.url +
+                                            "/chat/get_ds_instance?" +
+                                            "ds_name=" + selectDs +
+                                            "&query_idx=" + "0"
+                                        ).then(res => {
+                                            const data = res.data.data
+                                            sessionList[model_.model_id] = []
+                                            if (data["exist"])
+                                                sessionList[model_.model_id].push({
+                                                    id: "1",
+                                                    status: 0,
+                                                    message: data["response"],
+                                                    question: data["prompt"],
+                                                })
+                                            if (query_len === Object.keys(sessionList).length) {
+                                                localStorage.setItem("cacheSession", JSON.stringify(sessionList))
+                                                navigate('/home', { state: new_model });
+                                            }
+                                        })
+                                    })
+                                }
                             }
                         });
                     });
