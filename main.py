@@ -9,7 +9,12 @@ from loguru import logger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from tools.utils import find_free_port, run_subprocess_server, run_suprocess_ui, check_nickname_unique
+from tools.utils import (
+    find_free_port,
+    run_subprocess_server,
+    run_suprocess_ui,
+    check_nickname_unique,
+)
 
 from server.service.database.crud.user_crud import adjust_username_in_user
 from server.service.database.crud.user_crud import insert_or_update_user
@@ -22,7 +27,9 @@ parse.add_argument("--config", type=str, required=True, help="Configuration file
 args = parse.parse_args()
 
 if not os.path.exists(args.config):
-    raise ValueError(f"config: {args.config} could not find! Please check if the file : {args.config} exists")
+    raise ValueError(
+        f"config: {args.config} could not find! Please check if the file : {args.config} exists"
+    )
 
 
 # 初始化参数
@@ -30,7 +37,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_origin_regex='http.*?://.*',
+    allow_origin_regex="http.*?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,6 +61,7 @@ if not check_nickname_unique(model_list=model_list):
 if hasattr(config_module, "label_prompt") and len(model_list) > 2:
     raise ValueError(f"if you set `label_prompt`, model_list could not larger than 2")
 
+
 # 在程序退出前终止所有子进程
 def terminate_subprocesses(subprocesses):
     for process in subprocesses:
@@ -62,10 +70,12 @@ def terminate_subprocesses(subprocesses):
     for process in subprocesses:
         process.wait()
 
+
 # 注册退出时的回调函数
 def exit_handler(signum, frame):
     terminate_subprocesses()
     exit(0)
+
 
 # 启动进程
 @app.on_event("startup")
@@ -82,20 +92,26 @@ async def startup_event():
     is_stream = config_module.is_stream
     database_path = config_module.database_path
     database_dtype = config_module.database_dtype
-    db = initial_database(database_path=database_path,db_type=database_dtype)
+    db = initial_database(database_path=database_path, db_type=database_dtype)
 
     # insert_many_users(user_list, 100)
     # 批量插入改为一条条插入
     logger.info("检查用户信息是否存在,不存在则插入!", user_list)
     for idx, user in enumerate(user_list):
         try:
-            result = insert_or_update_user(username=user['username'], session_mark_num=user['session_mark_num'],
-                                single_mark_num=user['single_mark_num'], permission=user['role'])
+            result = insert_or_update_user(
+                username=user["username"],
+                session_mark_num=user["session_mark_num"],
+                single_mark_num=user["single_mark_num"],
+                permission=user["role"],
+            )
             if isinstance(result, int):
                 logger.info(f"更新用户username: {user['username']} 成功！")
             else:
                 if result:
-                    logger.info(f"插入用户数据：username: {result.username} role: {result.role} session_mark_num: {result.session_mark_num} single_mark_num: {result.single_mark_num}")
+                    logger.info(
+                        f"插入用户数据：username: {result.username} role: {result.role} session_mark_num: {result.session_mark_num} single_mark_num: {result.single_mark_num}"
+                    )
                 else:
                     logger.info(f"第{idx}条用户数据插入失败，请检查该数据是否有问题。数据: {user}")
         except:
@@ -103,24 +119,31 @@ async def startup_event():
 
     # check 变量是否出现问题
     if len(model_list) == 0:
-        raise ValueError(f"model_list length is `{len(model_list)}`, you should init it")
+        raise ValueError(
+            f"model_list length is `{len(model_list)}`, you should init it"
+        )
     if len(user_list) == 0:
         raise ValueError(f"user_list length is `{len(user_list)}`, you should init it")
 
     # 搜寻空闲的端口
-    used_port = [model['port'] for model in model_list if 'port' in model]
+    used_port = [model["port"] for model in model_list if "port" in model]
     used_port.append(main_port)
     for model in model_list:
-        if 'port' not  in model:
-            model['port'] = find_free_port(used_port)
-            used_port.append(model['port'])
-            
+        if "port" not in model:
+            model["port"] = find_free_port(used_port)
+            used_port.append(model["port"])
 
     for idx, model_info in enumerate(model_list):
-        process = run_subprocess_server(model_info=model_info, database_path=database_path, database_dtype=database_dtype,
-                              host_name=host_name, mode=mode, stream=is_stream)
+        process = run_subprocess_server(
+            model_info=model_info,
+            database_path=database_path,
+            database_dtype=database_dtype,
+            host_name=host_name,
+            mode=mode,
+            stream=is_stream,
+        )
         subprocesses.append(process)
-    
+
     logger.info("启动前端网页服务")
     data = [
         ["URL", f"{host_name}:{port}"],
@@ -130,14 +153,19 @@ async def startup_event():
     table.add_column("Value", [row[1] for row in data])
 
     print(table)
-    subprocesses.append(run_suprocess_ui(host_name=host_name, main_port=main_port, port=port, main_host=host_name))
+    subprocesses.append(
+        run_suprocess_ui(
+            host_name=host_name, main_port=main_port, port=port, main_host=host_name
+        )
+    )
+
 
 @app.get("/get_model_list")
 def get_model_list():
     global model_list, main_host
     # 移除URL中可能存在的结尾斜杠
     use_host = main_host
-    if use_host.endswith('/'):
+    if use_host.endswith("/"):
         use_host = use_host[:-1]
     if not use_host.startswith("http://") and not use_host.startswith("https://"):
         use_host = "http://" + use_host
@@ -147,36 +175,51 @@ def get_model_list():
 
     return {"code": 200, "data": urls}
 
+
 @app.post("/login/")
 async def login_by_username(username):
-    """主进程控制是否能够登录
-    """
+    """主进程控制是否能够登录"""
     global sys_mode
     print(username)
     is_access, query = adjust_username_in_user(username)
     print(is_access, query)
     logger.info(f"登录: username: {username} is_access: {is_access} user_info: {query}")
-    if sys_mode == 'evaluation':
-        return {"code": 200, "data": {"role": query.role,
-                                      "username": query.username, "session_mark_num": query.session_mark_num,
-                                      "single_mark_num": query.single_mark_num,"create_time": query.create_time,
-                                      "sys_mode": sys_mode},
-                "msg": "登录成功!"}
+    if sys_mode == "evaluation":
+        return {
+            "code": 200,
+            "data": {
+                "role": query.role,
+                "username": query.username,
+                "session_mark_num": query.session_mark_num,
+                "single_mark_num": query.single_mark_num,
+                "create_time": query.create_time,
+                "sys_mode": sys_mode,
+            },
+            "msg": "登录成功!",
+        }
     if is_access:
         # 在 debug 模式下， 非 debug 用户应该没法登录
-        if 'debug' in sys_mode and 'debug' not in query.role:
+        if "debug" in sys_mode and "debug" not in query.role:
             return {"code": 403, "data": None, "msg": "Debug模式, 标注用户无法登录"}
         # 在 arena 模式下， debug 用户无法登录
-        if 'arena' in sys_mode and 'annotate' not in query.role:
+        if "arena" in sys_mode and "annotate" not in query.role:
             return {"code": 403, "data": None, "msg": "Arena模式, debug用户无法登录"}
-            
-        return {"code": 200, "data": {"role": query.role,
-                                      "username": query.username, "session_mark_num": query.session_mark_num,
-                                      "single_mark_num": query.single_mark_num,"create_time": query.create_time,
-                                      "sys_mode": sys_mode},
-                "msg": "登录成功!"}
+
+        return {
+            "code": 200,
+            "data": {
+                "role": query.role,
+                "username": query.username,
+                "session_mark_num": query.session_mark_num,
+                "single_mark_num": query.single_mark_num,
+                "create_time": query.create_time,
+                "sys_mode": sys_mode,
+            },
+            "msg": "登录成功!",
+        }
     else:
         return {"code": 400, "data": None, "msg": "找不到该用户"}
+
 
 @app.post("/vote/")
 def vote_model(vote_msg: dict):
@@ -186,9 +229,17 @@ def vote_model(vote_msg: dict):
     dialogue_id = vote_msg.get("dialogue_id")
     turn_id = vote_msg.get("turn_id")
     vote_model_sequeue = vote_msg.get("model_sequeue")
-    logger.info(f"投票：username: {username} vote_model: {vote_model} vote_result: {vote_result} dialogue_id: {dialogue_id} turn_id: {turn_id} vote_model_sequeue: {vote_model_sequeue}")
-    vote_instance = create_vote(username=username, vote_model=vote_model, vote_result=vote_result, dialogue_id=dialogue_id,
-                           turn_id=turn_id, vote_model_sequeue=vote_model_sequeue)
+    logger.info(
+        f"投票：username: {username} vote_model: {vote_model} vote_result: {vote_result} dialogue_id: {dialogue_id} turn_id: {turn_id} vote_model_sequeue: {vote_model_sequeue}"
+    )
+    vote_instance = create_vote(
+        username=username,
+        vote_model=vote_model,
+        vote_result=vote_result,
+        dialogue_id=dialogue_id,
+        turn_id=turn_id,
+        vote_model_sequeue=vote_model_sequeue,
+    )
     if vote_instance:
         return {"code": 200, "response": "ok", "data": vote_instance}
     else:
@@ -203,8 +254,11 @@ def get_label_prompt():
         label_prompt = {"data": config_module.label_prompt, "user_prompt": True}
     except:
         # nickname 为 label
-        if config_module.mode == 'arena':
-            label_prompt = [f"Model_{chr(ord('A')+item)}" for item in range(len(config_module.model_list))]
+        if config_module.mode == "arena":
+            label_prompt = [
+                f"Model_{chr(ord('A')+item)}"
+                for item in range(len(config_module.model_list))
+            ]
         else:
             label_prompt = [item["nickname"] for item in config_module.model_list]
         label_prompt.extend(["都不符合", "都符合"])
@@ -219,19 +273,16 @@ def get_session_list():
     if sys_mode == "evaluation":
         file_names = []
         for model in model_list:
-            model_name_or_path = model['model_name_or_path']
+            model_name_or_path = model["model_name_or_path"]
             model_file_names = os.listdir(model_name_or_path)
             file_names.extend([item.replace(".json", "") for item in model_file_names])
         file_names = list(set(file_names))
         file_names = sorted(file_names)
         logger.info("获取所有数据集的名字: {}".format(file_names))
-        return {
-            "code": 200, "response": "ok", "data": file_names
-        }
+        return {"code": 200, "response": "ok", "data": file_names}
     else:
-        return {
-            "code": 400, "response": "error", "data": None
-        }
+        return {"code": 400, "response": "error", "data": None}
+
 
 @app.post("/get_length_by_ds_name/")
 def get_length_by_ds_name(query_msg: dict):
@@ -241,14 +292,109 @@ def get_length_by_ds_name(query_msg: dict):
     ds_name = query_msg.get("ds_name")
     nickname = query_msg.get("nickname")
     logger.info(f"/get_length_by_ds_name ---> ds_name: {ds_name}, nickname: {nickname}")
-    mode_info = list(filter(lambda x: x["nickname"] == nickname, model_list))[0]
-    with open(os.path.join(mode_info["model_name_or_path"], ds_name+".json"), "r", encoding="utf8") as fp:
+    model_info = list(filter(lambda x: x["nickname"] == nickname, model_list))[0]
+    with open(
+        os.path.join(model_info["model_name_or_path"], ds_name + ".json"),
+        "r",
+        encoding="utf8",
+    ) as fp:
         jsondata = json.load(fp)
         ds_len = len(jsondata["outputs"])
-    return {
-        "code": 400, "response": "ok", "data": {"ds_len": ds_len}
-    }
-    
+    return {"code": 400, "response": "ok", "data": {"ds_len": ds_len}}
+
+
+@app.post("/get_length_by_filter_content")
+def getLengthByFilterContent(query_msg: dict):
+    #  Eval评测数据集下，通过指定内容筛选出长度
+    global model_list
+    ds_name = query_msg.get("ds_name") + ".json"
+    filter_content = json.loads(query_msg.get("content"))
+    logger.info(
+        f"/get_length_by_filter_content ---> ds_name: {ds_name}, filterContent: {filter_content}"
+    )
+    nicknameDSMap = {}
+    filter_len = 0
+    total_len = 0
+    for model_info in model_list:
+        file_path = os.path.join(model_info["model_name_or_path"], ds_name)
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf8") as fp:
+                jsondata = json.load(fp)
+                total_len = len(jsondata["outputs"])
+                nicknameDSMap[model_info["nickname"]] = jsondata
+    for i in range(total_len):
+        isSelect = True
+        for key, value in nicknameDSMap.items():
+            rule = filter_content[key]
+            if rule == "pass":
+                continue
+            if rule == "correct":
+                if not value["outputs"].get(str(i))["right"]:
+                    isSelect = False
+                    break
+            if rule == "error":
+                if value["outputs"].get(str(i))["right"]:
+                    isSelect = False
+                    break
+        if isSelect:
+            filter_len += 1
+    logger.info(f"filter_length is {filter_len}")
+    return {"code": 400, "response": "ok", "data": {"ds_len": filter_len}}
+
+
+@app.post("/get_query_idx_by_filter_content")
+def getQueryIdxByFilterContent(query_msg: dict):
+    #  Eval评测数据集下，计算不同数据集下的idx
+    global model_list
+    ds_name = query_msg.get("ds_name") + ".json"
+    filter_content = json.loads(query_msg.get("content"))
+    query_idx = int(query_msg.get("query_idx"))
+    logger.info(
+        f"/get_query_idx_by_filter_content ---> ds_name: {ds_name}, filterContent: {filter_content}, query_idx: {query_idx}"
+    )
+    nicknameDSMap = {}
+    total_len = 0
+
+    # 先加载数据集，如果是pass就不需要加载，直接用默认的
+    for model_info in model_list:
+        item = model_info["nickname"]
+        logger.info(f"nickname: {item}")
+        if filter_content[model_info["nickname"]] == "pass":
+            continue
+        file_path = os.path.join(model_info["model_name_or_path"], ds_name)
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf8") as fp:
+                jsondata = json.load(fp)
+                total_len = len(jsondata["outputs"])
+                nicknameDSMap[model_info["nickname"]] = jsondata
+    cur_idx = 0
+    select_idx = -1
+    if len(nicknameDSMap) == 0:
+        # 都是 pass, 只需要返回原本的idx就行.
+        select_idx = query_idx - 1
+    else:
+        for idx in range(total_len):
+            isSelect = True
+            for nickname, ds in nicknameDSMap.items():
+                rule = filter_content[nickname]
+                item = ds["outputs"].get(str(idx))["right"]
+                logger.info(f"nickname: {nickname}, rule: {rule}, item: {item}")
+                if rule == "correct":
+                    if not ds["outputs"].get(str(idx))["right"]:
+                        isSelect = False
+                        break
+                if rule == "error":
+                    if ds["outputs"].get(str(idx))["right"]:
+                        isSelect = False
+                        break
+            if isSelect:
+                cur_idx += 1
+                if cur_idx == query_idx:
+                    select_idx = idx
+                    break
+    return {"code": 400, "response": "ok", "data": {"idx": select_idx}}
+
+
 @app.post("/get_ds_chip")
 def get_ds_chip(query_msg: dict):
     # 获取 eval评测数据集的若干个数据
@@ -257,7 +403,25 @@ def get_ds_chip(query_msg: dict):
     ds_name = query_msg.get("ds_name")
     start_idx = query_msg.get("start_idx")
     end_idx = query_msg.get("end_idx")
-    
+
+
+@app.get("/get_eval_ds_item")
+def get_eval_ds_item(ds_name: str):
+    # 获取 evaluation 情况下指定数据集要展示的items
+    global sys_mode, model_list
+    items = []
+    for model_info in model_list:
+        model_name_or_path = model_info["model_name_or_path"]
+        file_path = os.path.join(model_name_or_path, ds_name + ".json")
+        with open(file_path, "r", encoding="utf8") as fp:
+            data = json.load(fp)
+            items.extend(data.keys())
+    items = sorted(list(set(items)))
+    logger.info(items)
+    items = list(filter(lambda x: x != "outputs", items))
+    logger.info(f"获取数据集：{ds_name}的所有key: {items}")
+    return {"code": 200, "response": "ok", "data": items}
+
 
 # 获取自定义的关键词
 # @app.get("/get_keywords")
@@ -269,28 +433,29 @@ def get_ds_chip(query_msg: dict):
 #         keywords = []
 #     return {"data": keywords, "code": 200, "response": "ok"}
 
+
 # 关闭进程
 @app.on_event("shutdown")
 async def shutdown_event():
     global subprocesses
     logger.info("关闭子进程服务")
     terminate_subprocesses(subprocesses=subprocesses)
-    
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host=main_host, port=main_port)
     base_path = "ui/dist/"
     html_file = os.path.join(base_path, "index.html")
-    with open(html_file, 'rt') as f:
+    with open(html_file, "rt") as f:
         html_content = f.read()
 
     # 动态插入的 script 行
     script_line = f'<script>window.VITE_REACT_APP_PORT = "{main_port}";window.VITE_REACT_APP_HOST="{main_host}"</script>'
 
     # 在 </body> 标签之前插入 script 行
-    modified_content = html_content.replace(script_line,"")
+    modified_content = html_content.replace(script_line, "")
 
     # 创建临时 HTML 文件
-    temp_html_file = os.path.join(base_path,'index.html')
-    with open(temp_html_file, 'wt') as f:
+    temp_html_file = os.path.join(base_path, "index.html")
+    with open(temp_html_file, "wt") as f:
         f.write(modified_content)

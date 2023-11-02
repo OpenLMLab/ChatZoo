@@ -257,6 +257,7 @@ def get_ds_instance(request: Request):
     ds_name = request.query_params['ds_name']
     query_idx = request.query_params["query_idx"]
     instance = config.bot.get_ds_instance(ds_name, query_idx)
+    logger.info(f"instance: {instance}")
     return {"code": 200, "msg": "ok", "data": instance}
 
 @chat_router.post("/get_ds_chip")
@@ -269,4 +270,13 @@ def get_ds_chip(request: Request):
     return {
         "code": 200, "msg": "ok", "data": {"model_id": config.model_info["generate_config_id"],
                                            "data": rsp_list}
+    }
+
+@chat_router.get("/get_overall_score")
+def get_overall_score(ds_name: str):
+    config = AppConfig()
+    data = config.bot.get_overall_score(ds_name)
+    logger.info(f"数据集: {ds_name} --> overall score: {data}")
+    return {
+        "code": 200, "msg": "ok", "data": data
     }

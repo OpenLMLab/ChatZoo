@@ -33,36 +33,36 @@ const Annotate: React.FC = () => {
     const [beginVote, setBeginVote] = useState(false);
 
     // 是否是特殊的rlhf标注模式
-    const sys_mode = localStorage.getItem("sys_mode")
-    const [annotateMode, setAnnotateMode] = useState(sys_mode)
+    const sysMode = localStorage.getItem("sys_mode")
+    const [annotateMode, setAnnotateMode] = useState(sysMode)
 
     // 模型的名字，标注模式为字母，debug模式为nickname。
     const modeName = localStorage.getItem('permission')!;
 
     // 获取投票的标签
-    let label_info = JSON.parse(localStorage.getItem('label_prompt')!);
-    let label_prompts = label_info['data'];
-    console.log('label_prompts', label_prompts);
-    let label_prompts_smi: string[] = [];
-    if (models?.length == 2 && label_info['user_prompt'] && sys_mode == 'rlhf') {
-        label_prompts.forEach((label_name: any) => {
+    let labelInfo = JSON.parse(localStorage.getItem('label_prompt')!);
+    let labelPrompts = labelInfo['data'];
+    console.log('label_prompts', labelPrompts);
+    let labelPromptsSmi: string[] = [];
+    if (models?.length == 2 && labelInfo['user_prompt'] && sysMode == 'rlhf') {
+        labelPrompts.forEach((label_name: any) => {
             if (modeName.indexOf('debug') < 0) {
-                label_prompts_smi.push('Model_B ' + label_name + ' Model_A');
+                labelPromptsSmi.push('Model_B ' + label_name + ' Model_A');
             } else {
-                label_prompts_smi.push(models[1].nickname + ' ' + label_name + ' ' + models[0].nickname);
+                labelPromptsSmi.push(models[1].nickname + ' ' + label_name + ' ' + models[0].nickname);
             }
         });
-        for (let i = 0; i < label_prompts.length; i++) {
+        for (let i = 0; i < labelPrompts.length; i++) {
             if (modeName.indexOf('debug') < 0) {
-                label_prompts[i] = 'Model_A ' + label_prompts[i] + ' Model_B';
+                labelPrompts[i] = 'Model_A ' + labelPrompts[i] + ' Model_B';
             } else {
-                label_prompts[i] = models[0].nickname + ' ' + label_prompts[i] + ' ' + models[1].nickname;
+                labelPrompts[i] = models[0].nickname + ' ' + labelPrompts[i] + ' ' + models[1].nickname;
             }
         }
     }
-    if (models && models?.length > 2 && label_info['user_prompt'] && sys_mode == 'rlhf') {
-        for (let i = 0; i < label_prompts.length; i++) {
-            label_prompts[i] = { label: label_prompts[i], selected: false };
+    if (models && models?.length > 2 && labelInfo['user_prompt'] && sysMode == 'rlhf') {
+        for (let i = 0; i < labelPrompts.length; i++) {
+            labelPrompts[i] = { label: labelPrompts[i], selected: false };
         }
     }
     // vote_model
@@ -70,14 +70,14 @@ const Annotate: React.FC = () => {
         const hash = SHA256(value);
         return hash.toString().slice(0, 8);
     }
-    const model_ids: { [key: string]: any } = {};
-    const model_sequeue: string[] = [];
+    const modelIds: { [key: string]: any } = {};
+    const modelSequeue: string[] = [];
     models?.forEach((model) => {
         // 加上哈希后缀
         // const hashid = createHash(JSON.stringify(model.generate_kwargs))
         // model_ids[model.nickname + hashid] = model.model_id;
-        model_ids[model.nickname] = model.model_id;
-        model_sequeue.push(model.nickname);
+        modelIds[model.nickname] = model.model_id;
+        modelSequeue.push(model.nickname);
     });
     const [value, setValue] = useState(['default', 'default', 'default', 'default']);
     // 合并字典
@@ -106,7 +106,7 @@ const Annotate: React.FC = () => {
             setBanVote(status);
         };
         const dialogueListener = (dialogue_ids: Dict) => {
-            const merge_ids = mergeDicts(model_ids, dialogue_ids);
+            const merge_ids = mergeDicts(modelIds, dialogue_ids);
             setDialogueIds(merge_ids);
         };
         eventBus.on('banVote', statusListener);
@@ -185,26 +185,26 @@ const Annotate: React.FC = () => {
     }
 
     // 如果模型的数量小于等于2，那么标注的标签只有一个，故取第一个value的值即可。
-    let vote_result: string[] | string = value;
-    if (sys_mode != 'rlhf') {
-        vote_result = value[0]
+    let voteResult: string[] | string = value;
+    if (sysMode != 'rlhf') {
+        voteResult = value[0]
     }
 
-    console.log('投票结果', vote_result);
+    console.log('投票结果', voteResult);
     // 投票功能
     const vote = () => {
         const username = localStorage.getItem('username');
-        const dialogue_id = null;
-        const turn_id = sessionId;
-        console.log('vote session vote_model: ', JSON.stringify(vote_result));
+        const dialogueId = null;
+        const turnId = sessionId;
+        console.log('vote session vote_model: ', JSON.stringify(voteResult));
         const data = {
             username: username,
-            vote_result: vote_result,
+            vote_result: voteResult,
             // vote_result: JSON.stringify(vote_result),
-            vote_model: model_ids,
-            dialogue_id: dialogue_id,
-            turn_id: turn_id,
-            model_sequeue: JSON.stringify(model_sequeue),
+            vote_model: modelIds,
+            dialogue_id: dialogueId,
+            turn_id: turnId,
+            model_sequeue: JSON.stringify(modelSequeue),
         };
         console.log('投票的信息', data);
 
@@ -232,15 +232,15 @@ const Annotate: React.FC = () => {
     // 会话标注完成：
     const voteDialogue = () => {
         const username = localStorage.getItem('username');
-        const turn_id = null;
+        const turnId = null;
         const data = {
             username: username,
-            vote_result: vote_result,
+            vote_result: voteResult,
             // vote_result: JSON.stringify(vote_result),
-            vote_model: model_ids,
+            vote_model: modelIds,
             dialogue_id: dialogueIds,
-            turn_id: turn_id,
-            model_sequeue: JSON.stringify(model_sequeue),
+            turn_id: turnId,
+            model_sequeue: JSON.stringify(modelSequeue),
         };
         console.log('投票的信息', data);
         // 区别 debug 投票还是 arena 模式投票， 根据 permission 来判别
@@ -299,7 +299,7 @@ const Annotate: React.FC = () => {
             eventBus.off('detectChatBegin', detectEvent);
         };
     });
-    console.log(value, model_ids);
+    console.log(value, modelIds);
     return (
         <>
             {notificationHolder}
@@ -324,7 +324,7 @@ const Annotate: React.FC = () => {
                         <br />
                         <Radio.Group onChange={onChange(0)} value={value}>
                             <Space direction="vertical">
-                                {label_prompts.map((key: any, idx: any) => {
+                                {labelPrompts.map((key: any, idx: any) => {
                                     const id = key;
                                     console.log(key);
                                     return (
@@ -342,10 +342,10 @@ const Annotate: React.FC = () => {
                         请选择任意符合预期的模型
                         <br />
                         <Row gutter={24}>
-                            <Col span={label_prompts_smi.length > 0 ? 12 : 24}>
+                            <Col span={labelPromptsSmi.length > 0 ? 12 : 24}>
                                 <Radio.Group onChange={onChange(0)} value={value}>
                                     <Space direction="vertical">
-                                        {label_prompts.map((key: any, idx: any) => {
+                                        {labelPrompts.map((key: any, idx: any) => {
                                             const id = key;
                                             console.log(key);
                                             return (
@@ -360,7 +360,7 @@ const Annotate: React.FC = () => {
                             <Col span={12}>
                                 <Radio.Group onChange={onChange(0)} value={value}>
                                     <Space direction="vertical">
-                                        {label_prompts_smi.map((key: any, idx: any) => {
+                                        {labelPromptsSmi.map((key: any, idx: any) => {
                                             const id = key;
                                             console.log(key);
                                             return (
@@ -407,7 +407,7 @@ const Annotate: React.FC = () => {
                             size="middle"
                         >
                             <Space direction="vertical">
-                                {label_prompts.map((key: any, idx: any) => {
+                                {labelPrompts.map((key: any, idx: any) => {
                                     const id = key['label'];
                                     console.log(key);
                                     return (
@@ -456,7 +456,7 @@ const Annotate: React.FC = () => {
                             size="middle"
                         >
                             <Space direction="vertical">
-                                {label_prompts.map((key: any, idx: any) => {
+                                {labelPrompts.map((key: any, idx: any) => {
                                     const id = key['label'];
                                     console.log(key);
                                     return (
@@ -501,7 +501,7 @@ const Annotate: React.FC = () => {
                         <br />
                         <Radio.Group onChange={onChange(0)} value={value[0]}>
                             <Space direction="vertical">
-                                {label_prompts.map((key: any, idx: any) => {
+                                {labelPrompts.map((key: any, idx: any) => {
                                     const id = key;
                                     return (
                                         <Radio key={id} value={id}>

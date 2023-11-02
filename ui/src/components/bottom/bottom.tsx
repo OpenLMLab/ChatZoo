@@ -47,18 +47,18 @@ const Bottom: React.FC = () => {
             setisInput(banButton)
         }
         eventBus.on("banInputEvent", banInputEvent)
-        return ()=>{
+        return () => {
             eventBus.off("banInputEvent", banInputEvent)
         }
     }, [])
     // 错误全局提示
     const error = (msg: string) => {
         messageApi.open({
-          type: 'error',
-          content: msg,
+            type: 'error',
+            content: msg,
         });
-      };
-    
+    };
+
     // 输入框
     const handleChange = (event: any) => {
         const { value } = event.target;
@@ -87,10 +87,10 @@ const Bottom: React.FC = () => {
     // 下载对话记录
     const handleDownloadSingle = (model_info: ModelConfig, sessionid: string) => {
         let history: sessionMesage = {};
-        const cache_data = localStorage.getItem(sessionid);
-        if (cache_data) history = JSON.parse(cache_data);
-        const model_history = JSON.stringify(history[model_info.model_id]);
-        const blob = new Blob([model_history], { type: 'application/json' });
+        const cacheData = localStorage.getItem(sessionid);
+        if (cacheData) history = JSON.parse(cacheData);
+        const modelHistory = JSON.stringify(history[model_info.model_id]);
+        const blob = new Blob([modelHistory], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -100,14 +100,14 @@ const Bottom: React.FC = () => {
     };
     const handleDownloadAll = (model_infos: ModelConfig[], sessionid: string) => {
         let history: sessionMesage = {};
-        const cache_data = localStorage.getItem(sessionid);
-        if (cache_data) history = JSON.parse(cache_data);
+        const cacheData = localStorage.getItem(sessionid);
+        if (cacheData) history = JSON.parse(cacheData);
         let new_history: sessionMesage = {};
         model_infos.forEach((model_info) => {
             new_history[model_info.nickname] = history[model_info.model_id];
         });
-        const model_history = JSON.stringify(new_history);
-        const blob = new Blob([model_history], { type: 'application/json' });
+        const modelHistory = JSON.stringify(new_history);
+        const blob = new Blob([modelHistory], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -119,7 +119,7 @@ const Bottom: React.FC = () => {
     // 处理禁止输入后点击输入框
     const handleClickInputAfterBanner = () => {
         console.log("点击我！", isInput)
-        if(isInput){
+        if (isInput) {
             // 开启禁用点击，输入开启标注模式
             eventBus.emit("openVoteModal")
         }
@@ -127,9 +127,9 @@ const Bottom: React.FC = () => {
 
     // 计算视图长度
     let width = 0
-    if(models?.length == 1){
+    if (models?.length == 1) {
         width = 77
-    }else if(models?.length! > 1){
+    } else if (models?.length! > 1) {
         width = 100
     }
 
@@ -140,7 +140,7 @@ const Bottom: React.FC = () => {
                     Input: {
                         colorBgContainer: 'rgba(255, 255, 255, 0.06)',
                         colorTextPlaceholder: 'rgba(255, 255, 255, 0.95)',
-                        fontFamily: 'PingFang SC',
+                        fontFamily: 'PingFang SC, Arial, Helvetica, sans-serif',
                     },
                     Button: {
                         colorBorder: 'rgba(255, 255, 255, 0.85)',
@@ -151,8 +151,8 @@ const Bottom: React.FC = () => {
             {contextHolder}
             <div className={style.wrapper}>
                 <div className={style.input}>
-                    <div className={style.inputCover} onMouseDown={()=> handleClickInputAfterBanner()}
-                        style={!isInput?{display: "none"} : {}}
+                    <div className={style.inputCover} onMouseDown={() => handleClickInputAfterBanner()}
+                        style={!isInput ? { display: "none" } : {}}
                     ></div>
                     <Input
                         placeholder="介绍一下你自己吧"
@@ -168,7 +168,7 @@ const Bottom: React.FC = () => {
                             icon={<SendOutlined />}
                             style={{ color: 'rgba(255, 255, 255, 0.85)' }}
                             ghost
-                            onClick={()=>handleEnter()}
+                            onClick={() => handleEnter()}
                         ></Button>
                     </div>
                 </div>
@@ -199,7 +199,7 @@ const Bottom: React.FC = () => {
                 <div className={style.icon}>
                     <Popover
                         overlayClassName={style.popoverStyle}
-                        overlayInnerStyle={{ fontSize: 14, fontFamily: 'PingFang SC', fontWeight: 400 }}
+                        overlayInnerStyle={{ fontSize: 14, fontFamily: 'PingFang SC, Arial, Helvetica, sans-serif', fontWeight: 400 }}
                         content={
                             <div>
                                 <Button

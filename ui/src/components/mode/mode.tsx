@@ -5,6 +5,10 @@ import { useContext, useState, useEffect } from 'react';
 import style from './mode.module.less';
 // import { FreezeContext } from '@/utils/freezecontext';
 import eventBus from '@/utils/eventBus';
+import { ModelContext } from '@/utils/modelcontext';
+import ModelConfig from '../model/model';
+import http from '@/utils/axios';
+
 
 const Mode = () => {
     // 禁用mode的开关
@@ -17,12 +21,43 @@ const Mode = () => {
     // if(freeze?.freeze === 'yes') {
     //     myfreeze = true;
     // }
+    // 获取当前模式
+    const sysMode = localStorage.getItem("sys_mode")
+
     const modeContext = useContext(ModeContext);
     const [value, setValue] = useState('dialogue');
+    const models = useContext(ModelContext)?.models;
+
     const onChange = (e: RadioChangeEvent) => {
         // 通知保存数据
-        eventBus.emit('modeChangeEvent', e.target.value);
-        modeContext?.setMode(e.target.value);
+        if (sysMode === "evaluation") {
+            // evaluation 模式下，不需要真正换模式，通知home组件切换页面即可
+            console.log("mode component values is ", e.target.value)
+            if (e.target.value === 'dialogue') {
+                eventBus.emit("evalPageSwitch", true)
+                eventBus.emit("evalBottomSwitch", true)
+            }
+            else {
+                let newData: any[] = []
+                models?.forEach((model: ModelConfig, idx: number) => {
+                    http.get<string, any>(model.url + "/chat/get_overall_score?ds_name=" +
+                        localStorage.getItem("selectDs")).then((res) => {
+                            let ds_data = res.data.data
+                            ds_data['model'] = model.nickname
+                            console.log("evaloverall setData --> ", ds_data)
+                            newData.push(ds_data)
+                            if (newData.length == Object.keys(models).length) {
+                                localStorage.setItem("overallScore", JSON.stringify(newData))
+                                eventBus.emit("evalPageSwitch", false)
+                            }
+                        })
+                })
+                eventBus.emit("evalBottomSwitch", false)
+            }
+        } else {
+            eventBus.emit('modeChangeEvent', e.target.value);
+            modeContext?.setMode(e.target.value);
+        }
         setValue(e.target.value);
     };
     const fullOptions = [
@@ -41,6 +76,13 @@ const Mode = () => {
         currOption = disOptions;
     }
 
+    if (sysMode === 'evaluation') {
+        currOption = [
+            { label: '数据展示', value: 'dialogue' },
+            { label: 'OVERALL SCORE', value: 'single' }
+        ]
+    }
+
     // 开始/关闭会话后，接受到禁用/开启mode的命令
     useEffect(() => {
         const banModeEvent = (banButton: boolean) => {
@@ -54,11 +96,6 @@ const Mode = () => {
 
     return (
         <div className={style.mode_display}>
-            {/* <div className={style.tag}>
-                <Tag color="blue">杜甫</Tag>
-                <Tag color="red">李白</Tag>
-                <Tag color="green">唐朝历史</Tag>
-            </div> */}
             <div className={style.radio}>
                 <Radio.Group
                     options={currOption}
@@ -70,7 +107,7 @@ const Mode = () => {
                 />
             </div>
         </div>
-        
+
     );
 };
 

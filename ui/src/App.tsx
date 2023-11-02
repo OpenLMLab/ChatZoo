@@ -68,17 +68,23 @@ function App() {
                     console.log(label_prompts, "自定义的标签或者默认的标注标签")
                     localStorage.setItem("label_prompt", JSON.stringify(label_prompts))
                 })
-
-                http.get<string, any>("/get_session_list").then((res) => {
-                    const dataset_name = res.data.data
-                    console.log(res.data, "获取数据集的名字")
-                    if (res.data.code == 200) {
-                        console.log(dataset_name, "获取数据集的名字")
-                        selectDs = dataset_name[0]
-                        localStorage.setItem("selectDs", selectDs)
-                        localStorage.setItem("dataset_name", JSON.stringify(dataset_name))
-                    }
-                })
+                if (res.data.data.sys_mode === "evaluation") {
+                    http.get<string, any>("/get_session_list").then((res) => {
+                        const dataset_name = res.data.data
+                        console.log(res.data, "获取数据集的名字")
+                        if (res.data.code == 200) {
+                            console.log(dataset_name, "获取数据集的名字")
+                            selectDs = dataset_name[0]
+                            localStorage.setItem("selectDs", selectDs)
+                            localStorage.setItem("dataset_name", JSON.stringify(dataset_name))
+                            // 获取overall要展示的数据items
+                            http.get<string, any>("/get_eval_ds_item?ds_name=" + localStorage.getItem("selectDs")).then((res) => {
+                                console.log("/get_eval_ds_item ->> ", res.data.data)
+                                localStorage.setItem("overallItems", JSON.stringify(res.data.data))
+                            })
+                        }
+                    })
+                }
 
                 // 获取关键词然后存储到localStorage
                 // http.get<string, any>("/get_keywords").then((res)=>{
@@ -111,10 +117,14 @@ function App() {
                                     navigate('/home', { state: new_model });
                                 else {
                                     let modelsMap = {}
+                                    // 初始化筛选的filter字典，都是pass状态
+                                    let filterContent: any = {}
                                     new_model.forEach((res) => {
                                         // @ts-ignore
                                         modelsMap[res.model_id] = res
+                                        filterContent[res.nickname] = 'pass'
                                     })
+                                    localStorage.setItem("filterContent", JSON.stringify(filterContent))
                                     localStorage.setItem("modelsMap", JSON.stringify(modelsMap))
                                     // 初始化Evaluation会话的内容
                                     let sessionList: sessionMesage = {}

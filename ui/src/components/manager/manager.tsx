@@ -36,10 +36,10 @@ function Manager() {
     const [banSession, setBanSession] = useState(false);
     const [curChatId, setCurChatId] = useState<string>(idContext?.id!)
 
-    const sys_mode = localStorage.getItem("sys_mode")
+    const sysMode = localStorage.getItem("sys_mode")
     // 用于处理 evaluation 的情况
     let allChatList: ChatItem[] = []
-    if (sys_mode === "evaluation") {
+    if (sysMode === "evaluation") {
         console.log("初始化会话, ds_name是", localStorage.getItem("selectDs"))
         const dataset_name = JSON.parse(localStorage.getItem("dataset_name")!)
         // let allChatList: ChatItem[] = []
@@ -188,18 +188,20 @@ function Manager() {
     // 选择会话
     const selectChat = (id: string) => {
         const index = chatList.findIndex((x) => x.id === id);
-        if (sys_mode === "evaluation") {
+        if (sysMode === "evaluation") {
             // 处理 evaluation 的情况
             console.log("切换会话，ds_name是", chatList[index].name)
             localStorage.setItem("selectDs", chatList[index].name)
             const newSelectDs = chatList[index].name
             let newSessionList: sessionMesage = {}
+            let filterContent: any = {}
             models?.forEach((model: ModelConfig) => {
                 http.post<string, any>(model.url +
                     "/chat/get_ds_instance?" +
                     "ds_name=" + newSelectDs +
                     "&query_idx=" + "0"
                 ).then(res => {
+                    filterContent[model.nickname] = 'pass'
                     const data = res.data.data
                     newSessionList[model.model_id] = []
                     if (data["exist"])
@@ -211,9 +213,28 @@ function Manager() {
                         })
                     if (Object.keys(models).length === Object.keys(newSessionList).length) {
                         localStorage.setItem("cacheSession", JSON.stringify(newSessionList))
+                        localStorage.setItem("filterContent", JSON.stringify(filterContent))
                         eventBus.emit("managerDsChange", newSessionList)
                         eventBus.emit("getEvalPageNum")
                         eventBus.emit("setCurrentPage", 1)
+                        eventBus.emit('bannerDsNameChange', newSelectDs)  // banner 的模型名字修改
+                        http.get<string, any>("/get_eval_ds_item?ds_name=" + newSelectDs).then((res) => {
+                            localStorage.setItem("overallItems", JSON.stringify(res.data.data))
+                            let newData: any[] = []
+                            models?.forEach((model: ModelConfig, idx: number) => {
+                                http.get<string, any>(model.url + "/chat/get_overall_score?ds_name=" +
+                                    localStorage.getItem("selectDs")).then((res) => {
+                                        let ds_data = res.data.data
+                                        ds_data['model'] = model.nickname
+                                        console.log("evaloverall setData --> ", ds_data)
+                                        newData.push(ds_data)
+                                        if (newData.length == Object.keys(models).length) {
+                                            localStorage.setItem("overallScore", JSON.stringify(newData))
+                                            eventBus.emit("overallShow")
+                                        }
+                                    })
+                            })
+                        })
                         setCurChatId(id);
                         idContext?.setId(id);
                     }
@@ -340,6 +361,74 @@ function Manager() {
             prevMyStateRef.current = modeContext
         }
     }, [modeContext]);
+
+    // 用于 evaluation 时候 home 页面搜索数据集切换
+    useEffect(() => {
+        const onSelectFn = (ds_name: string) => {
+            // 处理 evaluation 的情况
+            const index = chatList.findIndex((x) => x.name === ds_name);
+            const id = chatList[index].id
+            console.log("切换会话，ds_name是", chatList[index].name)
+            localStorage.setItem("selectDs", chatList[index].name)
+            const newSelectDs = chatList[index].name
+            let newSessionList: sessionMesage = {}
+            let filterContent: any = {}
+            models?.forEach((model: ModelConfig) => {
+                http.post<string, any>(model.url +
+                    "/chat/get_ds_instance?" +
+                    "ds_name=" + newSelectDs +
+                    "&query_idx=" + "0"
+                ).then(res => {
+                    filterContent[model.nickname] = 'pass'
+                    const data = res.data.data
+                    newSessionList[model.model_id] = []
+                    if (data["exist"])
+                        newSessionList[model.model_id].push({
+                            id: "1",
+                            status: 0,
+                            message: data["response"],
+                            question: data["prompt"],
+                        })
+                    if (Object.keys(models).length === Object.keys(newSessionList).length) {
+                        localStorage.setItem("cacheSession", JSON.stringify(newSessionList))
+                        localStorage.setItem("filterContent", JSON.stringify(filterContent))
+                        eventBus.emit("managerDsChange", newSessionList)
+                        eventBus.emit("getEvalPageNum")
+                        eventBus.emit("setCurrentPage", 1)
+                        eventBus.emit('bannerDsNameChange', ds_name)  // banner 的模型名字修改
+                        http.get<string, any>("/get_eval_ds_item?ds_name=" + newSelectDs).then((res) => {
+                            localStorage.setItem("overallItems", JSON.stringify(res.data.data))
+                            let newData: any[] = []
+                            models?.forEach((model: ModelConfig, idx: number) => {
+                                http.get<string, any>(model.url + "/chat/get_overall_score?ds_name=" +
+                                    localStorage.getItem("selectDs")).then((res) => {
+                                        let ds_data = res.data.data
+                                        ds_data['model'] = model.nickname
+                                        console.log("evaloverall setData --> ", ds_data)
+                                        newData.push(ds_data)
+                                        if (newData.length == Object.keys(models).length) {
+                                            localStorage.setItem("overallScore", JSON.stringify(newData))
+                                            eventBus.emit("overallShow")
+                                        }
+                                    })
+                            })
+                        })
+                        let newChatList = chatList.slice()
+                        const temp = chatList[index]
+                        newChatList[index] = newChatList[0]
+                        newChatList[0] = temp
+                        setChatList(newChatList)
+                        setCurChatId(id);
+                        idContext?.setId(id);
+                    }
+                })
+            })
+        }
+        eventBus.on("onSelectFn", onSelectFn)
+        return () => {
+            eventBus.off("onSelectFn", onSelectFn)
+        }
+    })
 
     return (
         <div className={style.chatmanagement} style={banSession ? { pointerEvents: 'none', opacity: 0.5 } : {}}>

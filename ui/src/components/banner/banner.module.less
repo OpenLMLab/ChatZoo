@@ -11,7 +11,7 @@
         'clig' off,
         'liga' off;
     text-overflow: ellipsis;
-    font-family: PingFang SC;
+    font-family: PingFang SC, Arial, Helvetica, sans-serif;
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
@@ -26,15 +26,33 @@
     align-items: center;
     gap: 16px;
     flex-shrink: 1;
+
     div {
         width: 24px;
         height: 24px;
+    }
+
+    :global {
+        .anticon {
+            // evaluation 模式下 icon的样式
+            width: 24px;
+            height: 24px;
+            color: white !important;
+            background-color: none;
+
+            svg {
+                height: 24px;
+                width: 19px;
+
+            }
+        }
+
     }
 }
 
 .tooltipTitle {
     //styleName: 正文/常规text-1-regular;
-    font-family: PingFang SC;
+    font-family: PingFang SC, Arial, Helvetica, sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 21px;
@@ -44,13 +62,14 @@
 
 .modelConfigTile {
     //styleName: 三级组件标题/加粗title-3-semibold;
-    font-family: PingFang SC;
+    font-family: PingFang SC, Arial, Helvetica, sans-serif;
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
     letter-spacing: 0px;
     text-align: left;
 }
+
 .modelConfig {
     width: Fixed (450px);
     height: Fixed (622px);
@@ -67,10 +86,15 @@
     height: Fixed (24px);
     padding: 1px 0px 1px 0px;
     gap: 4px;
-    font-family: PingFang SC;
+    font-family: PingFang SC, Arial, Helvetica, sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 21px;
     letter-spacing: 0px;
     text-align: left;
+}
+
+.filterWrap {
+    display: flex;
+    flex-direction: column;
 }

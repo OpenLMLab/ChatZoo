@@ -13,6 +13,8 @@ import styles from './chat.module.less';
 import { chatBoxStyle, requestSessageContainerStyle, responseMessageContainerStyle } from './puyuc.chatbox.style';
 import http from '@/utils/axios';
 
+import EvalChat from '@/components/eval-chat/eval-chat'
+
 /**
  * 1. 获取全局sessionId
  * 2. 读取缓存
@@ -23,7 +25,7 @@ const Chat: React.FC = () => {
     const [messageApi, contextHolder] = message.useMessage();
     const idContext = useContext(IdContext);
     const sessionId = idContext?.id;
-    const ref_sessionId = useRef(sessionId)
+    const refSessionId = useRef(sessionId)
     const ref_ssefinishCallCount = useRef(0)
     const mode = useContext(ModeContext)?.mode
     const models = useContext(ModelContext)?.models;
@@ -59,12 +61,12 @@ const Chat: React.FC = () => {
 
     //处理数据，以便于保存
     const saveSessionList = (session_ids: string) => {
-        let new_session_list: sessionMesage = {};
+        let newSessionList: sessionMesage = {};
         // @ts-ignore
-        const model_ids = JSON.parse(localStorage.getItem(session_ids + "model_sequeue"))
+        const modelIds = JSON.parse(localStorage.getItem(session_ids + "model_sequeue"))
         refs.map((ref, index) => {
-            if (index < model_ids?.length!) {
-                new_session_list[model_ids[index]] = ref.current.getSessionList();
+            if (index < modelIds?.length!) {
+                newSessionList[modelIds[index]] = ref.current.getSessionList();
             }
         });
         // refs.map((ref, index) => {
@@ -72,9 +74,9 @@ const Chat: React.FC = () => {
         //         new_session_list[models![index].model_id] = ref.current.getSessionList();
         //     }
         // });
-        console.log("sessionList", new_session_list)
-        Object.keys(new_session_list).forEach(function (key) {
-            let session = new_session_list[key];
+        console.log("sessionList", newSessionList)
+        Object.keys(newSessionList).forEach(function (key) {
+            let session = newSessionList[key];
             if (session.length - 1 >= 0) {
                 const last_dict = session[session.length - 1];
                 const new_dict: sseMesage = {
@@ -85,18 +87,18 @@ const Chat: React.FC = () => {
                 };
                 session[session.length - 1] = new_dict;
             }
-            new_session_list[key] = session;
+            newSessionList[key] = session;
         });
-        const sessionList = new_session_list;
-        if (model_ids != null)
-            model_ids.forEach((model_id: string) => {
+        const sessionList = newSessionList;
+        if (modelIds != null)
+            modelIds.forEach((model_id: string) => {
                 if (!(model_id in sessionList)) {
                     // 如果不存在就要初始化一个
                     sessionList[model_id] = [];
                 }
             });
         // setSessionList(sessionList)
-        localStorage.setItem(session_ids, JSON.stringify(new_session_list));
+        localStorage.setItem(session_ids, JSON.stringify(newSessionList));
     };
 
     const startSse = (question: string, new_models: ModelConfig[]) => {
@@ -169,14 +171,14 @@ const Chat: React.FC = () => {
 
     // 监控会话id变化,如果发现变化就要判断能否保存历史数据。
     useEffect(() => {
-        if (ref_sessionId.current != sessionId) {
+        if (refSessionId.current != sessionId) {
             refs.map((ref, index) => {
                 if (index < models?.length!) {
                     console.log('session_ids改变收到对话', ref.current.getSessionList());
                 }
             });
-            if (refs[0].current && refs[0].current.getSessionList()) saveSessionList(ref_sessionId.current!);
-            ref_sessionId.current = sessionId;
+            if (refs[0].current && refs[0].current.getSessionList()) saveSessionList(refSessionId.current!);
+            refSessionId.current = sessionId;
         }
     }, [sessionId]);
 
@@ -205,30 +207,30 @@ const Chat: React.FC = () => {
     // 发送voteDict出去
     const sendVoteDict = (models: ModelConfig[]) => {
         // 获取最新的 Dict
-        let new_session_list: sessionMesage = {};
+        let newSessionList: sessionMesage = {};
         console.log("sendVote", models)
         refs.map((ref, index) => {
             if (index < models?.length!) {
-                new_session_list[models![index].model_id] = ref.current.getSessionList();
+                newSessionList[models![index].model_id] = ref.current.getSessionList();
             }
         });
         // 这里使用model_id : dialogue_id
-        let dialogue_ids: { [key: number]: string } = {}
-        Object.keys(new_session_list).forEach(function (key) {
-            const session = new_session_list[key]
+        let dialogueIds: { [key: number]: string } = {}
+        Object.keys(newSessionList).forEach(function (key) {
+            const session = newSessionList[key]
             if (session.length >= 1) {
-                const last_dict = session[session.length - 1];
+                const lastDict = session[session.length - 1];
                 // @ts-ignore
-                dialogue_ids[key] = last_dict['id']
+                dialogueIds[key] = lastDict['id']
             }
         })
-        eventBus.emit('sendVoteDict', dialogue_ids)
+        eventBus.emit('sendVoteDict', dialogueIds)
     }
 
     let model_status = [-2, -2, -2, -2]
     const sseFinishCallable = () => {
         ref_ssefinishCallCount.current = ref_ssefinishCallCount.current + 1;
-        const models = model_ref.current
+        const models = modelRef.current
         console.log('获取状态', refs[ref_ssefinishCallCount.current - 1].current.getStatus())
         const validNum = models?.filter((model) => model.start === true)?.length ?? 0;
         if (ref_ssefinishCallCount.current == validNum || (refs[ref_ssefinishCallCount.current].current === undefined || refs[ref_ssefinishCallCount.current].current === null)) {
@@ -255,34 +257,45 @@ const Chat: React.FC = () => {
     };
 
     useEffect(() => {
-        model_ref.current = models
-        console.log("model_ref", model_ref)
+        modelRef.current = models
+        console.log("model_ref", modelRef)
     }, [models])
 
     useEffect(() => {
         // 用于标注数据展示的监听函数
         const pageChange = (pageNum: number, pageSize: number) => {
             console.log("[Debug] pageChange ", "eval_page_change", pageNum)
-            let newSessionList: sessionMesage = {}
-            models?.forEach((model: ModelConfig) => {
-                http.post<string, any>(model.url +
-                    "/chat/get_ds_instance?" +
-                    "ds_name=" + localStorage.getItem("selectDs") +
-                    "&query_idx=" + (pageNum - 1)
-                ).then(res => {
-                    const data = res.data.data
-                    newSessionList[model.model_id] = []
-                    if (data["exist"])
-                        newSessionList[model.model_id].push({
-                            id: "1",
-                            status: 0,
-                            message: data["response"],
-                            question: data["prompt"],
-                        })
-                    if (Object.keys(models).length === Object.keys(newSessionList).length) {
-                        localStorage.setItem("cacheSession", JSON.stringify(newSessionList))
-                        setSessionList(newSessionList)
-                    }
+            let filterContent = localStorage.getItem("filterContent")
+            http.post<any, any>('/get_query_idx_by_filter_content?', {
+                data: {
+                    ds_name: localStorage.getItem("selectDs"),
+                    content: filterContent,
+                    query_idx: pageNum
+                }
+            }).then(res => {
+                console.log(res.data.data, "queryIdxByFilterContent")
+                const queryIdx = res.data.data["idx"]
+                let newSessionList: sessionMesage = {}
+                models?.forEach((model: ModelConfig) => {
+                    http.post<string, any>(model.url +
+                        "/chat/get_ds_instance?" +
+                        "ds_name=" + localStorage.getItem("selectDs") +
+                        "&query_idx=" + queryIdx
+                    ).then(res => {
+                        const data = res.data.data
+                        newSessionList[model.model_id] = []
+                        if (data["exist"])
+                            newSessionList[model.model_id].push({
+                                id: "1",
+                                status: 0,
+                                message: data["response"],
+                                question: data["prompt"],
+                            })
+                        if (Object.keys(models).length === Object.keys(newSessionList).length) {
+                            localStorage.setItem("cacheSession", JSON.stringify(newSessionList))
+                            setSessionList(newSessionList)
+                        }
+                    })
                 })
             })
             // models?.forEach((model: ModelConfig) => {
@@ -327,7 +340,7 @@ const Chat: React.FC = () => {
     let width = 0
     let height = 0
     // 横屏模式
-    const model_ref = useRef(models)
+    const modelRef = useRef(models)
     // console.log('是否换行', doWrap, styles.wrap, models, model_ref)
     if (doWrap === styles.wrap) {
         if (models?.length === 1) {
@@ -369,6 +382,12 @@ const Chat: React.FC = () => {
                         </div>
                         <div className={styles.main} key={index + ''} >
                             <div className={`${styles.chatBoxWrap} ${!model.start ? styles.pause : ''}`}>
+                                {/* <EvalChat
+                                    propsSessionList={sessionList[model.model_id]}
+                                    style={chatBoxStyle}
+                                    userAvatar={<>{localStorage.getItem('username')}</>}
+                                    modelAvatar={<>{modeName == 'debug' ? model.nickname : 'Model_' + String.fromCharCode(index + 65)}</>}
+                                ></EvalChat> */}
                                 <PUYUC.ChatBox
                                     sseStopCallback={(url) => {
                                         console.log("ssestop", models)
